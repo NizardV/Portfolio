@@ -1,0 +1,9 @@
+[
+  { "labelFR": "Backend", "labelEN": "Backend", "items": ["ASP.NET Core","C#","Laravel","Node.js","FastAPI","NestJS","GraphQL","gRPC"] },
+  { "labelFR": "Frontend", "labelEN": "Frontend", "items": ["React","Next.js","TypeScript","Tailwind CSS","shadcn/ui","Framer Motion","React Query","Zustand"] },
+  { "labelFR": "Données", "labelEN": "Data", "items": ["PostgreSQL","SQL Server","MySQL","Prisma ORM","Entity Framework Core","MongoDB (basics)","Redis (cache/session)"] },
+  { "labelFR": "DevOps & Infra", "labelEN": "DevOps & Infra", "items": ["Docker","docker-compose","GitLab CI","GitHub Actions","Nginx Reverse Proxy","SSL","Portainer","Watchtower","Prometheus/Grafana","Uptime Kuma","Ansible (init)","Terraform (init)"] },
+  { "labelFR": "Tests & Qualité", "labelEN": "Testing & Quality", "items": ["xUnit","Jest","Vitest","Playwright","Swagger / OpenAPI","ESLint","Prettier","CodeQL","SonarCloud"] },
+  { "labelFR": "Méthodes", "labelEN": "Methods", "items": ["Scrum","User Stories (RU)","Documentation","Code Review"] },
+  { "labelFR": "Outils", "labelEN": "Tools", "items": ["Postman","DBeaver","Git","GitHub","GitLab","VS Code","Rider","Insomnia"] }
+]

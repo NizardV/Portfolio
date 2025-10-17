@@ -1,0 +1,14 @@
+[
+  {
+    "title": "GeoRisk",
+    "timeframe": "2024–2025",
+    "location": "Dijon, FR",
+    "stack": ["React", "Leaflet", "Laravel/.NET", "PostgreSQL", "Docker"],
+    "descriptionFR": "Application web cartographique sur les risques naturels.",
+    "descriptionEN": "Map-based web app for natural hazard data.",
+    "evidence": "not_hosted",
+    "repo": "",
+    "demo": "",
+    "caseStudy": ""
+  }
+]

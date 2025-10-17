@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+/* Empêche l'arrière-plan blanc visible lors du sur-défilement (haut/bas) */
+:root, html, body { background-color: #0b1020; }
+body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui révèle le bg de page */
