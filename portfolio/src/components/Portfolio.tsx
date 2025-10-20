@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Download, Github, Linkedin, Mail, Globe2, Link as LinkIcon, MapPin, Calendar, ExternalLink } from "lucide-react";
 import Contact from '@/components/Contact';
+import Image from "next/image";
+import Link from "next/link";
 
 // ---- Quick notes ----
 // • Single-file portfolio starter for React (Vite/Next).
@@ -116,15 +118,15 @@ export default function Portfolio() {
   const HEADER_OFFSET = 80; // ~ h-16 + marge
 
   const scrollToId = (e: React.MouseEvent, id: string) => {
-  e.preventDefault();
-  setShowHeader(true); // on force l’apparition du header
-  const el = document.getElementById(id);
-  if (!el) return;
-  const y = el.getBoundingClientRect().top + window.pageYOffset - HEADER_OFFSET;
-  window.scrollTo({ top: y, behavior: "smooth" });
-  // on met aussi le hash pour l’URL, après un petit délai
-  window.history.replaceState(null, "", `#${id}`);
-};
+    e.preventDefault();
+    setShowHeader(true); // on force l’apparition du header
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.pageYOffset - HEADER_OFFSET;
+    window.scrollTo({ top: y, behavior: "smooth" });
+    // on met aussi le hash pour l’URL, après un petit délai
+    window.history.replaceState(null, "", `#${id}`);
+  };
 
   // Hide header on scroll down
   React.useEffect(() => {
@@ -186,29 +188,57 @@ export default function Portfolio() {
 
       {/* Top Bar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 h-16 flex items-center backdrop-blur border-b transition-transform duration-300
+        className={`fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-black/40 backdrop-blur transition-transform duration-300
                     ${showHeader ? "translate-y-0" : "-translate-y-full"}
-                    bg-black/40 border-white/10`}
+                    ring-1 ring-fuchsia-500
+        `}
       >
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3 justify-between">
-        <div className="flex items-center gap-2 font-semibold tracking-tight">
-          <Globe2 className="w-5 h-5" /> <span>Nizard.dev</span>
-        </div>
-        <nav className="hidden md:flex items-center gap-4 text-sm">
-          <a href="#about"      onClick={(e) => scrollToId(e, "about")}      className="hover:underline">{t.nav.about}</a>
-          <a href="#projects"   onClick={(e) => scrollToId(e, "projects")}   className="hover:underline">{t.nav.projects}</a>
-          <a href="#experience" onClick={(e) => scrollToId(e, "experience")} className="hover:underline">{t.nav.experience}</a>
-          <a href="#skills"     onClick={(e) => scrollToId(e, "skills")}     className="hover:underline">{t.nav.skills}</a>
-          <a href="#contact"    onClick={(e) => scrollToId(e, "contact")}    className="hover:underline">{t.nav.contact}</a>
-        </nav>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-xs">
-            <span>FR</span>
-            <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
-            <span>EN</span>
+        {/* Barre principale */}
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between ring-1 ring-cyan-500">
+          
+          {/* Logo (dans la top bar directement) */}
+          <Link href="/" className="group flex items-center gap-3 shrink-0 navbar-brand">
+            {/* Icône NV (mobile) */}
+            <div className="relative md:hidden h-10 w-10">
+              <Image
+                src="/brand/nv-icon.png"
+                alt="Logo NV"
+                fill
+                priority
+                className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_#06b6d4]"
+              />
+            </div>
+
+            {/* Logo complet NV + nizard.dev (desktop) */}
+            <div className="relative hidden md:block h-10 w-[200px]">
+              <Image
+                src="/brand/nv-logo.png"
+                alt="Nizard.dev"
+                fill
+                priority
+                className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
+              />
+            </div>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-6 text-sm ring-1 ring-orange-500">
+            <a href="#about"      onClick={(e) => scrollToId(e, "about")}      className="hover:underline">{t.nav.about}</a>
+            <a href="#projects"   onClick={(e) => scrollToId(e, "projects")}   className="hover:underline">{t.nav.projects}</a>
+            <a href="#experience" onClick={(e) => scrollToId(e, "experience")} className="hover:underline">{t.nav.experience}</a>
+            <a href="#skills"     onClick={(e) => scrollToId(e, "skills")}     className="hover:underline">{t.nav.skills}</a>
+            <a href="#contact"    onClick={(e) => scrollToId(e, "contact")}    className="hover:underline">{t.nav.contact}</a>
+          </nav>
+
+          {/* Lang Switch */}
+          <div className="flex items-center gap-3 ring-1 ring-yellow-500">
+            <div className="flex items-center gap-2 text-xs">
+              <span>FR</span>
+              <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
+              <span>EN</span>
+            </div>
           </div>
         </div>
-      </div>
       </header>
 
       {/* Main content */}
@@ -243,7 +273,7 @@ export default function Portfolio() {
                   </a>
                 </Button>
                 <Button variant="secondary" asChild>
-                  <a href="#contact">
+                  <a href="#contact" onClick={(e) => scrollToId(e, "contact")}>
                     <Mail className="w-4 h-4 mr-2" />
                     {t.ctaContact}
                   </a>
