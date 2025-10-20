@@ -186,45 +186,44 @@ export default function Portfolio() {
       <div className="pointer-events-none absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl
                       bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]"></div>
 
-      {/* Top Bar */}
       <header
         className={`fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-black/40 backdrop-blur transition-transform duration-300
-                    ${showHeader ? "translate-y-0" : "-translate-y-full"}
-                    ring-1 ring-fuchsia-500
-        `}
+                    ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
       >
-        {/* Barre principale */}
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between ring-1 ring-cyan-500">
-          
-          {/* Logo (dans la top bar directement) */}
-          <Link href="/" className="group flex items-center gap-3 shrink-0 navbar-brand">
-            {/* Icône NV (mobile) */}
-            <div className="relative md:hidden h-10 w-10">
+        {/* grille 3 colonnes: logo | nav | switch */}
+        <div className="mx-auto max-w-6xl h-16 px-6 grid grid-cols-[auto_1fr_auto] items-center">
+
+          {/* LOGO — cliquable uniquement sur sa zone */}
+          <Link
+            href="/"
+            className="group flex items-center gap-3 shrink-0 justify-self-start"
+            aria-label="Accueil Nizard.dev"
+          >
+            {/* Mobile: icône */}
+            <div className="relative md:hidden h-8 w-8">
               <Image
                 src="/brand/nv-icon.png"
-                alt="Logo NV"
+                alt="NV"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, (min-width: 1024px) 50vw"
-                className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_#06b6d4]"
+                className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
               />
             </div>
 
-            {/* Logo complet NV + nizard.dev (desktop) */}
-            <div className="relative hidden md:block h-10 w-[200px]">
+            {/* Desktop: mot-symbole (taille + glow) */}
+            <div className="relative hidden md:block h-16 w-[65px]">
               <Image
                 src="/brand/nv-logo.png"
                 alt="Nizard.dev"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, (min-width: 1024px) 50vw"
-                className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
+                className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_#06b6d4]"
               />
             </div>
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm ring-1 ring-orange-500">
+          {/* NAV — centrée, sans overlay */}
+          <nav className="hidden md:flex justify-self-center items-center justify-center gap-6 text-sm">
             <a href="#about"      onClick={(e) => scrollToId(e, "about")}      className="hover:underline">{t.nav.about}</a>
             <a href="#projects"   onClick={(e) => scrollToId(e, "projects")}   className="hover:underline">{t.nav.projects}</a>
             <a href="#experience" onClick={(e) => scrollToId(e, "experience")} className="hover:underline">{t.nav.experience}</a>
@@ -232,8 +231,8 @@ export default function Portfolio() {
             <a href="#contact"    onClick={(e) => scrollToId(e, "contact")}    className="hover:underline">{t.nav.contact}</a>
           </nav>
 
-          {/* Lang Switch */}
-          <div className="flex items-center gap-3 ring-1 ring-yellow-500">
+          {/* SWITCH — à droite */}
+          <div className="justify-self-end flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs">
               <span>FR</span>
               <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
