@@ -1,8 +1,10 @@
+import { time } from "console";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { name, email, title, message } = await req.json();
+    const now = new Date().toISOString();
 
     const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
@@ -12,7 +14,7 @@ export async function POST(req: Request) {
         template_id: process.env.EMAILJS_TEMPLATE_ID,
         user_id: process.env.EMAILJS_PUBLIC_KEY,      // PUBLIC key ici
         accessToken: process.env.EMAILJS_PRIVATE_KEY, // PRIVATE key ici
-        template_params: { name, email, title: title || "", message },
+        template_params: { name, email, title: title || "", message, site: "nizard.dev", time: now, reply_to: email },
       }),
     });
 

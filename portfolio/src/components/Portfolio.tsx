@@ -205,6 +205,7 @@ export default function Portfolio() {
                 alt="Logo NV"
                 fill
                 priority
+                sizes="(max-width: 1024px) 100vw, (min-width: 1024px) 50vw"
                 className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_#06b6d4]"
               />
             </div>
@@ -216,6 +217,7 @@ export default function Portfolio() {
                 alt="Nizard.dev"
                 fill
                 priority
+                sizes="(max-width: 1024px) 100vw, (min-width: 1024px) 50vw"
                 className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
               />
             </div>
