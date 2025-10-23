@@ -51,58 +51,6 @@ import {
 // • Projects & Skills are loaded from /projects.json and /skills.json at runtime.
 // • Bilingual FR/EN with a toggle, plus dark mode.
 
-// --- Static experience data (editable in code) ---
-const experiences = [
-  {
-    roleFR: "Alternant Développeur (recherche)",
-    roleEN: "Apprenticeship - Full-Stack (seeking)",
-    org: "DIIAGE / Entreprise (à définir)",
-    timeframe: "Sept. 2025 → Sept. 2026",
-    pointsFR: [
-      "Périmètre full-stack: Laravel / ASP.NET Core, SQL Server & PostgreSQL, Docker",
-      "CI/CD GitLab & GitHub, qualité (CodeQL), documentation",
-      "Mise en place d'environnements dev/test/prod, SSL, monitoring",
-    ],
-    pointsEN: [
-      "Full-stack scope: Laravel / ASP.NET Core, SQL Server & PostgreSQL, Docker",
-      "CI/CD with GitLab & GitHub, quality (CodeQL), documentation",
-      "Dev/test/prod environments, SSL, monitoring",
-    ],
-  },
-  {
-    roleFR: "Stagiaire Développeur (InnovQube)",
-    roleEN: "Software Developer Intern (InnovQube)",
-    org: "InnovQube",
-    timeframe: "2024",
-    pointsFR: [
-      "Développement d'outils internes et petites features sur applications existantes",
-      "Mises à jour correctives, revue de code, tickets JIRA / Git",
-      "Bases de données relationnelles (modèles, migrations, requêtes)",
-    ],
-    pointsEN: [
-      "Built internal tools and small features on existing apps",
-      "Bugfixes, code review, ticket handling (JIRA / Git)",
-      "Relational databases (models, migrations, queries)",
-    ],
-  },
-  {
-    roleFR: "Stagiaire Développeur (Association O.R.E.)",
-    roleEN: "Software Developer Intern (Association O.R.E.)",
-    org: "Association O.R.E.",
-    timeframe: "2023",
-    pointsFR: [
-      "Site vitrine et modules back-office simples (contenus, médias)",
-      "Intégration front (HTML/CSS/JS) et optimisation accessibilité de base",
-      "Support utilisateur, petites corrections et déploiement",
-    ],
-    pointsEN: [
-      "Showcase website and lightweight back-office modules (content, media)",
-      "Front-end integration (HTML/CSS/JS) and basic accessibility improvements",
-      "User support, small fixes and deployment",
-    ],
-  },
-];
-
 // --- Dictionary ---
 const dict = {
   fr: {
@@ -138,29 +86,33 @@ const dict = {
 } as const;
 
 export default function Portfolio() {
+  // --- Language state ---
   const [lang, setLang] = useState<"fr" | "en">("fr");
-  const [projects, setProjects] = useState<any[]>([]);
-  const [skills, setSkills] = useState<any[]>([]);
+
+  // --- Experiences & Projects & Skills ---
+  const [experiences, setExperiences] = useState<any[]>([]); // loaded from /experiences.json
+  const [projects, setProjects] = useState<any[]>([]); // loaded from /projects.json
+  const [skills, setSkills] = useState<any[]>([]); // loaded from /skills.json
+
+  // --- Dictionary selection ---
   const t = dict[lang];
+
   // -------- Scroll: hide on down, show on up --------
   const [showHeader, setShowHeader] = React.useState(true);
   const lastY = React.useRef(0);
   const onNavClick = () => setShowHeader(true);
-
   const HEADER_OFFSET = 80; // ~ h-16 + marge
-
   const scrollToId = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    setShowHeader(true); // on force l’apparition du header
+    setShowHeader(true); // show header on nav click
     const el = document.getElementById(id);
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.pageYOffset - HEADER_OFFSET;
     window.scrollTo({ top: y, behavior: "smooth" });
-    // on met aussi le hash pour l’URL, après un petit délai
     window.history.replaceState(null, "", `#${id}`);
   };
 
-    // --- Icônes de compétences --- //
+  // --- Icon mapping --- //
   const iconMap = {
     SiReact,
     SiTailwindcss,
@@ -206,7 +158,6 @@ export default function Portfolio() {
     );
   }
 
-
   // Hide header on scroll down
   React.useEffect(() => {
     let ticking = false;
@@ -215,8 +166,8 @@ export default function Portfolio() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const delta = y - lastY.current;
-          if (delta > 4 && y > 80) setShowHeader(false);         // cache lorsqu'on descend
-          else if (delta < -4 || y < 120) setShowHeader(true);  // montre lorsqu'on remonte
+          if (delta > 4 && y > 80) setShowHeader(false);         // hide when scrolling down
+          else if (delta < -4 || y < 120) setShowHeader(true);  // show when scrolling up
           lastY.current = y;
           ticking = false;
         });
@@ -227,7 +178,16 @@ export default function Portfolio() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Load projects from /projects.json (Option 1)
+  // Load experiences from /experiences.json
+  React.useEffect(() => {
+    fetch("/experiences.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => (Array.isArray(data) ? data : []))
+      .then((list) => setExperiences(list))
+      .catch(() => setExperiences([]));
+  }, []);
+
+  // Load projects from /projects.json
   React.useEffect(() => {
     fetch("/projects.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
