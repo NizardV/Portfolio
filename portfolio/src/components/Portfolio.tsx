@@ -12,6 +12,38 @@ import { Download, Github, Linkedin, Mail, Globe2, Link as LinkIcon, MapPin, Cal
 import Contact from '@/components/Contact';
 import Image from "next/image";
 import Link from "next/link";
+// Portfolio.tsx (haut du fichier)
+import {
+  SiReact,
+  SiTailwindcss,
+  SiDotnet,
+  SiDocker,
+  SiGithub,
+  SiGitlab,
+  SiLinux,
+  SiNextdotjs,
+  SiTypescript,
+  SiMariadb,
+  SiMicrosoftsqlserver,
+  SiPostgresql,
+  SiNginx,
+  SiApache,
+  SiVisualstudiocode,
+  SiPostman,
+  SiGit,
+  SiBookstack,
+  SiReadthedocs,
+  SiScrumalliance,
+  SiVisualstudio,
+  SiCsharp,
+  SiWindowsterminal,
+  SiPhp,
+  SiMicrosoftazure,
+  SiAzuredevops,
+  SiLaravel,
+  SiDbeaver
+} from "react-icons/si";
+
 
 // ---- Quick notes ----
 // • Single-file portfolio starter for React (Vite/Next).
@@ -127,6 +159,53 @@ export default function Portfolio() {
     // on met aussi le hash pour l’URL, après un petit délai
     window.history.replaceState(null, "", `#${id}`);
   };
+
+    // --- Icônes de compétences --- //
+  const iconMap = {
+    SiReact,
+    SiTailwindcss,
+    SiDotnet,
+    SiDocker,
+    SiGithub,
+    SiGitlab,
+    SiLinux,
+    SiNextdotjs,
+    SiTypescript,
+    SiMariadb,
+    SiMicrosoftsqlserver,
+    SiPostgresql,
+    SiNginx,
+    SiApache,
+    SiVisualstudiocode,
+    SiPostman,
+    SiGit,
+    SiBookstack,
+    SiReadthedocs,
+    SiScrumalliance,
+    SiCsharp,
+    SiWindowsterminal,
+    SiPhp,
+    SiMicrosoftazure,
+    SiAzuredevops,
+    SiVisualstudio,
+    SiDbeaver,
+    SiLaravel
+  } as const;
+
+  type IconKey = keyof typeof iconMap;
+
+  function SkillBadge({ item }: { item: string | { label: string; icon?: IconKey } }) {
+    const label = typeof item === "string" ? item : item.label;
+    const Icon = typeof item === "object" && item.icon ? iconMap[item.icon] : null;
+
+    return (
+      <Badge variant="outline" className="inline-flex items-center gap-1 px-2 py-1 text-sm">
+        {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+        {label}
+      </Badge>
+    );
+  }
+
 
   // Hide header on scroll down
   React.useEffect(() => {
@@ -437,12 +516,9 @@ export default function Portfolio() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {Array.isArray(group.items) &&
-                    group.items.map((s: string, idx: number) => (
-                      <Badge key={idx} variant="outline">
-                        {s}
-                      </Badge>
-                    ))}
+                  {group.items.map((s: any, idx: number) => (
+                    <SkillBadge key={idx} item={s} />
+                  ))}
                 </CardContent>
               </Card>
             ))}

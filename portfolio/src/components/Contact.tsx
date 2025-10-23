@@ -123,7 +123,7 @@ export default function Contact() {
                 Envoi…
               </>
             ) : (
-              "Envoyer ✉️"
+              "Envoyer"
             )}
           </button>
 
