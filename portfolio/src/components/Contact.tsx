@@ -1,16 +1,36 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, User2, Mail, Type as TypeIcon, MessageSquareText } from "lucide-react";
 import { useToast } from "@/components/ui/toast-context";
 
-// On ajoute une prop pour récupérer la langue du Portfolio
-export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
+type Lang = "fr" | "en";
+
+export default function Contact({
+  lang = "fr",
+  showTitle = false,
+}: {
+  lang?: Lang;
+  showTitle?: boolean;
+}) {
   const formRef = useRef<HTMLFormElement | null>(null);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // --- Dictionnaire bilingue ---
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Skeleton placeholder to avoid white flash on hydration
+    return (
+      <div className="relative max-w-2xl mx-auto">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md shadow-xl animate-pulse h-72" />
+      </div>
+    );
+  }
+
   const t = {
     fr: {
       title: "📬 Me Contacter",
@@ -18,7 +38,7 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
       email: "Votre email",
       subject: "Sujet (optionnel)",
       message: "Votre message",
-      send: "Envoyer ✉️",
+      send: "Envoyer",
       sending: "Envoi…",
       validation: {
         name: "Le nom doit faire au moins 2 caractères.",
@@ -26,7 +46,7 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
         message: "Le message doit faire au moins 10 caractères.",
       },
       success: "✅ Message envoyé avec succès !",
-      fail: "❌ Erreur lors de l’envoi : ",
+      fail: "❌ Erreur lors de l'envoi : ",
       retry: "Veuillez réessayer.",
     },
     en: {
@@ -35,12 +55,12 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
       email: "Your email",
       subject: "Subject (optional)",
       message: "Your message",
-      send: "Send ✉️",
+      send: "Send",
       sending: "Sending…",
       validation: {
-        name: "Name must be at least 2 characters long.",
+        name: "Name must be at least 2 characters.",
         email: "Invalid email address.",
-        message: "Message must be at least 10 characters long.",
+        message: "Message must be at least 10 characters.",
       },
       success: "✅ Message sent successfully!",
       fail: "❌ Error while sending: ",
@@ -52,7 +72,6 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
     const name = String(data.name || "").trim();
     const email = String(data.email || "").trim();
     const message = String(data.message || "").trim();
-
     if (name.length < 2) return t.validation.name;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return t.validation.email;
     if (message.length < 10) return t.validation.message;
@@ -66,7 +85,7 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
     const fd = new FormData(formRef.current);
     const payload = Object.fromEntries(fd.entries());
 
-    // Anti-bot
+    // Honeypot anti-bot
     if (payload.company) return;
 
     const error = validate(payload);
@@ -89,29 +108,39 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
       });
 
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j?.error || "Failed");
+        const j = await res.text().catch(() => "");
+        throw new Error(j || "EmailJS API error");
       }
 
       toast({ message: t.success, variant: "success" });
       formRef.current.reset();
-    } catch (err: any) {
-      toast({
-        message: `${t.fail}${err?.message ?? t.retry}`,
-        variant: "error",
-      });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : t.retry;
+      toast({ message: `${t.fail}${msg}`, variant: "error" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-900 text-white">
-      <div className="max-w-xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">{t.title}</h2>
+    <div className="relative max-w-2xl mx-auto">
+      {/* halo subtil pour rappeler tes blobs */}
+      <div className="pointer-events-none absolute -inset-x-10 -top-10 h-40 rounded-full blur-3xl opacity-30
+                      bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]" />
+      <div className="rounded-2xl border bg-white/5 border-white/10 shadow-xl backdrop-blur-md">
+        {showTitle && (
+          <div className="px-6 pt-6">
+            <h2 className="text-2xl md:text-3xl font-bold">{t.title}</h2>
+          </div>
+        )}
 
-        <form ref={formRef} onSubmit={sendEmail} className="space-y-4" noValidate>
-          {/* Honeypot caché */}
+        <form
+          ref={formRef}
+          onSubmit={sendEmail}
+          className="p-6 md:p-8 space-y-5"
+          noValidate
+        >
+          {/* Honeypot */}
           <input
             type="text"
             name="company"
@@ -121,57 +150,94 @@ export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
             aria-hidden="true"
           />
 
-          <input
-            type="text"
-            name="name"
-            placeholder={t.name}
-            className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder={t.email}
-            className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
-            inputMode="email"
-            required
-          />
-          <input
-            type="text"
-            name="title"
-            placeholder={t.subject}
-            className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
-          />
-          <textarea
-            name="message"
-            placeholder={t.message}
-            className="w-full p-3 rounded bg-gray-800 h-32 focus:ring-2 focus:ring-purple-500"
-            minLength={10}
-            required
-          />
+          {/* Grid 2 colonnes */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field icon={<User2 className="w-4 h-4" />} >
+              <input
+                type="text"
+                name="name"
+                placeholder={t.name}
+                className="w-full bg-transparent outline-none placeholder-white/50"
+                required
+              />
+            </Field>
+
+            <Field icon={<Mail className="w-4 h-4" />}>
+              <input
+                type="email"
+                name="email"
+                placeholder={t.email}
+                className="w-full bg-transparent outline-none placeholder-white/50"
+                inputMode="email"
+                required
+              />
+            </Field>
+          </div>
+
+          <Field icon={<TypeIcon className="w-4 h-4" />}>
+            <input
+              type="text"
+              name="title"
+              placeholder={t.subject}
+              className="w-full bg-transparent outline-none placeholder-white/50"
+            />
+          </Field>
+
+          <Field icon={<MessageSquareText className="w-4 h-4" />} big>
+            <textarea
+              name="message"
+              placeholder={t.message}
+              className="w-full h-32 bg-transparent outline-none resize-y placeholder-white/50"
+              minLength={10}
+              required
+            />
+          </Field>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 transition font-semibold py-3 rounded inline-flex items-center justify-center disabled:opacity-50"
+            className="w-full rounded-xl font-semibold py-3
+                       bg-gradient-to-r from-fuchsia-600 to-cyan-500
+                       hover:from-fuchsia-500 hover:to-cyan-400
+                       focus:outline-none focus:ring-2 focus:ring-white/40
+                       disabled:opacity-60 transition"
             aria-busy={loading}
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t.sending}
-              </>
-            ) : (
-              t.send
-            )}
+            <span className="inline-flex items-center justify-center gap-2">
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading ? t.sending : t.send}
+            </span>
           </button>
 
-          {/* Zone d’annonce accessible */}
           <p className="sr-only" aria-live="polite">
             {loading ? t.sending : ""}
           </p>
         </form>
       </div>
-    </section>
+    </div>
+  );
+}
+
+/* --- Wrapper for form fields --- */
+function Field({
+  children,
+  icon,
+  big = false,
+}: {
+  children: React.ReactNode;
+  icon: React.ReactNode;
+  big?: boolean;
+}) {
+  return (
+    <label
+      className={`group flex items-start gap-3 rounded-xl border border-white/10 bg-white/5
+                  focus-within:border-white/20 focus-within:ring-2 focus-within:ring-purple-500/40
+                  transition px-3 ${big ? "py-3" : "py-2.5"}`}
+    >
+      <span className="mt-1.5 text-white/70 group-focus-within:text-white transition">
+        {icon}
+      </span>
+      {children}
+    </label>
   );
 }

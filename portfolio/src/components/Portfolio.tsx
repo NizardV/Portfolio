@@ -5,10 +5,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Download, Github, Linkedin, Mail, Globe2, Link as LinkIcon, MapPin, Calendar, ExternalLink } from "lucide-react";
+import { Download, Github, Linkedin, Mail, Link as LinkIcon, MapPin, Calendar, ExternalLink } from "lucide-react";
 import Contact from '@/components/Contact';
 import {
   Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, GraduationCap
@@ -17,54 +15,137 @@ import SkillBadge from "@/components/SkillBadge";
 import Image from "next/image";
 import Link from "next/link";
 
+// -------- Types --------
+type Lang = "fr" | "en";
+
+type Dict = {
+  nav: { about: string; projects: string; experience: string; skills: string; contact: string };
+  heroTitle: string;
+  heroSub: string;
+  ctaCV: string;
+  ctaContact: string;
+  about: string;
+  projectsTitle: string;
+  experienceTitle: string;
+  skillsTitle: string;
+  contactTitle: string;
+  contactBlurb: string;
+  form: { name: string; email: string; message: string; send: string };
+  footer: string;
+};
+
+type AllDict = Readonly<Record<Lang, Dict>>;
+
+
+type Experience = {
+  roleFR: string;
+  roleEN: string;
+  org: string;
+  timeframe: string;
+  pointsFR: string[];
+  pointsEN: string[];
+};
+
+type Project = {
+  title: string;
+  timeframe?: string;
+  location?: string;
+  descriptionFR?: string;
+  descriptionEN?: string;
+  stack?: string[];
+  demo?: string;
+  repo?: string;
+  caseStudy?: string;
+  evidence?: "private_repo" | "not_hosted" | "coming_soon";
+};
+
+type SkillGroup = {
+  label?: string;
+  labelFR?: string;
+  labelEN?: string;
+  icon?: string;
+  items: string[];
+};
+
+type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+
+// -------- Fallback dictionary --------
+export const FALLBACK_DICT: AllDict = {
+  fr: {
+    nav: {
+      about: "À propos",
+      projects: "Projets",
+      experience: "Expérience",
+      skills: "Compétences",
+      contact: "Contact",
+    },
+    heroTitle: "Nizard Verdenal",
+    heroSub:
+      "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de sept. 2025",
+    ctaCV: "Télécharger le CV",
+    ctaContact: "Me contacter",
+    about:
+      "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
+    projectsTitle: "Projets",
+    experienceTitle: "Expérience",
+    skillsTitle: "Compétences",
+    contactTitle: "Contact",
+    contactBlurb:
+      "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
+    form: {
+      name: "Nom",
+      email: "Email",
+      message: "Message",
+      send: "Envoyer",
+    },
+    footer: "© 2025 - Nizard Verdenal. Tous droits réservés.",
+  },
+
+  en: {
+    nav: {
+      about: "About",
+      projects: "Projects",
+      experience: "Experience",
+      skills: "Skills",
+      contact: "Contact",
+    },
+    heroTitle: "Nizard Verdenal",
+    heroSub:
+      "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from Sep 2025",
+    ctaCV: "Download CV",
+    ctaContact: "Contact me",
+    about:
+      "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
+    projectsTitle: "Projects",
+    experienceTitle: "Experience",
+    skillsTitle: "Skills",
+    contactTitle: "Contact",
+    contactBlurb:
+      "Got a project, apprenticeship opportunity, or a question? Drop a line.",
+    form: {
+      name: "Name",
+      email: "Email",
+      message: "Message",
+      send: "Send",
+    },
+    footer: "© 2025 - Nizard Verdenal. All rights reserved.",
+  },
+} as const;
+
 
 export default function Portfolio() {
   // ------- State --------
 
-  // --- Fallback dictionary ---
-  const FALLBACK_DICT = {
-    fr: {
-      nav: { about: "À propos", projects: "Projets", experience: "Expérience", skills: "Compétences", contact: "Contact" },
-      heroTitle: "Nizard Verdenal",
-      heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE)",
-      ctaCV: "Télécharger le CV",
-      ctaContact: "Me contacter",
-      about: "",
-      projectsTitle: "Projets",
-      experienceTitle: "Expérience",
-      skillsTitle: "Compétences",
-      contactTitle: "Contact",
-      contactBlurb: "",
-      form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
-      footer: ""
-    },
-    en: {
-      nav: { about: "About", projects: "Projects", experience: "Experience", skills: "Skills", contact: "Contact" },
-      heroTitle: "Nizard Verdenal",
-      heroSub: "Full-stack developer (Bachelor CPI - DIIAGE)",
-      ctaCV: "Download CV",
-      ctaContact: "Contact me",
-      about: "",
-      projectsTitle: "Projects",
-      experienceTitle: "Experience",
-      skillsTitle: "Skills",
-      contactTitle: "Contact",
-      contactBlurb: "",
-      form: { name: "Name", email: "Email", message: "Message", send: "Send" },
-      footer: ""
-    }
-  } as const;
-
   // --- Language state ---
-  const [lang, setLang] = useState<"fr" | "en">("fr");
-  const [dict, setDict] = useState<any>(FALLBACK_DICT); // loaded from /dict.json
+  const [lang, setLang] = useState<Lang>("fr");
+  const [dict, setDict] = useState<AllDict>(FALLBACK_DICT); // loaded from /dict.json
   const t = dict[lang];
 
   // --- Experiences & Projects & Skills ---
-  const [experiences, setExperiences] = useState<any[]>([]); // loaded from /experiences.json
-  const [projects, setProjects] = useState<any[]>([]); // loaded from /projects.json
-  const [skills, setSkills] = useState<any[]>([]); // loaded from /skills.json
-  const groupIconMap: Record<string, any> = {
+  const [experiences, setExperiences] = useState<Experience[]>([]); // loaded from /experiences.json
+  const [projects, setProjects] = useState<Project[]>([]); // loaded from /projects.json
+  const [skills, setSkills] = useState<SkillGroup[]>([]); // loaded from /skills.json
+  const groupIconMap: Record<string, IconType> = {
     backend: Server,
     frontend: Layout,
     data: Database,
@@ -78,7 +159,6 @@ export default function Portfolio() {
   // -------- Scroll: hide on down, show on up --------
   const [showHeader, setShowHeader] = React.useState(true);
   const lastY = React.useRef(0);
-  const onNavClick = () => setShowHeader(true);
   const HEADER_OFFSET = 80; // ~ h-16 + marge
   const scrollToId = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -92,8 +172,16 @@ export default function Portfolio() {
 
   // -------- Helpers --------
 
+  // Type guard for dictionary
+  function isAllDict(x: unknown): x is AllDict {
+    if (!x || typeof x !== "object") return false;
+    const obj = x as Record<string, unknown>;
+    return "fr" in obj && "en" in obj;
+  }
+
+
   // Get icon for skill group
-  function getGroupIcon(key?: string) {
+  function getGroupIcon(key?: string): IconType {
     if (!key) return Hammer;
     const normalized = key.toLowerCase();
     return groupIconMap[normalized] || Hammer;
@@ -101,24 +189,15 @@ export default function Portfolio() {
 
   // -------- Effects --------
 
-  // Load dictionary (FR/EN) from /dict.json
+  // Load dictionary from /dict.json
   React.useEffect(() => {
-    const url = "/dict.json"; // doit être dans /public/dict.json
-    fetch(url, { cache: "no-store" })
-      .then((r) => {
-        console.log("dict status", r.status, r.url);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
+    fetch("/dict.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: unknown) => {
+        if (isAllDict(data)) setDict(data);
+        else setDict(FALLBACK_DICT);
       })
-      .then((data) => {
-        console.log("dict loaded:", data);
-        setDict(data);
-      })
-      .catch((err) => {
-        console.error("dict load error:", err);
-        // on garde FALLBACK_DICT
-        setDict(FALLBACK_DICT);
-      });
+      .catch(() => setDict(FALLBACK_DICT));
   }, []);
 
 
@@ -126,8 +205,8 @@ export default function Portfolio() {
   React.useEffect(() => {
     fetch("/experiences.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => (Array.isArray(data) ? data : []))
-      .then((list) => setExperiences(list))
+      .then((data: unknown) => (Array.isArray(data) ? (data as Experience[]) : []))
+      .then(setExperiences)
       .catch(() => setExperiences([]));
   }, []);
 
@@ -135,8 +214,8 @@ export default function Portfolio() {
   React.useEffect(() => {
     fetch("/projects.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => (Array.isArray(data) ? data : []))
-      .then((list) => setProjects(list))
+      .then((data : unknown) => (Array.isArray(data) ? (data as Project[]) : []))
+      .then(setProjects)
       .catch(() => setProjects([]));
   }, []);
 
@@ -144,8 +223,8 @@ export default function Portfolio() {
   React.useEffect(() => {
     fetch("/skills.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => (Array.isArray(data) ? data : []))
-      .then((list) => setSkills(list))
+      .then((data : unknown) => (Array.isArray(data) ? (data as SkillGroup[]) : []))
+      .then(setSkills)
       .catch(() => setSkills([]));
   }, []);
 
@@ -170,7 +249,7 @@ export default function Portfolio() {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white">
+    <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.05),transparent_60%)]">
       {/* decorative background: subtle grid + gradient blobs */}
       <div className="pointer-events-none absolute inset-0 opacity-20
                       [background:repeating-linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px),
@@ -245,10 +324,14 @@ export default function Portfolio() {
         <section id="about" className="max-w-6xl mx-auto px-4 py-16 md:py-24">
         {/* banner */}
           <div className="mb-8 rounded-3xl ring-1 ring-white/10 overflow-hidden">
-            <img
+            <Image
               src="/banner-linkedin.jpg"
               alt="Bannière"
-              className="w-full h-56 md:h-64 lg:h-72 object-contain"
+              width={960}
+              height={288}
+              className="w-full h-48 md:h-64 lg:h-72 object-cover rounded-3xl"
+              draggable={false}
+              priority
             />
           </div>
           <div className="grid md:grid-cols-5 gap-8 items-center">
@@ -288,7 +371,7 @@ export default function Portfolio() {
               </div>
             </div>
             <div className="md:col-span-2">
-              <Card className="rounded-2xl border bg-white/5 border-white/10 shadow-lg">
+              <Card className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
                 <CardHeader>
                   <CardTitle>{lang === "fr" ? "À propos" : "About"}</CardTitle>
                   <CardDescription>{lang === "fr" ? "Résumé rapide" : "Quick summary"}</CardDescription>
@@ -311,8 +394,8 @@ export default function Portfolio() {
         <section id="projects" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.projectsTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {projects.map((p: any, i: number) => (
-              <Card key={i} className="hover:shadow-xl transition-shadow rounded-2xl border bg-white/5 border-white/10 shadow-lg">
+            {projects.map((p: Project, i: number) => (
+              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -336,7 +419,7 @@ export default function Portfolio() {
                   )}
                   {Array.isArray(p.stack) && p.stack.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {p.stack.map((s: any, idx: number) => (
+                      {p.stack.map((s: string, idx: number) => (
                         <SkillBadge key={idx} item={s} />
                       ))}
                     </div>
@@ -397,7 +480,7 @@ export default function Portfolio() {
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.experienceTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {experiences.map((e, i) => (
-              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg">
+              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
                 <CardHeader>
                   <CardTitle className="text-xl">
                     {lang === "fr" ? e.roleFR : e.roleEN}
@@ -423,8 +506,8 @@ export default function Portfolio() {
         <section id="skills" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.skillsTitle}</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {skills.map((group: any, i: number) => (
-              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg">
+            {skills.map((group: SkillGroup, i: number) => (
+              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   {(() => {
@@ -437,7 +520,7 @@ export default function Portfolio() {
                 </CardTitle>
               </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {group.items.map((s: any, idx: number) => (
+                  {group.items.map((s: string, idx: number) => (
                     <SkillBadge key={idx} item={s} />
                   ))}
                 </CardContent>
@@ -450,8 +533,9 @@ export default function Portfolio() {
         <section id="contact" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.contactTitle}</h2>
           <p className="text-white/70 mb-6">{t.contactBlurb}</p>
-          <Contact lang={lang} />
+          <Contact lang={lang} showTitle={false} />
         </section>
+
 
         {/* Footer */}
         <footer className="border-t border-white/10 mt-12">

@@ -3,8 +3,10 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const { name, email, title, message } = await req.json();
-    // Timestamp (format ISO 8601) simplified
-    const now = new Date().toISOString().replace("T", " ").split(".")[0];
+    const now = new Date().toLocaleString("fr-FR", {
+      timeZone: "Europe/Paris",
+      hour12: false,
+    });
 
     if (!name || !email || !message) {
       return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
@@ -42,8 +44,9 @@ export async function POST(req: Request) {
 
     console.log("✅ Email sent successfully:", text);
     return NextResponse.json({ ok: true, result: text });
-  } catch (e: any) {
-    console.error("⚠️ Server error:", e);
-    return NextResponse.json({ ok: false, error: e.message || "Server error" }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Server error";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
+
 }

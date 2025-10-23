@@ -1,18 +1,23 @@
+// input.tsx
 import * as React from "react";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/lib/utils";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={twMerge(
-        "flex h-10 w-full rounded-xl border border-white/15 bg-white/5 px-3 text-sm text-white placeholder-white/40 outline-none ring-0 focus:border-white/30",
-        className
-      )}
-      {...props}
-    />
-  )
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
 );
 Input.displayName = "Input";
+
+export { Input };
