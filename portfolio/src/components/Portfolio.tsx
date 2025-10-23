@@ -10,6 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Download, Github, Linkedin, Mail, Globe2, Link as LinkIcon, MapPin, Calendar, ExternalLink } from "lucide-react";
 import Contact from '@/components/Contact';
+import {
+  Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, GraduationCap
+} from "lucide-react";
 import SkillBadge from "@/components/SkillBadge";
 import Image from "next/image";
 import Link from "next/link";
@@ -61,6 +64,16 @@ export default function Portfolio() {
   const [experiences, setExperiences] = useState<any[]>([]); // loaded from /experiences.json
   const [projects, setProjects] = useState<any[]>([]); // loaded from /projects.json
   const [skills, setSkills] = useState<any[]>([]); // loaded from /skills.json
+  const groupIconMap: Record<string, any> = {
+    backend: Server,
+    frontend: Layout,
+    data: Database,
+    devops: Wrench,
+    tests: FlaskConical,
+    methods: Workflow,
+    tools: Hammer,
+    learning: GraduationCap,
+  };
 
   // -------- Scroll: hide on down, show on up --------
   const [showHeader, setShowHeader] = React.useState(true);
@@ -76,6 +89,15 @@ export default function Portfolio() {
     window.scrollTo({ top: y, behavior: "smooth" });
     window.history.replaceState(null, "", `#${id}`);
   };
+
+  // -------- Helpers --------
+
+  // Get icon for skill group
+  function getGroupIcon(key?: string) {
+    if (!key) return Hammer;
+    const normalized = key.toLowerCase();
+    return groupIconMap[normalized] || Hammer;
+  }
 
   // -------- Effects --------
 
@@ -314,8 +336,8 @@ export default function Portfolio() {
                   )}
                   {Array.isArray(p.stack) && p.stack.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {p.stack.map((s: string, idx: number) => (
-                        <Badge key={idx} variant="outline">{s}</Badge>
+                      {p.stack.map((s: any, idx: number) => (
+                        <SkillBadge key={idx} item={s} />
                       ))}
                     </div>
                   )}
@@ -387,7 +409,7 @@ export default function Portfolio() {
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 text-sm text-white/70 space-y-2">
-                    {(lang === "fr" ? e.pointsFR : e.pointsEN).map((pt, idx) => (
+                    {(lang === "fr" ? e.pointsFR : e.pointsEN).map((pt: string, idx: number) => (
                       <li key={idx}>{pt}</li>
                     ))}
                   </ul>
@@ -403,13 +425,17 @@ export default function Portfolio() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {skills.map((group: any, i: number) => (
               <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {lang === "fr"
-                      ? group.labelFR || group.labelEN || group.label
-                      : group.labelEN || group.labelFR || group.label}
-                  </CardTitle>
-                </CardHeader>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  {(() => {
+                    const Icon = getGroupIcon(group.icon);
+                    return <Icon className="w-4 h-4 opacity-80" />;
+                  })()}
+                  {lang === "fr"
+                    ? group.labelFR || group.labelEN || group.label
+                    : group.labelEN || group.labelFR || group.label}
+                </CardTitle>
+              </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {group.items.map((s: any, idx: number) => (
                     <SkillBadge key={idx} item={s} />

@@ -2,87 +2,95 @@
   {
     "labelFR": "Backend",
     "labelEN": "Backend",
+    "icon": "backend",
     "items": [
-      { "label": "ASP.NET Core", "icon": "SiDotnet" },
-      { "label": "C#", "icon": "SiCsharp" },
-      { "label": ".NET 9", "icon": "SiDotnet" },
-      { "label": "TerminalGUI", "icon": "SiWindowsterminal" },
-      { "label": "PHP", "icon": "SiPhp" },
-      { "label": "Laravel", "icon": "SiLaravel" }
+      { "label": "ASP.NET Core", "icon": "dotnet" },
+      { "label": "C#", "icon": "csharp" },
+      { "label": ".NET 9", "icon": "dotnet" },
+      { "label": "TerminalGUI", "icon": "windowsterminal" },
+      { "label": "PHP", "icon": "php" },
+      { "label": "Laravel", "icon": "laravel" }
     ]
   },
   {
     "labelFR": "Frontend",
     "labelEN": "Frontend",
+    "icon": "frontend",
     "items": [
-      { "label": "React", "icon": "SiReact" },
-      { "label": "Next.js", "icon": "SiNextdotjs" },
-      { "label": "Tailwind CSS", "icon": "SiTailwindcss" },
-      { "label": "Framer Motion", "icon": "SiReact" },
-      { "label": "shadcn/ui", "icon": "SiReact" }
+      { "label": "React", "icon": "react" },
+      { "label": "Next.js", "icon": "nextdotjs" },
+      { "label": "Tailwind CSS", "icon": "tailwindcss" },
+      { "label": "Framer Motion", "icon": "react" },
+      { "label": "shadcn/ui", "icon": "shadcnui" }
     ]
   },
   {
     "labelFR": "Données",
     "labelEN": "Data",
+    "icon": "data",
     "items": [
-      { "label": "SQL Server", "icon": "SiMicrosoftsqlserver" },
-      { "label": "MySQL", "icon": "SiMysql" },
-      { "label": "PostgreSQL", "icon": "SiPostgresql" },
-      { "label": "EFCore", "icon": "SiDotnet" },
-      { "label": "LINQ", "icon": "SiDotnet" }
+      { "label": "SQL Server", "icon": "microsoftsqlserver" },
+      { "label": "MySQL", "icon": "mysql" },
+      { "label": "PostgreSQL", "icon": "postgresql" },
+      { "label": "EFCore", "icon": "dotnet" },
+      { "label": "LINQ", "icon": "dotnet" }
     ]
   },
   {
     "labelFR": "DevOps & Infra",
     "labelEN": "DevOps & Infra",
+    "icon": "devops",
     "items": [
-      { "label": "Docker", "icon": "SiDocker" },
-      { "label": "docker-compose", "icon": "SiDocker" },
-      { "label": "Microsoft Azure", "icon": "SiMicrosoftazure" },
-      { "label": "Azure DevOps", "icon": "SiAzuredevops" }
+      { "label": "Docker", "icon": "docker" },
+      { "label": "docker-compose", "icon": "docker" },
+      { "label": "Microsoft Azure", "icon": "microsoftazure" },
+      { "label": "Azure DevOps", "icon": "azuredevops" }
     ]
   },
   {
     "labelFR": "Tests & Qualité",
     "labelEN": "Testing & Quality",
+    "icon": "tests",
     "items": [
-      { "label": "xUnit", "icon": "SiCsharp" },
-      { "label": "nUnit", "icon": "SiCsharp" },
-      { "label": "MsTests", "icon": "SiCsharp" },
-      { "label": "PHPUnit", "icon": "SiPhp" }
+      { "label": "xUnit", "icon": "testing" },
+      { "label": "nUnit", "icon": "testing" },
+      { "label": "MsTests", "icon": "testing" },
+      { "label": "PHPUnit", "icon": "testing" }
     ]
   },
   {
     "labelFR": "Méthodes",
     "labelEN": "Methods",
+    "icon": "methods",
     "items": [
-      { "label": "Scrum", "icon": "SiScrumalliance" },
-      { "label": "User Stories (RU)", "icon": "SiBookstack" },
-      { "label": "Documentation", "icon": "SiReadthedocs" },
-      { "label": "Code Review", "icon": "SiGithub" }
+      { "label": "Scrum", "icon": "scrum" },
+      { "label": "User Stories (RU)", "icon": "bookstack" },
+      { "label": "Documentation", "icon": "readthedocs" },
+      { "label": "Code Review", "icon": "github" }
     ]
   },
   {
     "labelFR": "Outils",
     "labelEN": "Tools",
+    "icon": "tools",
     "items": [
-      { "label": "Git", "icon": "SiGit" },
-      { "label": "GitHub", "icon": "SiGithub" },
-      { "label": "GitLab", "icon": "SiGitlab" },
-      { "label": "VS Code", "icon": "SiVisualstudiocode" },
-      { "label": "Visual Studio", "icon": "SiVisualstudio" },
-      { "label": "Postman", "icon": "SiPostman" },
-      { "label": "DBeaver", "icon": "SiDbeaver" }
+      { "label": "Git", "icon": "git" },
+      { "label": "GitHub", "icon": "github" },
+      { "label": "GitLab", "icon": "gitlab" },
+      { "label": "VS Code", "icon": "visualstudiocode" },
+      { "label": "Visual Studio", "icon": "visualstudio" },
+      { "label": "Postman", "icon": "postman" },
+      { "label": "DBeaver", "icon": "dbeaver" }
     ]
   },
   {
     "labelFR": "En cours d'apprentissage",
     "labelEN": "Learning",
+    "icon": "learning",
     "items": [
-      { "label": "Next.js", "icon": "SiNextdotjs" },
-      { "label": "TypeScript", "icon": "SiTypescript" },
-      { "label": "GitHub Actions", "icon": "SiGithubactions" }
+      { "label": "Next.js", "icon": "nextdotjs" },
+      { "label": "TypeScript", "icon": "typescript" },
+      { "label": "GitHub Actions", "icon": "githubactions" }
     ]
   }
 ]
