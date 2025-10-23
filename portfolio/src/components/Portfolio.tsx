@@ -10,92 +10,57 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Download, Github, Linkedin, Mail, Globe2, Link as LinkIcon, MapPin, Calendar, ExternalLink } from "lucide-react";
 import Contact from '@/components/Contact';
+import SkillBadge from "@/components/SkillBadge";
 import Image from "next/image";
 import Link from "next/link";
-// Portfolio.tsx (haut du fichier)
-import {
-  SiReact,
-  SiTailwindcss,
-  SiDotnet,
-  SiDocker,
-  SiGithub,
-  SiGitlab,
-  SiLinux,
-  SiNextdotjs,
-  SiTypescript,
-  SiMariadb,
-  SiMicrosoftsqlserver,
-  SiPostgresql,
-  SiNginx,
-  SiApache,
-  SiVisualstudiocode,
-  SiPostman,
-  SiGit,
-  SiBookstack,
-  SiReadthedocs,
-  SiScrumalliance,
-  SiVisualstudio,
-  SiCsharp,
-  SiWindowsterminal,
-  SiPhp,
-  SiMicrosoftazure,
-  SiAzuredevops,
-  SiLaravel,
-  SiDbeaver
-} from "react-icons/si";
 
-
-// ---- Quick notes ----
-// • Single-file portfolio starter for React (Vite/Next).
-// • Tailwind + shadcn/ui + framer-motion assumed.
-// • Projects & Skills are loaded from /projects.json and /skills.json at runtime.
-// • Bilingual FR/EN with a toggle, plus dark mode.
-
-// --- Dictionary ---
-const dict = {
-  fr: {
-    nav: { about: "À propos", projects: "Projets", experience: "Expérience", skills: "Compétences", contact: "Contact" },
-    heroTitle: "Nizard Verdenal",
-    heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de sept. 2025",
-    ctaCV: "Télécharger le CV",
-    ctaContact: "Me contacter",
-    about: "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
-    projectsTitle: "Projets",
-    experienceTitle: "Expérience",
-    skillsTitle: "Compétences",
-    contactTitle: "Contact",
-    contactBlurb: "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
-    form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
-    footer: "© " + new Date().getFullYear() + " - Nizard Verdenal. Tous droits réservés.",
-  },
-  en: {
-    nav: { about: "About", projects: "Projects", experience: "Experience", skills: "Skills", contact: "Contact" },
-    heroTitle: "Nizard Verdenal",
-    heroSub: "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from Sep 2025",
-    ctaCV: "Download CV",
-    ctaContact: "Contact me",
-    about: "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
-    projectsTitle: "Projects",
-    experienceTitle: "Experience",
-    skillsTitle: "Skills",
-    contactTitle: "Contact",
-    contactBlurb: "Got a project, apprenticeship opportunity, or a question? Drop a line.",
-    form: { name: "Name", email: "Email", message: "Message", send: "Send" },
-    footer: "© " + new Date().getFullYear() + " - Nizard Verdenal. All rights reserved.",
-  },
-} as const;
 
 export default function Portfolio() {
+  // ------- State --------
+
+  // --- Fallback dictionary ---
+  const FALLBACK_DICT = {
+    fr: {
+      nav: { about: "À propos", projects: "Projets", experience: "Expérience", skills: "Compétences", contact: "Contact" },
+      heroTitle: "Nizard Verdenal",
+      heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE)",
+      ctaCV: "Télécharger le CV",
+      ctaContact: "Me contacter",
+      about: "",
+      projectsTitle: "Projets",
+      experienceTitle: "Expérience",
+      skillsTitle: "Compétences",
+      contactTitle: "Contact",
+      contactBlurb: "",
+      form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
+      footer: ""
+    },
+    en: {
+      nav: { about: "About", projects: "Projects", experience: "Experience", skills: "Skills", contact: "Contact" },
+      heroTitle: "Nizard Verdenal",
+      heroSub: "Full-stack developer (Bachelor CPI - DIIAGE)",
+      ctaCV: "Download CV",
+      ctaContact: "Contact me",
+      about: "",
+      projectsTitle: "Projects",
+      experienceTitle: "Experience",
+      skillsTitle: "Skills",
+      contactTitle: "Contact",
+      contactBlurb: "",
+      form: { name: "Name", email: "Email", message: "Message", send: "Send" },
+      footer: ""
+    }
+  } as const;
+
   // --- Language state ---
   const [lang, setLang] = useState<"fr" | "en">("fr");
+  const [dict, setDict] = useState<any>(FALLBACK_DICT); // loaded from /dict.json
+  const t = dict[lang];
 
   // --- Experiences & Projects & Skills ---
   const [experiences, setExperiences] = useState<any[]>([]); // loaded from /experiences.json
   const [projects, setProjects] = useState<any[]>([]); // loaded from /projects.json
   const [skills, setSkills] = useState<any[]>([]); // loaded from /skills.json
-
-  // --- Dictionary selection ---
-  const t = dict[lang];
 
   // -------- Scroll: hide on down, show on up --------
   const [showHeader, setShowHeader] = React.useState(true);
@@ -112,71 +77,28 @@ export default function Portfolio() {
     window.history.replaceState(null, "", `#${id}`);
   };
 
-  // --- Icon mapping --- //
-  const iconMap = {
-    SiReact,
-    SiTailwindcss,
-    SiDotnet,
-    SiDocker,
-    SiGithub,
-    SiGitlab,
-    SiLinux,
-    SiNextdotjs,
-    SiTypescript,
-    SiMariadb,
-    SiMicrosoftsqlserver,
-    SiPostgresql,
-    SiNginx,
-    SiApache,
-    SiVisualstudiocode,
-    SiPostman,
-    SiGit,
-    SiBookstack,
-    SiReadthedocs,
-    SiScrumalliance,
-    SiCsharp,
-    SiWindowsterminal,
-    SiPhp,
-    SiMicrosoftazure,
-    SiAzuredevops,
-    SiVisualstudio,
-    SiDbeaver,
-    SiLaravel
-  } as const;
+  // -------- Effects --------
 
-  type IconKey = keyof typeof iconMap;
-
-  function SkillBadge({ item }: { item: string | { label: string; icon?: IconKey } }) {
-    const label = typeof item === "string" ? item : item.label;
-    const Icon = typeof item === "object" && item.icon ? iconMap[item.icon] : null;
-
-    return (
-      <Badge variant="outline" className="inline-flex items-center gap-1 px-2 py-1 text-sm">
-        {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
-        {label}
-      </Badge>
-    );
-  }
-
-  // Hide header on scroll down
+  // Load dictionary (FR/EN) from /dict.json
   React.useEffect(() => {
-    let ticking = false;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const delta = y - lastY.current;
-          if (delta > 4 && y > 80) setShowHeader(false);         // hide when scrolling down
-          else if (delta < -4 || y < 120) setShowHeader(true);  // show when scrolling up
-          lastY.current = y;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const url = "/dict.json"; // doit être dans /public/dict.json
+    fetch(url, { cache: "no-store" })
+      .then((r) => {
+        console.log("dict status", r.status, r.url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        console.log("dict loaded:", data);
+        setDict(data);
+      })
+      .catch((err) => {
+        console.error("dict load error:", err);
+        // on garde FALLBACK_DICT
+        setDict(FALLBACK_DICT);
+      });
   }, []);
+
 
   // Load experiences from /experiences.json
   React.useEffect(() => {
@@ -205,14 +127,25 @@ export default function Portfolio() {
       .catch(() => setSkills([]));
   }, []);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert(
-      lang === "fr"
-        ? "Merci ! Votre message a été simulé côté client."
-        : "Thanks! Your message was simulated on the client side."
-    );
-  };
+  // Scroll listener for header show/hide
+  React.useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const delta = y - lastY.current;
+          if (delta > 4 && y > 80) setShowHeader(false);         // hide when scrolling down
+          else if (delta < -4 || y < 120) setShowHeader(true);  // show when scrolling up
+          lastY.current = y;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white">
@@ -244,6 +177,7 @@ export default function Portfolio() {
                 src="/brand/nv-icon.png"
                 alt="NV"
                 fill
+                sizes="32px"
                 priority
                 className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
               />
@@ -255,6 +189,7 @@ export default function Portfolio() {
                 src="/brand/nv-logo.png"
                 alt="Nizard.dev"
                 fill
+                sizes="65px"
                 priority
                 className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_#06b6d4]"
               />
