@@ -2,21 +2,60 @@
 
 import { useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/toast-context"; // context-based toast
+import { useToast } from "@/components/ui/toast-context";
 
-export default function Contact() {
+// On ajoute une prop pour récupérer la langue du Portfolio
+export default function Contact({ lang = "fr" }: { lang?: "fr" | "en" }) {
   const formRef = useRef<HTMLFormElement | null>(null);
-  const { toast } = useToast(); // context-based toast
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // --- Dictionnaire bilingue ---
+  const t = {
+    fr: {
+      title: "📬 Me Contacter",
+      name: "Votre nom",
+      email: "Votre email",
+      subject: "Sujet (optionnel)",
+      message: "Votre message",
+      send: "Envoyer ✉️",
+      sending: "Envoi…",
+      validation: {
+        name: "Le nom doit faire au moins 2 caractères.",
+        email: "Adresse email invalide.",
+        message: "Le message doit faire au moins 10 caractères.",
+      },
+      success: "✅ Message envoyé avec succès !",
+      fail: "❌ Erreur lors de l’envoi : ",
+      retry: "Veuillez réessayer.",
+    },
+    en: {
+      title: "📬 Contact Me",
+      name: "Your name",
+      email: "Your email",
+      subject: "Subject (optional)",
+      message: "Your message",
+      send: "Send ✉️",
+      sending: "Sending…",
+      validation: {
+        name: "Name must be at least 2 characters long.",
+        email: "Invalid email address.",
+        message: "Message must be at least 10 characters long.",
+      },
+      success: "✅ Message sent successfully!",
+      fail: "❌ Error while sending: ",
+      retry: "Please try again.",
+    },
+  }[lang];
 
   const validate = (data: Record<string, FormDataEntryValue>) => {
     const name = String(data.name || "").trim();
     const email = String(data.email || "").trim();
     const message = String(data.message || "").trim();
 
-    if (name.length < 2) return "Le nom doit faire au moins 2 caractères.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Adresse email invalide.";
-    if (message.length < 10) return "Le message doit faire au moins 10 caractères.";
+    if (name.length < 2) return t.validation.name;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return t.validation.email;
+    if (message.length < 10) return t.validation.message;
     return null;
   };
 
@@ -27,7 +66,7 @@ export default function Contact() {
     const fd = new FormData(formRef.current);
     const payload = Object.fromEntries(fd.entries());
 
-    // Anti-bot (honeypot)
+    // Anti-bot
     if (payload.company) return;
 
     const error = validate(payload);
@@ -51,14 +90,14 @@ export default function Contact() {
 
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
-        throw new Error(j?.error || "Échec de l’envoi");
+        throw new Error(j?.error || "Failed");
       }
 
-      toast({ message: "✅ Message envoyé avec succès !", variant: "success" });
+      toast({ message: t.success, variant: "success" });
       formRef.current.reset();
     } catch (err: any) {
       toast({
-        message: `❌ Erreur lors de l’envoi : ${err?.message ?? "Veuillez réessayer."}`,
+        message: `${t.fail}${err?.message ?? t.retry}`,
         variant: "error",
       });
     } finally {
@@ -69,7 +108,7 @@ export default function Contact() {
   return (
     <section id="contact" className="py-20 bg-gray-900 text-white">
       <div className="max-w-xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">📬 Me Contacter</h2>
+        <h2 className="text-3xl font-bold mb-6">{t.title}</h2>
 
         <form ref={formRef} onSubmit={sendEmail} className="space-y-4" noValidate>
           {/* Honeypot caché */}
@@ -85,14 +124,14 @@ export default function Contact() {
           <input
             type="text"
             name="name"
-            placeholder="Votre nom"
+            placeholder={t.name}
             className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
             required
           />
           <input
             type="email"
             name="email"
-            placeholder="Votre email"
+            placeholder={t.email}
             className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
             inputMode="email"
             required
@@ -100,12 +139,12 @@ export default function Contact() {
           <input
             type="text"
             name="title"
-            placeholder="Sujet (optionnel)"
+            placeholder={t.subject}
             className="w-full p-3 rounded bg-gray-800 focus:ring-2 focus:ring-purple-500"
           />
           <textarea
             name="message"
-            placeholder="Votre message"
+            placeholder={t.message}
             className="w-full p-3 rounded bg-gray-800 h-32 focus:ring-2 focus:ring-purple-500"
             minLength={10}
             required
@@ -120,16 +159,16 @@ export default function Contact() {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi…
+                {t.sending}
               </>
             ) : (
-              "Envoyer"
+              t.send
             )}
           </button>
 
           {/* Zone d’annonce accessible */}
           <p className="sr-only" aria-live="polite">
-            {loading ? "Envoi en cours" : ""}
+            {loading ? t.sending : ""}
           </p>
         </form>
       </div>

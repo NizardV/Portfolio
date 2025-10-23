@@ -450,7 +450,7 @@ export default function Portfolio() {
         <section id="contact" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.contactTitle}</h2>
           <p className="text-white/70 mb-6">{t.contactBlurb}</p>
-          <Contact />
+          <Contact lang={lang} />
         </section>
 
         {/* Footer */}
