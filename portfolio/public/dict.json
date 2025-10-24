@@ -1,0 +1,54 @@
+{
+  "fr": {
+    "nav": {
+      "about": "À propos",
+      "projects": "Projets",
+      "experience": "Expérience",
+      "skills": "Compétences",
+      "contact": "Contact"
+    },
+    "heroTitle": "Nizard Verdenal",
+    "heroSub": "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de sept. 2025",
+    "ctaCV": "Télécharger le CV",
+    "ctaContact": "Me contacter",
+    "about": "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
+    "projectsTitle": "Projets",
+    "experienceTitle": "Expérience",
+    "skillsTitle": "Compétences",
+    "contactTitle": "Contact",
+    "contactBlurb": "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
+    "form": {
+      "name": "Nom",
+      "email": "Email",
+      "message": "Message",
+      "send": "Envoyer"
+    },
+    "footer": "© 2025 - Nizard Verdenal. Tous droits réservés."
+  },
+  "en": {
+    "nav": {
+      "about": "About",
+      "projects": "Projects",
+      "experience": "Experience",
+      "skills": "Skills",
+      "contact": "Contact"
+    },
+    "heroTitle": "Nizard Verdenal",
+    "heroSub": "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from Sep 2025",
+    "ctaCV": "Download CV",
+    "ctaContact": "Contact me",
+    "about": "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
+    "projectsTitle": "Projects",
+    "experienceTitle": "Experience",
+    "skillsTitle": "Skills",
+    "contactTitle": "Contact",
+    "contactBlurb": "Got a project, apprenticeship opportunity, or a question? Drop a line.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "send": "Send"
+    },
+    "footer": "© 2025 - Nizard Verdenal. All rights reserved."
+  }
+}

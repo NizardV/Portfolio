@@ -1,0 +1,31 @@
+[
+  {
+    "title": "AgeOfCode",
+    "timeframe": "2025",
+    "location": "Dijon, France",
+    "descriptionFR": "Jeu en terminal (.NET 9 / C#) réalisé en équipe au DIIAGE. Architecture modulaire orientée features, principes SOLID. Conteneurisation via Docker ; bases de CI/CD (non finalisé).",
+    "descriptionEN": "Terminal game (.NET 9 / C#) built as a team at DIIAGE. Modular, feature-driven architecture with SOLID principles. Dockerized; CI/CD basics (not fully finalized).",
+    "stack": [
+      { "label": "C#", "icon":"csharp" },
+      { "label": ".NET 9", "icon": "dotnet" },
+      { "label": "TerminalGUI", "icon": "windowsterminal" },
+      { "label": "Docker", "icon": "docker" }
+    ],
+    "repo": "https://github.com/NizardV/AgeOfCode"
+  },
+  {
+    "title": "Portfolio (Nizard.dev)",
+    "timeframe": "2025",
+    "location": "Dijon, France",
+    "descriptionFR": "Portfolio personnel avec Next.js 15 + React, Tailwind, Framer Motion et shadcn/ui. Identité visuelle alignée LinkedIn, déploiement Vercel. Formulaire de contact branché sur API interne.",
+    "descriptionEN": "Personal portfolio using Next.js 15 + React, Tailwind, Framer Motion and shadcn/ui. Visual identity aligned with LinkedIn, deployed on Vercel. Contact form wired to an internal API.",
+    "stack": [
+      { "label": "Next.js", "icon": "nextdotjs" },
+      { "label": "React", "icon": "react" },
+      { "label": "Tailwind CSS", "icon": "tailwindcss" },
+      { "label": "Framer Motion", "icon": "react" },
+      { "label": "shadcn/ui", "icon": "shadcn" }
+    ],
+    "repo": "https://github.com/NizardV/Portfolio"
+  }
+]
