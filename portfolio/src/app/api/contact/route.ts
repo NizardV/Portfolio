@@ -73,6 +73,9 @@ export async function POST(req: Request) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (PRIVATE_KEY) headers.Authorization = `Bearer ${PRIVATE_KEY}`;
 
+    // Debug temporaire (à enlever ensuite)
+    console.log("Has private key:", !!PRIVATE_KEY);
+
     const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
       headers,
