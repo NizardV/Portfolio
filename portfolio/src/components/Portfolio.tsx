@@ -231,7 +231,7 @@ export default function Portfolio() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.05),transparent_60%)]">
       {/* decorative background */}
-      <div className="pointer-events-none absolute inset-0 opacity-20 [background:repeating-linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px),repeating-linear-gradient(0deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px)]"></div>
+      <div className="pointer-events-none absolute inset-0 opacity-10 [background:repeating-linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px),repeating-linear-gradient(0deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px)]"></div>
       <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(0,179,255,0.35),transparent_70%)]"></div>
       <div className="pointer-events-none absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]"></div>
 
@@ -397,7 +397,7 @@ export default function Portfolio() {
               </div>
             </div>
             <div className="md:col-span-2">
-              <Card className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
+              <Card className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
                 <CardHeader>
                   <CardTitle>{lang === "fr" ? "À propos" : "About"}</CardTitle>
                   <CardDescription>{lang === "fr" ? "Résumé rapide" : "Quick summary"}</CardDescription>
@@ -421,7 +421,7 @@ export default function Portfolio() {
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.projectsTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {projects.map((p: Project, i: number) => (
-              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
+              <Card key={i} className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -496,7 +496,7 @@ export default function Portfolio() {
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.experienceTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {experiences.map((e, i) => (
-              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
+              <Card key={i} className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
                 <CardHeader>
                   <CardTitle className="text-xl">{lang === "fr" ? e.roleFR : e.roleEN}</CardTitle>
                   <CardDescription className="flex flex-wrap items-center gap-2">
@@ -521,7 +521,7 @@ export default function Portfolio() {
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.skillsTitle}</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {skills.map((group: SkillGroup, i: number) => (
-              <Card key={i} className="rounded-2xl border bg-white/5 border-white/10 shadow-lg hover:bg-white/[0.08] transition-colors">
+              <Card key={i} className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     {(() => {
