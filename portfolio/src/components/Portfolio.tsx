@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
@@ -112,6 +112,8 @@ export default function Portfolio() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<SkillGroup[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string>("about");
+
 
   const groupIconMap: Record<string, IconType> = {
     backend: Server,
@@ -127,8 +129,8 @@ export default function Portfolio() {
   // -------- Scroll: hide on down, show on up --------
   const [showHeader, setShowHeader] = React.useState(true);
   const lastY = React.useRef(0);
-  const HEADER_OFFSET = 80;
-  const scrollToId = (e: React.MouseEvent, id: string) => {
+  const HEADER_OFFSET = 100;
+  const scrollToId = <T extends HTMLElement>(e: React.MouseEvent<T>, id: string) => {
     e.preventDefault();
     setShowHeader(true);
     setIsMenuOpen(false);
@@ -206,6 +208,26 @@ export default function Portfolio() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+  const sections = ["about","projects","experience","skills","contact"]
+    .map(id => document.getElementById(id))
+    .filter(Boolean) as HTMLElement[];
+
+    const obs = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top));
+        if (visible[0]?.target.id) setActiveId(visible[0].target.id);
+      },
+      { rootMargin: "-40% 0px -55% 0px", threshold: [0, 0.2, 0.6] }
+    );
+    sections.forEach(s => obs.observe(s));
+    return () => obs.disconnect();
+  }, []);
+
+  // -------- Render --------
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.05),transparent_60%)]">
       {/* decorative background */}
@@ -215,69 +237,70 @@ export default function Portfolio() {
 
       {/* ====== HEADER ====== */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-black/40 backdrop-blur transition-transform duration-300 ${
-          showHeader ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300
+                    ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
       >
-        <div className="mx-auto max-w-6xl h-16 px-6 flex items-center justify-between">
-          {/* LOGO */}
-          <Link href="/" className="group flex items-center gap-3 shrink-0" aria-label="Accueil Nizard.dev">
-            <div className="relative h-8 w-8 md:h-10 md:w-10">
-              <Image
-                src="/brand/nv-icon.png"
-                alt="NV"
-                fill
-                sizes="40px"
-                priority
-                className="object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_#06b6d4]"
-              />
-            </div>
-            <div className="relative hidden md:block h-16 w-[65px]">
-              <Image
-                src="/brand/nv-logo.png"
-                alt="Nizard.dev"
-                fill
-                sizes="65px"
-                priority
-                className="object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_#06b6d4]"
-              />
-            </div>
-          </Link>
+        <div className="mx-auto max-w-6xl px-6">
+          {/* barre glass + gradient de bordure */}
+          <div className="h-14 mt-2 mb-2 rounded-2xl border border-white/10
+                          bg-[linear-gradient(180deg,rgba(10,16,32,0.85),rgba(10,16,32,0.65))]
+                          backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.35)]
+                          flex items-center justify-between px-4">
+            {/* Logo (icône uniquement, toutes tailles) */}
+            <Link href="/" className="group flex items-center gap-3 shrink-0" aria-label="Accueil">
+              <div className="relative h-8 w-8 md:h-9 md:w-9">
+                <Image
+                  src="/brand/nv-icon.png"
+                  alt="NV"
+                  fill
+                  priority
+                  className="object-contain transition-transform group-hover:scale-110"
+                />
+              </div>
+            </Link>
 
-          {/* NAV DESKTOP */}
-          <nav className="hidden md:flex items-center justify-center gap-6 text-sm">
-            <a href="#about" onClick={(e) => scrollToId(e, "about")} className="hover:underline">
-              {t.nav.about}
-            </a>
-            <a href="#projects" onClick={(e) => scrollToId(e, "projects")} className="hover:underline">
-              {t.nav.projects}
-            </a>
-            <a href="#experience" onClick={(e) => scrollToId(e, "experience")} className="hover:underline">
-              {t.nav.experience}
-            </a>
-            <a href="#skills" onClick={(e) => scrollToId(e, "skills")} className="hover:underline">
-              {t.nav.skills}
-            </a>
-            <a href="#contact" onClick={(e) => scrollToId(e, "contact")} className="hover:underline">
-              {t.nav.contact}
-            </a>
-          </nav>
 
-          {/* Right: switch (desktop) + burger (mobile) */}
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 text-xs">
-              <span>FR</span>
-              <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
-              <span>EN</span>
+            {/* Nav desktop avec soulignement animé + lien actif */}
+            <nav className="hidden md:flex items-center gap-1 text-sm relative">
+              {(["about","projects","experience","skills","contact"] as const).map((id) => {
+                const isActive = activeId === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={(e) => scrollToId<HTMLButtonElement>(e, id)}
+                    className={`relative px-3 py-2 rounded-lg transition 
+                                hover:bg-white/5 focus:outline-none ${isActive ? "text-white" : "text-white/80"}`}
+                  >
+                    {/* libellé */}
+                    {t.nav[id]}
+                    {/* underline animé */}
+                    {isActive && (
+                      <motion.span
+                        layoutId="nv-underline"
+                        className="absolute left-2 right-2 -bottom-[2px] h-[2px] bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Lang switch (desktop) + burger (mobile) */}
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 text-xs">
+                <span>FR</span>
+                <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
+                <span>EN</span>
+              </div>
+              {/* bouton burger mobile inchangé */}
+              <button
+                onClick={() => setIsMenuOpen((v) => !v)}
+                className="md:hidden p-2 rounded-md hover:bg-white/10 focus:outline-none text-white"
+                aria-label="Ouvrir le menu"
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
-
-            <button
-              onClick={() => setIsMenuOpen((v) => !v)}
-              className="md:hidden p-2 rounded-md hover:bg-white/10 focus:outline-none text-white"
-              aria-label="Ouvrir le menu"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
 
@@ -321,16 +344,21 @@ export default function Portfolio() {
         {/* Hero */}
         <section id="about" className="max-w-6xl mx-auto px-4 py-16 md:py-24">
           {/* banner */}
-          <div className="mb-8 rounded-3xl ring-1 ring-white/10 overflow-hidden">
-            <Image
-              src="/banner-linkedin.jpg"
-              alt="Bannière"
-              width={960}
-              height={288}
-              className="w-full h-48 md:h-64 lg:h-72 object-cover rounded-3xl"
-              draggable={false}
-              priority
-            />
+          <div className="mb-10">
+            <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl ring-1 ring-white/10">
+              <div className="absolute inset-0 pointer-events-none
+                              bg-[radial-gradient(1200px_300px_at_80%_-50%,rgba(0,179,255,0.18),transparent)]" />
+              <Image
+                src="/banner-linkedin.jpg"
+                alt="Bannière"
+                priority
+                sizes="(max-width: 768px) 100vw, 960px"
+                width={1280}
+                height={400}
+                className="w-full aspect-[21/6] md:aspect-[21/5] object-cover"
+                draggable={false}
+              />
+            </div>
           </div>
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 space-y-6">
@@ -389,7 +417,7 @@ export default function Portfolio() {
         </section>
 
         {/* Projects */}
-        <section id="projects" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <section id="projects" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.projectsTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {projects.map((p: Project, i: number) => (
@@ -464,7 +492,7 @@ export default function Portfolio() {
         </section>
 
         {/* Experience */}
-        <section id="experience" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <section id="experience" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.experienceTitle}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {experiences.map((e, i) => (
@@ -489,7 +517,7 @@ export default function Portfolio() {
         </section>
 
         {/* Skills */}
-        <section id="skills" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <section id="skills" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.skillsTitle}</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {skills.map((group: SkillGroup, i: number) => (
@@ -514,34 +542,58 @@ export default function Portfolio() {
         </section>
 
         {/* Contact */}
-        <section id="contact" className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <section id="contact" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.contactTitle}</h2>
           <p className="text-white/70 mb-6">{t.contactBlurb}</p>
           <Contact lang={lang} showTitle={false} />
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-white/10 mt-12">
-          <div className="max-w-6xl mx-auto px-4 py-8 text-sm flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/70">{t.footer}</p>
-            <div className="flex items-center gap-4">
-              <a href="mailto:nizardverdenal.pro@gmail.com" className="inline-flex items-center hover:underline">
+        <footer role="contentinfo" className="border-t border-white/10 mt-12">
+          <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            {/* Logo complet horizontal */}
+            <div className="flex items-center gap-3">
+              <Image
+                src="/brand/nv-logo-footer.png" // ← ton nouveau logo horizontal
+                alt="nizard.dev"
+                width={300}
+                height={90}
+                sizes="(max-width: 640px) 180px, 240px"
+                className="object-contain h-6 sm:h-7 md:h-8 w-auto shrink-0"
+                priority
+              />
+              <p className="text-white/70 text-sm hidden sm:block">{t.footer}</p>
+            </div>
+
+            {/* Liens */}
+            <nav className="flex flex-wrap items-center justify-center sm:justify-end gap-4 text-sm">
+              <a
+                href="mailto:nizardverdenal.pro@gmail.com"
+                className="inline-flex items-center hover:underline"
+              >
                 <Mail className="w-4 h-4 mr-1" /> Email
               </a>
-              <a href="https://github.com/NizardV" target="_blank" rel="noreferrer" className="inline-flex items-center hover:underline">
+              <a
+                href="https://github.com/NizardV"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center hover:underline"
+              >
                 <Github className="w-4 h-4 mr-1" /> GitHub
               </a>
               <a
                 href="https://www.linkedin.com/in/nizard-verdenal"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center hover:underline"
               >
                 <Linkedin className="w-4 h-4 mr-1" /> LinkedIn
               </a>
-            </div>
+            </nav>
           </div>
         </footer>
+
       </main>
     </div>
   );
