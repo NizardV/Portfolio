@@ -1,18 +1,22 @@
 [
   {
-    "roleFR": "Stagiaire Technicien de maintenance informatique",
-    "roleEN": "IT Maintenance Intern",
-    "org": "ITC Neo Impex – Dijon",
-    "timeframe": "2020",
+    "roleFR": "Stagiaire Développeur Web",
+    "roleEN": "Web Developer Intern",
+    "org": "InnovQube – Noisy-le-Grand",
+    "timeframe": "2025",
     "pointsFR": [
-      "Stage d’observation en environnement professionnel",
-      "Maintenance et gestion d’un parc informatique",
-      "Installation et configuration de nouveaux équipements"
+      "Stage full remote sur une solution SaaS de guide de voyage",
+      "Ajout des traductions dynamiques selon les préférences utilisateurs",
+      "Intégration d’un framework UI (Filament) pour les panneaux d’administration",
+      "Optimisation globale de l’application (performance et UX)",
+      "Technologies : Laravel (Localization, Livewire, Filament), Vue.js"
     ],
     "pointsEN": [
-      "Observation internship in a professional IT environment",
-      "Maintenance and management of a computer network and devices",
-      "Installation and setup of new computer equipment"
+      "Remote internship on a SaaS travel guide solution",
+      "Implemented multilingual support based on user preferences",
+      "Integrated a UI framework (Filament) for admin panel management",
+      "Optimized overall application performance and UX",
+      "Tech stack: Laravel (Localization, Livewire, Filament), Vue.js"
     ]
   },
   {
@@ -36,23 +40,19 @@
     ]
   },
   {
-    "roleFR": "Stagiaire Développeur Web",
-    "roleEN": "Web Developer Intern",
-    "org": "InnovQube – Noisy-le-Grand",
-    "timeframe": "2025",
+    "roleFR": "Stagiaire Technicien de maintenance informatique",
+    "roleEN": "IT Maintenance Intern",
+    "org": "ITC Neo Impex – Dijon",
+    "timeframe": "2020",
     "pointsFR": [
-      "Stage full remote sur une solution SaaS de guide de voyage",
-      "Ajout des traductions dynamiques selon les préférences utilisateurs",
-      "Intégration d’un framework UI (Filament) pour les panneaux d’administration",
-      "Optimisation globale de l’application (performance et UX)",
-      "Technologies : Laravel (Localization, Livewire, Filament), Vue.js"
+      "Stage d’observation en environnement professionnel",
+      "Maintenance et gestion d’un parc informatique",
+      "Installation et configuration de nouveaux équipements"
     ],
     "pointsEN": [
-      "Remote internship on a SaaS travel guide solution",
-      "Implemented multilingual support based on user preferences",
-      "Integrated a UI framework (Filament) for admin panel management",
-      "Optimized overall application performance and UX",
-      "Tech stack: Laravel (Localization, Livewire, Filament), Vue.js"
+      "Observation internship in a professional IT environment",
+      "Maintenance and management of a computer network and devices",
+      "Installation and setup of new computer equipment"
     ]
   }
 ]

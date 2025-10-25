@@ -14,10 +14,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 // -------- Types --------
+
+// Supported languages
 type Lang = "fr" | "en";
 
+// Dictionary structure
 type Dict = {
-  nav: { about: string; projects: string; experience: string; skills: string; contact: string };
+  nav: { about: string; projects: string; experience: string; education: string; skills: string; contact: string };
   heroTitle: string;
   heroSub: string;
   ctaCV: string;
@@ -25,6 +28,7 @@ type Dict = {
   about: string;
   projectsTitle: string;
   experienceTitle: string;
+  educationTitle: string;
   skillsTitle: string;
   contactTitle: string;
   contactBlurb: string;
@@ -34,8 +38,10 @@ type Dict = {
   cvFilename: string;
 };
 
+// Complete dictionary for all languages
 type AllDict = Readonly<Record<Lang, Dict>>;
 
+// Experience structure
 type Experience = {
   roleFR: string;
   roleEN: string;
@@ -45,6 +51,18 @@ type Experience = {
   pointsEN: string[];
 };
 
+// Education structure
+type Education = {
+  diplomaFR: string;
+  diplomaEN: string;
+  school: string;
+  timeframe: string;
+  location?: string;
+  detailsFR?: string[];
+  detailsEN?: string[];
+};
+
+// Project structure
 type Project = {
   title: string;
   timeframe?: string;
@@ -58,6 +76,7 @@ type Project = {
   evidence?: "private_repo" | "not_hosted" | "coming_soon";
 };
 
+// Skill group structure
 type SkillGroup = {
   label?: string;
   labelFR?: string;
@@ -66,12 +85,13 @@ type SkillGroup = {
   items: string[];
 };
 
+// Icon component type
 type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 // -------- Fallback dictionary --------
 export const FALLBACK_DICT: AllDict = {
   fr: {
-    nav: { about: "À propos", projects: "Projets", experience: "Expérience", skills: "Compétences", contact: "Contact" },
+    nav: { about: "À propos", projects: "Projets", experience: "Expérience", education: "Formation", skills: "Compétences", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
     heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de novembre 2025",
     ctaCV: "Télécharger le CV",
@@ -82,6 +102,7 @@ export const FALLBACK_DICT: AllDict = {
       "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
     projectsTitle: "Projets",
     experienceTitle: "Expérience",
+    educationTitle: "Formation",
     skillsTitle: "Compétences",
     contactTitle: "Contact",
     contactBlurb: "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
@@ -89,7 +110,7 @@ export const FALLBACK_DICT: AllDict = {
     footer: "© 2025 - Nizard Verdenal. Tous droits réservés.",
   },
   en: {
-    nav: { about: "About", projects: "Projects", experience: "Experience", skills: "Skills", contact: "Contact" },
+    nav: { about: "About", projects: "Projects", experience: "Experience", education: "Education", skills: "Skills", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
     heroSub: "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from November 2025",
     ctaCV: "Download Resume",
@@ -100,6 +121,7 @@ export const FALLBACK_DICT: AllDict = {
       "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
     projectsTitle: "Projects",
     experienceTitle: "Experience",
+    educationTitle: "Education",
     skillsTitle: "Skills",
     contactTitle: "Contact",
     contactBlurb: "Got a project, apprenticeship opportunity, or a question? Drop a line.",
@@ -110,17 +132,26 @@ export const FALLBACK_DICT: AllDict = {
 
 export default function Portfolio() {
   // ------- State --------
+
+  // Language states
   const [lang, setLang] = useState<Lang>("fr");
   const [dict, setDict] = useState<AllDict>(FALLBACK_DICT);
   const t = dict[lang];
 
+  // Data states
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [educations, setEducations] = useState<Education[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<SkillGroup[]>([]);
+
+  // Menu states
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>("about");
 
+  // Section IDs for nav and scroll
+  const SECTION_IDS = ["about","projects","experience","education","skills","contact"] as const;
 
+  // Map skill group keys to icons
   const groupIconMap: Record<string, IconType> = {
     backend: Server,
     frontend: Layout,
@@ -133,6 +164,8 @@ export default function Portfolio() {
   };
 
   // -------- Scroll: hide on down, show on up --------
+
+  // Header show/hide on scroll
   const [showHeader, setShowHeader] = React.useState(true);
   const lastY = React.useRef(0);
   const HEADER_OFFSET = 100;
@@ -154,12 +187,14 @@ export default function Portfolio() {
 
 
   // -------- Helpers --------
+  // Type guard for dictionary
   function isAllDict(x: unknown): x is AllDict {
     if (!x || typeof x !== "object") return false;
     const obj = x as Record<string, unknown>;
     return "fr" in obj && "en" in obj;
   }
 
+  // Get icon for skill group
   function getGroupIcon(key?: string): IconType {
     if (!key) return Hammer;
     const normalized = key.toLowerCase();
@@ -167,6 +202,8 @@ export default function Portfolio() {
   }
 
   // -------- Effects --------
+
+  // Load dictionary
   React.useEffect(() => {
     fetch("/dict.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -177,6 +214,7 @@ export default function Portfolio() {
       .catch(() => setDict(FALLBACK_DICT));
   }, []);
 
+  // Load experiences
   React.useEffect(() => {
     fetch("/experiences.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
@@ -185,6 +223,17 @@ export default function Portfolio() {
       .catch(() => setExperiences([]));
   }, []);
 
+  // Load educations
+  React.useEffect(() => {
+    fetch("/educations.json", { cache: "no-store" })
+      .then(r => (r.ok ? r.json() : []))
+      .then((data: unknown) => (Array.isArray(data) ? (data as Education[]) : []))
+      .then(setEducations)
+      .catch(() => setEducations([]));
+  }, []);
+
+
+  // Load projects
   React.useEffect(() => {
     fetch("/projects.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
@@ -193,6 +242,7 @@ export default function Portfolio() {
       .catch(() => setProjects([]));
   }, []);
 
+  // Load skills
   React.useEffect(() => {
     fetch("/skills.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
@@ -201,6 +251,7 @@ export default function Portfolio() {
       .catch(() => setSkills([]));
   }, []);
 
+  // Scroll listener for header show/hide
   React.useEffect(() => {
     let ticking = false;
     const onScroll = () => {
@@ -220,10 +271,11 @@ export default function Portfolio() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-  const sections = ["about","projects","experience","skills","contact"]
-    .map(id => document.getElementById(id))
-    .filter(Boolean) as HTMLElement[];
+  // IntersectionObserver to update active nav link
+  React.useEffect(() => {
+    const sections = SECTION_IDS
+      .map(id => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
 
     const obs = new IntersectionObserver(
       entries => {
@@ -274,7 +326,7 @@ export default function Portfolio() {
 
             {/* Nav desktop avec soulignement animé + lien actif */}
             <nav className="hidden md:flex items-center gap-1 text-sm relative">
-              {(["about","projects","experience","skills","contact"] as const).map((id) => {
+              {SECTION_IDS.map((id) => {
                 const isActive = activeId === id;
                 return (
                   <button
@@ -330,7 +382,7 @@ export default function Portfolio() {
                          flex flex-col text-center py-4 space-y-1 overflow-hidden"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.25),transparent_70%)] opacity-40 pointer-events-none" />
-              {(["about", "projects", "experience", "skills", "contact"] as const).map((id) => (
+              {SECTION_IDS.map((id) => (
                 <a
                   key={id}
                   href={`#${id}`}
@@ -544,6 +596,37 @@ export default function Portfolio() {
             ))}
           </div>
         </section>
+
+        {/* Education / Formation */}
+        <section id="education" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.educationTitle}</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {educations.map((ed, i) => (
+              <Card key={i} className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
+                <CardHeader>
+                  <CardTitle className="text-xl">
+                    {lang === "fr" ? ed.diplomaFR : ed.diplomaEN}
+                  </CardTitle>
+                  <CardDescription className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{ed.school}</span>
+                    <Badge variant="secondary">{ed.timeframe}</Badge>
+                    {ed.location && <span className="text-xs opacity-80">• {ed.location}</span>}
+                  </CardDescription>
+                </CardHeader>
+                {(ed.detailsFR?.length || ed.detailsEN?.length) && (
+                  <CardContent>
+                    <ul className="list-disc pl-5 text-sm text-white/70 space-y-2">
+                      {(lang === "fr" ? ed.detailsFR : ed.detailsEN)?.map((d, idx) => (
+                        <li key={idx}>{d}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
+          </div>
+        </section>
+
 
         {/* Skills */}
         <section id="skills" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">

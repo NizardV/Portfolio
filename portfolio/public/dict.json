@@ -4,6 +4,7 @@
       "about": "À propos",
       "projects": "Projets",
       "experience": "Expérience",
+      "education": "Formation",
       "skills": "Compétences",
       "contact": "Contact"
     },
@@ -16,6 +17,7 @@
     "about": "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
     "projectsTitle": "Projets",
     "experienceTitle": "Expérience",
+    "educationTitle": "Formation",
     "skillsTitle": "Compétences",
     "contactTitle": "Contact",
     "contactBlurb": "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
@@ -32,6 +34,7 @@
       "about": "About",
       "projects": "Projects",
       "experience": "Experience",
+      "education": "Education",
       "skills": "Skills",
       "contact": "Contact"
     },
@@ -44,6 +47,7 @@
     "about": "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
     "projectsTitle": "Projects",
     "experienceTitle": "Experience",
+    "educationTitle": "Education",
     "skillsTitle": "Skills",
     "contactTitle": "Contact",
     "contactBlurb": "Got a project, apprenticeship opportunity, or a question? Drop a line.",
