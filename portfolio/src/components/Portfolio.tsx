@@ -12,6 +12,7 @@ import { Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, Gradu
 import SkillBadge from "@/components/SkillBadge";
 import Image from "next/image";
 import Link from "next/link";
+import LangToggle from "@/components/LangToggle";
 
 // -------- Types --------
 
@@ -351,10 +352,8 @@ export default function Portfolio() {
 
             {/* Lang switch (desktop) + burger (mobile) */}
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 text-xs">
-                <span>FR</span>
-                <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
-                <span>EN</span>
+              <div className="hidden md:block">
+                <LangToggle lang={lang} onChange={setLang} />
               </div>
               {/* bouton burger mobile inchangé */}
               <button
@@ -393,10 +392,8 @@ export default function Portfolio() {
                 </a>
               ))}
               <div className="mx-10 border-t border-white/10 my-2" />
-              <div className="flex justify-center items-center gap-2 pt-1 text-xs">
-                <span>FR</span>
-                <Switch checked={lang === "en"} onCheckedChange={(v) => setLang(v ? "en" : "fr")} />
-                <span>EN</span>
+              <div className="flex justify-center pt-1">
+                <LangToggle lang={lang} onChange={setLang} />
               </div>
             </motion.nav>
           )}
