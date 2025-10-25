@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
     "start": "cross-env HOST=0.0.0.0 PORT=3000 next start",
+    "dev": "next dev",
     "lint": "eslint"
   },
   "dependencies": {
