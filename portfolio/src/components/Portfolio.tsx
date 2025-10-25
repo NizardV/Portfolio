@@ -30,6 +30,8 @@ type Dict = {
   contactBlurb: string;
   form: { name: string; email: string; message: string; send: string };
   footer: string;
+  cvPath: string;
+  cvFilename: string;
 };
 
 type AllDict = Readonly<Record<Lang, Dict>>;
@@ -71,8 +73,10 @@ export const FALLBACK_DICT: AllDict = {
   fr: {
     nav: { about: "À propos", projects: "Projets", experience: "Expérience", skills: "Compétences", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
-    heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de sept. 2025",
+    heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de novembre 2025",
     ctaCV: "Télécharger le CV",
+    cvPath: "/brand/resume-nizard-public-updated-11-2025-fr.pdf",
+    cvFilename: "CV_Nizard-Verdenal_FR.pdf",
     ctaContact: "Me contacter",
     about:
       "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
@@ -87,8 +91,10 @@ export const FALLBACK_DICT: AllDict = {
   en: {
     nav: { about: "About", projects: "Projects", experience: "Experience", skills: "Skills", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
-    heroSub: "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from Sep 2025",
-    ctaCV: "Download CV",
+    heroSub: "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from November 2025",
+    ctaCV: "Download Resume",
+    cvPath: "/brand/resume-nizard-public-updated-11-2025-gb.pdf",
+    cvFilename: "Resume_Nizard-Verdenal_EN.pdf",
     ctaContact: "Contact me",
     about:
       "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
@@ -140,6 +146,12 @@ export default function Portfolio() {
     window.scrollTo({ top: y, behavior: "smooth" });
     window.history.replaceState(null, "", `#${id}`);
   };
+
+
+  // -------- Resume links --------
+  const cvHref = t.cvPath;
+  const cvFilename = t.cvFilename;
+
 
   // -------- Helpers --------
   function isAllDict(x: unknown): x is AllDict {
@@ -346,16 +358,33 @@ export default function Portfolio() {
           {/* banner */}
           <div className="mb-10">
             <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl ring-1 ring-white/10">
-              <div className="absolute inset-0 pointer-events-none
-                              bg-[radial-gradient(1200px_300px_at_80%_-50%,rgba(0,179,255,0.18),transparent)]" />
+              {/* overlay conservé */}
+              <div
+                className="absolute inset-0 pointer-events-none
+                          bg-[radial-gradient(1200px_300px_at_80%_-50%,rgba(0,179,255,0.18),transparent)]"
+              />
+
+              {/* Version mobile */}
               <Image
-                src="/banner-linkedin.jpg"
-                alt="Bannière"
+                src="/brand/nizardv-banner-mobile.png"
+                alt="Bannière mobile"
                 priority
-                sizes="(max-width: 768px) 100vw, 960px"
+                sizes="(max-width: 768px) 100vw, 0px"
                 width={1280}
                 height={400}
-                className="w-full aspect-[21/6] md:aspect-[21/5] object-cover"
+                className="block md:hidden w-full aspect-[21/6] object-cover"
+                draggable={false}
+              />
+
+              {/* Version desktop */}
+              <Image
+                src="/brand/nizardv-banner.png"
+                alt="Bannière"
+                priority
+                sizes="(max-width: 768px) 0px, 960px"
+                width={1280}
+                height={400}
+                className="hidden md:block w-full aspect-[21/6] md:aspect-[21/5] object-cover"
                 draggable={false}
               />
             </div>
@@ -373,7 +402,7 @@ export default function Portfolio() {
               <p className="text-white/80 text-base md:text-lg">{t.heroSub}</p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <a href="/cv.pdf" download>
+                  <a href={cvHref} download={cvFilename}>
                     <Download className="w-4 h-4 mr-2" />
                     {t.ctaCV}
                   </a>
@@ -408,7 +437,7 @@ export default function Portfolio() {
                     <MapPin className="w-4 h-4" /> Dijon, France
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <Calendar className="w-4 h-4" /> {lang === "fr" ? "Disponible dès sept. 2025" : "Available from Sep 2025"}
+                    <Calendar className="w-4 h-4" /> {lang === "fr" ? "Disponible dès nov. 2025" : "Available from Nov 2025"}
                   </div>
                 </CardContent>
               </Card>
