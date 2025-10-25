@@ -1,8 +1,5 @@
 /* globals.css */
 
-/* Import of flag icons CSS for use in LangToggle component */
-@import "flag-icons/css/flag-icons.min.css";
-
 /* Tailwind CSS Directives */
 @tailwind base;
 @tailwind components;
