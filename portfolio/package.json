@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
     "start": "cross-env HOST=0.0.0.0 PORT=3000 next start",
+    "dev": "next dev",
     "lint": "eslint"
   },
   "dependencies": {
@@ -13,7 +13,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "flag-icons": "^7.5.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.545.0",
     "next": "16.0.0",
