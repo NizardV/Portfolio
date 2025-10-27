@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Download, Github, Linkedin, Mail, Link as LinkIcon, MapPin, Calendar, ExternalLink, Menu, X } from "lucide-react";
 import Contact from "@/components/Contact";
 import { Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, GraduationCap } from "lucide-react";
@@ -47,6 +46,7 @@ type Experience = {
   roleFR: string;
   roleEN: string;
   org: string;
+  location?: string;
   timeframe: string;
   pointsFR: string[];
   pointsEN: string[];
@@ -581,6 +581,11 @@ export default function Portfolio() {
                     <span className="font-medium">{e.org}</span>
                     <Badge variant="secondary">{e.timeframe}</Badge>
                   </CardDescription>
+                  {e.location && (
+                    <CardDescription className="flex items-center gap-2 mt-1 text-xs">
+                      <MapPin className="w-3 h-3" />{e.location}
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 text-sm text-white/70 space-y-2">
@@ -607,8 +612,12 @@ export default function Portfolio() {
                   <CardDescription className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{ed.school}</span>
                     <Badge variant="secondary">{ed.timeframe}</Badge>
-                    {ed.location && <span className="text-xs opacity-80">• {ed.location}</span>}
                   </CardDescription>
+                  {ed.location && (
+                    <CardDescription className="flex items-center gap-2 mt-1 text-xs">
+                      <MapPin className="w-3 h-3" />{ed.location}
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 {(ed.detailsFR?.length || ed.detailsEN?.length) && (
                   <CardContent>

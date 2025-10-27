@@ -2,7 +2,8 @@
   {
     "roleFR": "Stagiaire Développeur Web",
     "roleEN": "Web Developer Intern",
-    "org": "InnovQube – Noisy-le-Grand",
+    "org": "InnovQube",
+    "location": "Noisy-le-Grand, France",
     "timeframe": "2025",
     "pointsFR": [
       "Stage full remote sur une solution SaaS de guide de voyage",
@@ -22,7 +23,8 @@
   {
     "roleFR": "Stagiaire Développeur Web",
     "roleEN": "Web Developer Intern",
-    "org": "Association O.R.E. – Quetigny",
+    "org": "Association O.R.E.",
+    "location": "Quetigny, France",
     "timeframe": "2024",
     "pointsFR": [
       "Stage en présentiel au sein du FabLab de l’association",
@@ -42,7 +44,8 @@
   {
     "roleFR": "Stagiaire Technicien de maintenance informatique",
     "roleEN": "IT Maintenance Intern",
-    "org": "ITC Neo Impex – Dijon",
+    "org": "ITC Neo Impex",
+    "location": "Dijon, France",
     "timeframe": "2020",
     "pointsFR": [
       "Stage d’observation en environnement professionnel",
