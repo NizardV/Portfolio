@@ -4,6 +4,27 @@ import "./globals.css";
 export const metadata = {
   title: "Nizard Verdenal - Portfolio",
   description: "Portfolio",
+  icons: {
+    icon: "/brand/nv-icon.png",
+    shortcut: "/brand/nv-icon.png",
+    apple: "/brand/nv-icon.png",
+  },
+  keywords: [
+    "Nizard Verdenal",
+    "Portfolio",
+    "Developer",
+    "Web Developer",
+    "Full-Stack Developer",
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "Next.js",
+    "Python",
+    "Django",
+    "Student",
+    "Computer Science",
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
