@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, Github, Linkedin, Mail, Link as LinkIcon, MapPin, Calendar, ExternalLink, Menu, X } from "lucide-react";
-import Contact from "@/components/Contact";
 import { Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, GraduationCap } from "lucide-react";
+import Contact from "@/components/Contact";
 import SkillBadge from "@/components/SkillBadge";
 import Image from "next/image";
 import Link from "next/link";
 import LangToggle from "@/components/LangToggle";
+import VeilleFeed from "./VeilleFeed";
 
 // -------- Types --------
 
@@ -20,7 +21,7 @@ type Lang = "fr" | "en";
 
 // Dictionary structure
 type Dict = {
-  nav: { about: string; projects: string; experience: string; education: string; skills: string; contact: string };
+  nav: { about: string; projects: string; experience: string; education: string; skills: string; veille: string; contact: string };
   heroTitle: string;
   heroSub: string;
   ctaCV: string;
@@ -30,6 +31,7 @@ type Dict = {
   experienceTitle: string;
   educationTitle: string;
   skillsTitle: string;
+  veilleTitle: string;
   contactTitle: string;
   contactBlurb: string;
   form: { name: string; email: string; message: string; send: string };
@@ -92,7 +94,7 @@ type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 // -------- Fallback dictionary --------
 export const FALLBACK_DICT: AllDict = {
   fr: {
-    nav: { about: "À propos", projects: "Projets", experience: "Expérience", education: "Formation", skills: "Compétences", contact: "Contact" },
+    nav: { about: "À propos", projects: "Projets", experience: "Expérience", education: "Formation", skills: "Compétences", veille: "Veille", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
     heroSub: "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de novembre 2025",
     ctaCV: "Télécharger le CV",
@@ -105,13 +107,14 @@ export const FALLBACK_DICT: AllDict = {
     experienceTitle: "Expérience",
     educationTitle: "Formation",
     skillsTitle: "Compétences",
+    veilleTitle: "Veille",
     contactTitle: "Contact",
     contactBlurb: "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
     form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
     footer: "© 2025 - Nizard Verdenal. Tous droits réservés.",
   },
   en: {
-    nav: { about: "About", projects: "Projects", experience: "Experience", education: "Education", skills: "Skills", contact: "Contact" },
+    nav: { about: "About", projects: "Projects", experience: "Experience", education: "Education", skills: "Skills", veille: "Monitoring", contact: "Contact" },
     heroTitle: "Nizard Verdenal",
     heroSub: "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from November 2025",
     ctaCV: "Download Resume",
@@ -124,6 +127,7 @@ export const FALLBACK_DICT: AllDict = {
     experienceTitle: "Experience",
     educationTitle: "Education",
     skillsTitle: "Skills",
+    veilleTitle: "Monitoring",
     contactTitle: "Contact",
     contactBlurb: "Got a project, apprenticeship opportunity, or a question? Drop a line.",
     form: { name: "Name", email: "Email", message: "Message", send: "Send" },
@@ -150,7 +154,7 @@ export default function Portfolio() {
   const [activeId, setActiveId] = useState<string>("about");
 
   // Section IDs for nav and scroll
-  const SECTION_IDS = ["about","projects","experience","education","skills","contact"] as const;
+  const SECTION_IDS = ["about","projects","experience","education","skills", "veille", "contact"] as const;
 
   // Map skill group keys to icons
   const groupIconMap: Record<string, IconType> = {
@@ -205,7 +209,7 @@ export default function Portfolio() {
   // -------- Effects --------
 
   // Load dictionary
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/dict.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: unknown) => {
@@ -216,7 +220,7 @@ export default function Portfolio() {
   }, []);
 
   // Load experiences
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/experiences.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
       .then((data: unknown) => (Array.isArray(data) ? (data as Experience[]) : []))
@@ -225,7 +229,7 @@ export default function Portfolio() {
   }, []);
 
   // Load educations
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/educations.json", { cache: "no-store" })
       .then(r => (r.ok ? r.json() : []))
       .then((data: unknown) => (Array.isArray(data) ? (data as Education[]) : []))
@@ -235,7 +239,7 @@ export default function Portfolio() {
 
 
   // Load projects
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/projects.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
       .then((data: unknown) => (Array.isArray(data) ? (data as Project[]) : []))
@@ -244,7 +248,7 @@ export default function Portfolio() {
   }, []);
 
   // Load skills
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/skills.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
       .then((data: unknown) => (Array.isArray(data) ? (data as SkillGroup[]) : []))
@@ -253,7 +257,7 @@ export default function Portfolio() {
   }, []);
 
   // Scroll listener for header show/hide
-  React.useEffect(() => {
+  useEffect(() => {
     let ticking = false;
     const onScroll = () => {
       const y = window.scrollY;
@@ -273,7 +277,7 @@ export default function Portfolio() {
   }, []);
 
   // IntersectionObserver to update active nav link
-  React.useEffect(() => {
+  useEffect(() => {
     const sections = SECTION_IDS
       .map(id => document.getElementById(id))
       .filter(Boolean) as HTMLElement[];
@@ -657,6 +661,12 @@ export default function Portfolio() {
               </Card>
             ))}
           </div>
+        </section>
+
+        {/* Veille */}
+        <section id="veille" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.veilleTitle}</h2>
+          <VeilleFeed lang={lang} />
         </section>
 
         {/* Contact */}

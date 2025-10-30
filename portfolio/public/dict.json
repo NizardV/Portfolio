@@ -6,6 +6,7 @@
       "experience": "Expérience",
       "education": "Formation",
       "skills": "Compétences",
+      "veille": "Veille",
       "contact": "Contact"
     },
     "heroTitle": "Nizard Verdenal",
@@ -19,6 +20,7 @@
     "experienceTitle": "Expérience",
     "educationTitle": "Formation",
     "skillsTitle": "Compétences",
+    "veilleTitle": "Veille",
     "contactTitle": "Contact",
     "contactBlurb": "Un projet, une opportunité d'alternance ou une question ? Écrivez-moi.",
     "form": {
@@ -36,6 +38,7 @@
       "experience": "Experience",
       "education": "Education",
       "skills": "Skills",
+      "veille": "Monitoring",
       "contact": "Contact"
     },
     "heroTitle": "Nizard Verdenal",
@@ -49,6 +52,7 @@
     "experienceTitle": "Experience",
     "educationTitle": "Education",
     "skillsTitle": "Skills",
+    "veilleTitle": "Monitoring",
     "contactTitle": "Contact",
     "contactBlurb": "Got a project, apprenticeship opportunity, or a question? Drop a line.",
     "form": {
