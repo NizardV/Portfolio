@@ -4,10 +4,17 @@ import "./globals.css";
 export const metadata = {
   title: "Nizard Verdenal - Portfolio",
   description: "Portfolio",
+  themeColor: "#ffffff",
   icons: {
-    icon: "/brand/nv-icon.png",
+    icon: [
+      { url: "/brand/nv-icon.png", type: "image/png" },
+    ],
     shortcut: "/brand/nv-icon.png",
     apple: "/brand/nv-icon.png",
+    other: [
+      { rel: "apple-touch-icon", url: "/brand/nv-icon.png" },
+      { rel: "manifest", url: "/site.webmanifest" }
+    ]
   },
   keywords: [
     "Nizard Verdenal",
