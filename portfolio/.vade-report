@@ -1,0 +1,44 @@
+## Vercel Speed Insights Implementation
+
+Successfully implemented Vercel Speed Insights for this Next.js portfolio project.
+
+### Changes Made
+
+**1. Installed Package**
+- Added `@vercel/speed-insights` version 1.3.1 to dependencies using pnpm
+- Package manager: pnpm (version 10.28.0)
+
+**2. Modified Files**
+
+`src/app/layout.tsx`:
+- Added import statement: `import { SpeedInsights } from "@vercel/speed-insights/next";`
+- Added `<SpeedInsights />` component inside the `<body>` tag, after the `<ToastProvider>` children
+- Placement ensures proper tracking of all pages in the application
+
+`package.json`:
+- Added `@vercel/speed-insights` to the dependencies list
+
+`pnpm-lock.yaml`:
+- Updated with the new dependency and its transitive dependencies
+
+### Implementation Details
+
+- **Next.js Version**: 16.0.10 (supports App Router)
+- **Router Type**: App Router (detected via `app/layout.tsx`)
+- **Import Path**: Used `@vercel/speed-insights/next` (correct for Next.js 13.5+)
+- **Component Placement**: Added to root layout inside `<body>` tag, ensuring it's included on all pages
+
+### Verification Steps Completed
+
+1. ✅ Package installed successfully via pnpm
+2. ✅ Build completed successfully with no compilation errors
+3. ✅ Linter executed - no new errors introduced by this change
+4. ✅ Layout.tsx has no linting issues
+5. ✅ Lock file (pnpm-lock.yaml) updated properly
+
+### Notes
+
+- The SpeedInsights component will automatically track Web Vitals (LCP, FID, CLS, etc.) when deployed to Vercel
+- No configuration needed - the component works out of the box
+- Pre-existing linting errors in other files (contact/route.ts, veille/route.ts, Portfolio.tsx, VeilleFeed.tsx) are unrelated to this implementation
+- The implementation follows Next.js best practices for App Router with TypeScript
