@@ -6,7 +6,7 @@
     "items": [
       { "label": "ASP.NET Core", "icon": "dotnet" },
       { "label": "C#", "icon": "csharp" },
-      { "label": ".NET 9", "icon": "dotnet" },
+      { "label": ".NET", "icon": "dotnet" },
       { "label": "TerminalGUI", "icon": "windowsterminal" },
       { "label": "PHP", "icon": "php" },
       { "label": "Laravel", "icon": "laravel" }
