@@ -1,10 +1,11 @@
 // app/api/contact/route.ts
 import { NextResponse } from "next/server";
+import validator from "validator";
 
 export const runtime = "nodejs";
 
-function isEmail(v: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+function isEmailSafe(v: string) {
+  return validator.isEmail(v, { allow_utf8_local_part: false });
 }
 
 export async function POST(req: Request) {
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     if (_name.length < 2) {
       return NextResponse.json({ ok: false, error: "Nom invalide" }, { status: 400 });
     }
-    if (!isEmail(_email)) {
+    if (!isEmailSafe(_email)) {
       return NextResponse.json({ ok: false, error: "Email invalide" }, { status: 400 });
     }
     if (_message.length < 10) {
