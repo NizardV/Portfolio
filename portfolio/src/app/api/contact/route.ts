@@ -55,8 +55,8 @@ export async function POST(req: Request) {
       chipBg: "#111827",
     };
 
-    const nvLogo =
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHJ4PSIxMiIgZmlsbD0iIzYzNjZmMSIvPjxwYXRoIGQ9Ik0xMyAxNEgyMkwzNSA0MkgzMEwyMyAyOEwxNiA0MkgxMkwxMyAxNFoiIGZpbGw9IndoaXRlIi8+PC9zdmc+";
+    // URL absolue hébergée — les clients mail bloquent les data:URI base64
+    const nvLogo = "https://nizard.dev/brand/nv-icon.png";
 
     const html = `
     <!doctype html>
@@ -172,8 +172,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    console.error("Contact route error:", e?.message);
+  } catch (e: unknown) {
+    console.error("Contact route error:", e instanceof Error ? e.message : e);
     return NextResponse.json({ ok: false, error: "Erreur serveur" }, { status: 500 });
   }
 }
