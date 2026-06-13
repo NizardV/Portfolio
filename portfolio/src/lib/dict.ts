@@ -1,0 +1,64 @@
+import type { AllDict } from "@/types";
+
+export const FALLBACK_DICT: AllDict = {
+  fr: {
+    nav: {
+      about: "À propos",
+      projects: "Projets",
+      experience: "Expérience",
+      education: "Formation",
+      skills: "Compétences",
+      contact: "Contact",
+    },
+    heroTitle: "Nizard Verdenal",
+    heroSub:
+      "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de septembre 2026",
+    ctaCV: "Télécharger le CV",
+    // TODO: mettre à jour avec le chemin du nouveau CV quand il sera prêt
+    cvPath: "/brand/resume-nizard-public-updated-06-2026-fr.pdf",
+    cvFilename: "CV_Nizard-Verdenal_FR.pdf",
+    ctaContact: "Me contacter",
+    about:
+      "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
+    projectsTitle: "Projets",
+    projectsPersonalTitle: "Projets personnels",
+    experienceTitle: "Expérience",
+    educationTitle: "Formation",
+    skillsTitle: "Compétences",
+    contactTitle: "Contact",
+    contactBlurb:
+      "Un projet, une opportunité d'alternance (sept. 2026) ou une question ? Écrivez-moi.",
+    form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
+    footer: "© 2026 - Nizard Verdenal.",
+  },
+  en: {
+    nav: {
+      about: "About",
+      projects: "Projects",
+      experience: "Experience",
+      education: "Education",
+      skills: "Skills",
+      contact: "Contact",
+    },
+    heroTitle: "Nizard Verdenal",
+    heroSub:
+      "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from September 2026",
+    ctaCV: "Download Resume",
+    // TODO: update with new CV path when ready
+    cvPath: "/brand/resume-nizard-public-updated-06-2026-gb.pdf",
+    cvFilename: "Resume_Nizard-Verdenal_EN.pdf",
+    ctaContact: "Contact me",
+    about:
+      "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
+    projectsTitle: "Projects",
+    projectsPersonalTitle: "Personal projects",
+    experienceTitle: "Experience",
+    educationTitle: "Education",
+    skillsTitle: "Skills",
+    contactTitle: "Contact",
+    contactBlurb:
+      "Got a project, apprenticeship opportunity (Sept. 2026), or a question? Drop a line.",
+    form: { name: "Name", email: "Email", message: "Message", send: "Send" },
+    footer: "© 2026 - Nizard Verdenal.",
+  },
+} as const;

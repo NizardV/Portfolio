@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { Loader2, User2, Mail, Type as TypeIcon, MessageSquareText } from "lucide-react";
 import { useToast } from "@/components/ui/toast-context";
 
@@ -16,11 +16,11 @@ export default function Contact({
   const formRef = useRef<HTMLFormElement | null>(null);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // useSyncExternalStore évite le double-rendu de useEffect(setState, [])
+  // Server snapshot → false (rendu squelette), Client snapshot → true (rendu formulaire)
+  const subscribe = () => () => {};
+  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
   if (!mounted) {
     // Skeleton placeholder to avoid white flash on hydration
@@ -109,15 +109,17 @@ export default function Contact({
 
       if (!res.ok) {
         const j = await res.text().catch(() => "");
-        throw new Error(j || "EmailJS API error");
+        setLoading(false);
+        toast({ message: `${t.fail}${j || "API error"}`, variant: "error" });
+        return;
       }
 
       toast({ message: t.success, variant: "success" });
       formRef.current.reset();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : t.retry;
+      setLoading(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t.retry;
       toast({ message: `${t.fail}${msg}`, variant: "error" });
-    } finally {
       setLoading(false);
     }
   };

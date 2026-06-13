@@ -1,0 +1,88 @@
+import type { Experience } from "@/types";
+
+export const experiences: Experience[] = [
+  {
+    roleFR: "Stagiaire DATA / Architecture",
+    roleEN: "DATA / Architecture Intern",
+    org: "APRR (Eiffage Group)",
+    timeframe: "2026",
+    stack: [
+      { label: "Talend", icon: "talend" },
+      { label: "Snowflake", icon: "snowflake" },
+      { label: "Power BI", icon: "powerbi" },
+      { label: "PostgreSQL", icon: "postgresql" },
+      { label: "Docker", icon: "docker" },
+    ],
+    pointsFR: [
+      "Intégration et transformation de données avec Talend",
+      "Modélisation et requêtage sur Snowflake",
+      "Administration et upgrade de TIBCO EBX (MDM v6.1 → v6.2)",
+      "Création de tableaux de bord Power BI",
+    ],
+    pointsEN: [
+      "Data integration and transformation with Talend",
+      "Data modeling and querying on Snowflake",
+      "Administration and upgrade of TIBCO EBX (MDM v6.1 → v6.2)",
+      "Created Power BI dashboards",
+    ],
+  },
+  {
+    roleFR: "Stagiaire Développeur Web",
+    roleEN: "Web Developer Intern",
+    org: "InnovQube",
+    location: "Noisy-le-Grand, France",
+    timeframe: "2025",
+    pointsFR: [
+      "Stage full remote sur une solution SaaS de guide de voyage",
+      "Ajout des traductions dynamiques selon les préférences utilisateurs",
+      "Intégration d'un framework UI (Filament) pour les panneaux d'administration",
+      "Optimisation globale de l'application (performance et UX)",
+      "Technologies : Laravel (Localization, Livewire, Filament), Vue.js",
+    ],
+    pointsEN: [
+      "Remote internship on a SaaS travel guide solution",
+      "Implemented multilingual support based on user preferences",
+      "Integrated a UI framework (Filament) for admin panel management",
+      "Optimized overall application performance and UX",
+      "Tech stack: Laravel (Localization, Livewire, Filament), Vue.js",
+    ],
+  },
+  {
+    roleFR: "Stagiaire Développeur Web",
+    roleEN: "Web Developer Intern",
+    org: "Association O.R.E.",
+    location: "Quetigny, France",
+    timeframe: "2024",
+    pointsFR: [
+      "Stage en présentiel au sein du FabLab de l'association",
+      "Gestion et maintenance d'un Extranet",
+      "Ajout de formulaires de gestion des paiements et abonnements",
+      "Mise en place d'une page de consultation des règlements du FabLab",
+      "Technologies : PHP, MySQL, Apache, phpMyAdmin",
+    ],
+    pointsEN: [
+      "On-site internship within the association's FabLab",
+      "Maintenance and management of an Extranet",
+      "Added management forms for payments and subscriptions",
+      "Implemented a payment overview page for the FabLab",
+      "Tech stack: PHP, MySQL, Apache, phpMyAdmin",
+    ],
+  },
+  {
+    roleFR: "Stagiaire Technicien de maintenance informatique",
+    roleEN: "IT Maintenance Intern",
+    org: "ITC Neo Impex",
+    location: "Dijon, France",
+    timeframe: "2020",
+    pointsFR: [
+      "Stage d'observation en environnement professionnel",
+      "Maintenance et gestion d'un parc informatique",
+      "Installation et configuration de nouveaux équipements",
+    ],
+    pointsEN: [
+      "Observation internship in a professional IT environment",
+      "Maintenance and management of a computer network and devices",
+      "Installation and setup of new computer equipment",
+    ],
+  },
+];
