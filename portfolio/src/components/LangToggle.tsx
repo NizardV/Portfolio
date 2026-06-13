@@ -40,6 +40,7 @@ export default function LangToggle({ lang, onChange, className = "" }: LangToggl
       />
 
       <button
+        type="button"
         role="tab"
         aria-selected={isFR}
         onClick={() => onChange("fr")}
@@ -52,6 +53,7 @@ export default function LangToggle({ lang, onChange, className = "" }: LangToggl
       </button>
 
       <button
+        type="button"
         role="tab"
         aria-selected={!isFR}
         onClick={() => onChange("en")}

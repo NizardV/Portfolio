@@ -43,6 +43,11 @@ import {
   SiJest,
   SiXamarin,
   SiShadcnui,
+  SiKotlin,
+  SiPython,
+  SiNodedotjs,
+  SiSnowflake,
+  SiPowerbi,
 } from "react-icons/si";
 
 /* -------------------- Icon maps & helpers -------------------- */
@@ -88,6 +93,11 @@ const iconMap = {
   shadcnui: SiShadcnui,
   testing: GrTest,
   scrum: DiScrum,
+  kotlin: SiKotlin,
+  python: SiPython,
+  nodedotjs: SiNodedotjs,
+  snowflake: SiSnowflake,
+  powerbi: SiPowerbi,
 } as const;
 
 type IconKey = keyof typeof iconMap;
@@ -168,6 +178,18 @@ const iconKeyAlias: Record<string, IconKey> = {
   postman: "postman",
   linux: "linux",
   windowsterminal: "windowsterminal",
+
+  // Langages supplémentaires
+  kotlin: "kotlin",
+  python: "python",
+  nodedotjs: "nodedotjs",
+  node: "nodedotjs",
+  nodejs: "nodedotjs",
+
+  // Data / Cloud
+  snowflake: "snowflake",
+  powerbi: "powerbi",
+  microsoftsqlserver: "sqlserver",
 };
 
 function normalizeLabel(s: string) {

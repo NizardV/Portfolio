@@ -3,18 +3,86 @@
     "title": "AgeOfCode",
     "timeframe": "2025",
     "location": "Dijon, France",
-    "descriptionFR": "Jeu en terminal (.NET 9 / C#) réalisé en équipe au DIIAGE. Architecture modulaire orientée features, principes SOLID. Conteneurisation via Docker ; bases de CI/CD (non finalisé).",
-    "descriptionEN": "Terminal game (.NET 9 / C#) built as a team at DIIAGE. Modular, feature-driven architecture with SOLID principles. Dockerized; CI/CD basics (not fully finalized).",
+    "descriptionFR": "Application client-serveur temps réel développée en équipe. API ASP.NET Core avec SignalR (WebSockets), client CLI en Terminal.Gui, PostgreSQL via Entity Framework Core. Conteneurisation Docker et bases de CI/CD.",
+    "descriptionEN": "Real-time client-server application built as a team. ASP.NET Core API with SignalR (WebSockets), Terminal.Gui CLI client, PostgreSQL via Entity Framework Core. Docker containerization and CI/CD basics.",
     "stack": [
-      { "label": "C#", "icon":"csharp" },
-      { "label": ".NET 9", "icon": "dotnet" },
-      { "label": "TerminalGUI", "icon": "windowsterminal" },
+      { "label": "C#", "icon": "csharp" },
+      { "label": ".NET 8", "icon": "dotnet" },
+      { "label": "SignalR", "icon": "dotnet" },
+      { "label": "Terminal.Gui", "icon": "windowsterminal" },
+      { "label": "PostgreSQL", "icon": "postgresql" },
       { "label": "Docker", "icon": "docker" }
     ],
     "repo": "https://github.com/NizardV/AgeOfCode"
   },
   {
-    "title": "Portfolio (Nizard.dev)",
+    "title": "Cybedu",
+    "timeframe": "2025 – 2026",
+    "location": "Dijon, France",
+    "descriptionFR": "Application mobile Android éducative sur la cybersécurité (quiz, articles). App Kotlin/Jetpack Compose avec architecture MVVM, API Node.js/TypeScript avec authentification JWT et PostgreSQL. Mock API documentée OpenAPI.",
+    "descriptionEN": "Educational Android mobile app about cybersecurity (quizzes, articles). Kotlin/Jetpack Compose app with MVVM architecture, Node.js/TypeScript API with JWT auth and PostgreSQL. OpenAPI-documented mock API.",
+    "stack": [
+      { "label": "Kotlin", "icon": "kotlin" },
+      { "label": "Jetpack Compose", "icon": "jetpackcompose" },
+      { "label": "Node.js", "icon": "nodedotjs" },
+      { "label": "TypeScript", "icon": "typescript" },
+      { "label": "PostgreSQL", "icon": "postgresql" },
+      { "label": "Docker", "icon": "docker" }
+    ],
+    "repo": "https://github.com/NizardV/Cybedu"
+  },
+  {
+    "title": "SkyByDns",
+    "timeframe": "2026",
+    "location": "Dijon, France",
+    "descriptionFR": "Application web de gestion de domaines et d'enregistrements DNS, développée en équipe. API REST ASP.NET Core en clean architecture (Domain/Application/Infrastructure), frontend React/Vite avec shadcn/ui. CI/CD Azure DevOps, conteneurisation Docker.",
+    "descriptionEN": "Web application for managing DNS domains and records, built as a team. ASP.NET Core REST API in clean architecture (Domain/Application/Infrastructure), React/Vite frontend with shadcn/ui. Azure DevOps CI/CD, Docker containerization.",
+    "stack": [
+      { "label": "C#", "icon": "csharp" },
+      { "label": "ASP.NET Core", "icon": "dotnet" },
+      { "label": "React", "icon": "react" },
+      { "label": "TypeScript", "icon": "typescript" },
+      { "label": "PostgreSQL", "icon": "postgresql" },
+      { "label": "Docker", "icon": "docker" }
+    ],
+    "repo": "https://github.com/NizardV/SkyByDns"
+  },
+  {
+    "title": "Webzine",
+    "timeframe": "2025 – 2026",
+    "location": "Dijon, France",
+    "descriptionFR": "Webzine musical développé en équipe avec ASP.NET Core MVC (architecture en couches). Intègre un chatbot RAG sur les artistes Deezer via LangChain, ChromaDB et Ollama. Déploiement Docker avec PostgreSQL.",
+    "descriptionEN": "Music webzine built as a team with ASP.NET Core MVC (layered architecture). Includes a RAG chatbot about Deezer artists using LangChain, ChromaDB and Ollama. Docker deployment with PostgreSQL.",
+    "stack": [
+      { "label": "C#", "icon": "csharp" },
+      { "label": "ASP.NET Core", "icon": "dotnet" },
+      { "label": "Python", "icon": "python" },
+      { "label": "LangChain", "icon": "langchain" },
+      { "label": "PostgreSQL", "icon": "postgresql" },
+      { "label": "Docker", "icon": "docker" }
+    ],
+    "repo": "https://github.com/NizardV/Webzine"
+  },
+  {
+    "title": "CYNA",
+    "timeframe": "2025 – 2026",
+    "location": "Dijon, France",
+    "descriptionFR": "Plateforme SaaS e-commerce de services cybersécurité, développée en équipe au DIIAGE (Sup de Vinci). Frontend React/TypeScript, API ASP.NET Core, app Android Kotlin/Jetpack Compose. CI/CD Azure DevOps, déploiement Docker sur VPS OVH avec Nginx et SSL.",
+    "descriptionEN": "SaaS cybersecurity e-commerce platform built as a team at DIIAGE (Sup de Vinci). React/TypeScript frontend, ASP.NET Core API, Kotlin/Jetpack Compose Android app. Azure DevOps CI/CD, Docker deployment on OVH VPS with Nginx and SSL.",
+    "stack": [
+      { "label": "React", "icon": "react" },
+      { "label": "TypeScript", "icon": "typescript" },
+      { "label": "ASP.NET Core", "icon": "dotnet" },
+      { "label": "C#", "icon": "csharp" },
+      { "label": "Kotlin", "icon": "kotlin" },
+      { "label": "Docker", "icon": "docker" },
+      { "label": "Azure DevOps", "icon": "azuredevops" }
+    ],
+    "demo": "https://projet-cyna.fr",
+    "repo": "https://github.com/DiiageCUCDB/DI1-P5-E3_Cyna-Web"
+  },
+  {
+    "title": "Portfolio (nizard.dev)",
     "timeframe": "2025",
     "location": "Dijon, France",
     "descriptionFR": "Portfolio personnel avec Next.js 15 + React, Tailwind, Framer Motion et shadcn/ui. Identité visuelle alignée LinkedIn, déploiement Vercel. Formulaire de contact branché sur API interne.",
@@ -23,9 +91,10 @@
       { "label": "Next.js", "icon": "nextdotjs" },
       { "label": "React", "icon": "react" },
       { "label": "Tailwind CSS", "icon": "tailwindcss" },
-      { "label": "Framer Motion", "icon": "react" },
-      { "label": "shadcn/ui", "icon": "shadcn" }
+      { "label": "shadcn/ui", "icon": "shadcnui" }
     ],
-    "repo": "https://github.com/NizardV/Portfolio"
+    "demo": "https://nizard.dev",
+    "repo": "https://github.com/NizardV/Portfolio",
+    "personal": true
   }
 ]
