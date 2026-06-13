@@ -17,7 +17,7 @@
   },
   {
     "title": "Cybedu",
-    "timeframe": "2025 – 2026",
+    "timeframe": "2025",
     "location": "Dijon, France",
     "descriptionFR": "Application mobile Android éducative sur la cybersécurité (quiz, articles). App Kotlin/Jetpack Compose avec architecture MVVM, API Node.js/TypeScript avec authentification JWT et PostgreSQL. Mock API documentée OpenAPI.",
     "descriptionEN": "Educational Android mobile app about cybersecurity (quizzes, articles). Kotlin/Jetpack Compose app with MVVM architecture, Node.js/TypeScript API with JWT auth and PostgreSQL. OpenAPI-documented mock API.",
@@ -49,7 +49,7 @@
   },
   {
     "title": "Webzine",
-    "timeframe": "2025 – 2026",
+    "timeframe": "2026",
     "location": "Dijon, France",
     "descriptionFR": "Webzine musical développé en équipe avec ASP.NET Core MVC (architecture en couches). Intègre un chatbot RAG sur les artistes Deezer via LangChain, ChromaDB et Ollama. Déploiement Docker avec PostgreSQL.",
     "descriptionEN": "Music webzine built as a team with ASP.NET Core MVC (layered architecture). Includes a RAG chatbot about Deezer artists using LangChain, ChromaDB and Ollama. Docker deployment with PostgreSQL.",
@@ -65,7 +65,7 @@
   },
   {
     "title": "CYNA",
-    "timeframe": "2025 – 2026",
+    "timeframe": "2026",
     "location": "Dijon, France",
     "descriptionFR": "Plateforme SaaS e-commerce de services cybersécurité, développée en équipe au DIIAGE (Sup de Vinci). Frontend React/TypeScript, API ASP.NET Core, app Android Kotlin/Jetpack Compose. CI/CD Azure DevOps, déploiement Docker sur VPS OVH avec Nginx et SSL.",
     "descriptionEN": "SaaS cybersecurity e-commerce platform built as a team at DIIAGE (Sup de Vinci). React/TypeScript frontend, ASP.NET Core API, Kotlin/Jetpack Compose Android app. Azure DevOps CI/CD, Docker deployment on OVH VPS with Nginx and SSL.",
@@ -83,7 +83,7 @@
   },
   {
     "title": "Portfolio (nizard.dev)",
-    "timeframe": "2025",
+    "timeframe": "2025 - Today",
     "location": "Dijon, France",
     "descriptionFR": "Portfolio personnel avec Next.js 15 + React, Tailwind, Framer Motion et shadcn/ui. Identité visuelle alignée LinkedIn, déploiement Vercel. Formulaire de contact branché sur API interne.",
     "descriptionEN": "Personal portfolio using Next.js 15 + React, Tailwind, Framer Motion and shadcn/ui. Visual identity aligned with LinkedIn, deployed on Vercel. Contact form wired to an internal API.",
