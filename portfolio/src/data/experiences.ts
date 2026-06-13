@@ -5,6 +5,7 @@ export const experiences: Experience[] = [
     roleFR: "Stagiaire DATA / Architecture",
     roleEN: "DATA / Architecture Intern",
     org: "APRR (Eiffage Group)",
+    location: "Saint-Apollinaire, France",
     timeframe: "2026",
     stack: [
       { label: "Talend", icon: "talend" },
