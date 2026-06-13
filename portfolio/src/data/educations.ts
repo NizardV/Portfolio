@@ -4,11 +4,11 @@ export const educations: Education[] = [
   {
     diplomaFR: "Mastère EADL (Expert en Architecture et Développement Logiciel)",
     diplomaEN: "Master's Degree EADL (Software Architecture & Development Expert)",
-    school: "DIIAGE",
+    school: "DIIAGE - CUCDB",
     timeframe: "Sept. 2026",
     location: "Dijon, France",
-    detailsFR: ["Prévu septembre 2026 – En cours d'inscription"],
-    detailsEN: ["Expected September 2026 – Registration in progress"],
+    detailsFR: ["Prévu septembre 2026 - Mastère en Architecture et Développement Logiciel"],
+    detailsEN: ["Expected September 2026 - Master's Degree in Software Architecture & Development"],
   },
   {
     diplomaFR: "Bachelor Coordinateur de Projets Informatiques (CPI)",
@@ -17,11 +17,11 @@ export const educations: Education[] = [
     timeframe: "2025 – 2026",
     location: "Dijon, France",
     detailsFR: [
-      "Apprentissage en entreprise de 12 mois (DIIAGE + Entreprise)",
+      "Stage en entreprise de 6 mois (DIIAGE + Entreprise)",
       "Gestion de projets informatiques, développement web et mobile, cybersécurité, administration systèmes et réseaux",
     ],
     detailsEN: [
-      "12-month apprenticeship (DIIAGE + Company)",
+      "6-month internship (DIIAGE + Company)",
       "IT project management, web and mobile development, cybersecurity, systems and network administration",
     ],
   },
