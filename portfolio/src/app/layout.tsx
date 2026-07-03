@@ -1,4 +1,5 @@
 import { ToastProvider } from "@/components/ui/toast-context";
+import { headers } from "next/headers";
 import "./globals.css";
 
 export const metadata = {
@@ -34,7 +35,9 @@ export const metadata = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <body>
