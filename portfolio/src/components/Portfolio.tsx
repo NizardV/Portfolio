@@ -14,82 +14,9 @@ import Link from "next/link";
 import LangToggle from "@/components/LangToggle";
 import VeilleFeed from "./VeilleFeed";
 
-// -------- Types --------
+import type { Lang, Dict, AllDict, Experience, Education, Project, SkillGroup, IconType } from "@/lib/types";
 
-// Supported languages
-type Lang = "fr" | "en";
-
-// Dictionary structure
-type Dict = {
-  nav: { about: string; projects: string; experience: string; education: string; skills: string; veille: string; contact: string };
-  heroTitle: string;
-  heroSub: string;
-  ctaCV: string;
-  ctaContact: string;
-  about: string;
-  projectsTitle: string;
-  experienceTitle: string;
-  educationTitle: string;
-  skillsTitle: string;
-  veilleTitle: string;
-  contactTitle: string;
-  contactBlurb: string;
-  form: { name: string; email: string; message: string; send: string };
-  footer: string;
-  cvPath: string;
-  cvFilename: string;
-};
-
-// Complete dictionary for all languages
-type AllDict = Readonly<Record<Lang, Dict>>;
-
-// Experience structure
-type Experience = {
-  roleFR: string;
-  roleEN: string;
-  org: string;
-  location?: string;
-  timeframe: string;
-  pointsFR: string[];
-  pointsEN: string[];
-};
-
-// Education structure
-type Education = {
-  diplomaFR: string;
-  diplomaEN: string;
-  school: string;
-  timeframe: string;
-  location?: string;
-  detailsFR?: string[];
-  detailsEN?: string[];
-};
-
-// Project structure
-type Project = {
-  title: string;
-  timeframe?: string;
-  location?: string;
-  descriptionFR?: string;
-  descriptionEN?: string;
-  stack?: string[];
-  demo?: string;
-  repo?: string;
-  caseStudy?: string;
-  evidence?: "private_repo" | "not_hosted" | "coming_soon";
-};
-
-// Skill group structure
-type SkillGroup = {
-  label?: string;
-  labelFR?: string;
-  labelEN?: string;
-  icon?: string;
-  items: string[];
-};
-
-// Icon component type
-type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+// -------- Fallback dictionary --------
 
 // -------- Fallback dictionary --------
 export const FALLBACK_DICT: AllDict = {
@@ -337,7 +264,7 @@ export default function Portfolio() {
                   <button
                     key={id}
                     onClick={(e) => scrollToId<HTMLButtonElement>(e, id)}
-                    className={`relative px-3 py-2 rounded-lg transition 
+                    className={`relative px-3 py-2 rounded-lg transition
                                 hover:bg-white/5 focus:outline-none ${isActive ? "text-white" : "text-white/80"}`}
                   >
                     {/* libellé */}
@@ -379,7 +306,7 @@ export default function Portfolio() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
-              className="md:hidden relative mx-3 mt-2 rounded-2xl border border-white/10 
+              className="md:hidden relative mx-3 mt-2 rounded-2xl border border-white/10
                          bg-gradient-to-br from-[#0b1020]/70 via-[#12192f]/60 to-[#1c1230]/50
                          backdrop-blur-xl shadow-[0_0_25px_rgba(0,0,0,0.5)]
                          flex flex-col text-center py-4 space-y-1 overflow-hidden"
@@ -419,7 +346,7 @@ export default function Portfolio() {
 
               {/* Version mobile */}
               <Image
-                src="/brand/nizardv-banner-mobile.png"
+                src="/brand/nizardv-banner-main.png"
                 alt="Bannière mobile"
                 priority
                 sizes="(max-width: 768px) 100vw, 0px"
@@ -679,7 +606,7 @@ export default function Portfolio() {
         {/* Footer */}
         <footer role="contentinfo" className="border-t border-white/10 mt-12">
           <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            
+
             {/* Logo complet horizontal */}
             <div className="flex items-center gap-3">
               <Image
