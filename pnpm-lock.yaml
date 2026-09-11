@@ -16,16 +16,16 @@ importers:
         specifier: ^13.15.10
         version: 13.15.10
       baseline-browser-mapping:
-        specifier: ^2.10.41
-        version: 2.10.41
+        specifier: ^2.11.0
+        version: 2.11.0
 
 packages:
 
   '@types/validator@13.15.10':
     resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
-  baseline-browser-mapping@2.10.41:
-    resolution: {integrity: sha512-WwS7MHhqGHHlaVsqRZnhvCEMS0owDX+SxRlve7JkuH7My1Ara3ZriTmCQupPfYjxMZ8I/tgxtJYr2t7taHaH4A==}
+  baseline-browser-mapping@2.11.0:
+    resolution: {integrity: sha512-oCu2wfipvX3AePSgmOuKkIywOu+8n9psz7hXYmk56ghpu3+7KzNIBopaOs4c9BrtdnTtW30unG9GTfHo7EwERQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -37,6 +37,6 @@ snapshots:
 
   '@types/validator@13.15.10': {}
 
-  baseline-browser-mapping@2.10.41: {}
+  baseline-browser-mapping@2.11.0: {}
 
   validator@13.15.35: {}
