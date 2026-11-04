@@ -7,14 +7,14 @@ const HubScene = dynamic(() => import("./HubScene"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center text-sm tracking-widest text-white/60">
-      OUVERTURE DU PORTAIL…
+      NO-CLIP EN COURS…
     </div>
   ),
 });
 
 export default function HubClient() {
   return (
-    <div className="fixed inset-0 bg-[#05060a] text-white">
+    <div className="fixed inset-0 bg-[#2a2412] text-white">
       <HubScene />
       <Link
         href="/"
