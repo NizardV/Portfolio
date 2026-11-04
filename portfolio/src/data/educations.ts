@@ -5,10 +5,10 @@ export const educations: Education[] = [
     diplomaFR: "Mastère EADL (Expert en Architecture et Développement Logiciel)",
     diplomaEN: "Master's Degree EADL (Software Architecture & Development Expert)",
     school: "DIIAGE - CUCDB",
-    timeframe: "Sept. 2026",
+    timeframe: "2026 – 2028",
     location: "Dijon, France",
-    detailsFR: ["Prévu septembre 2026 - Mastère en Architecture et Développement Logiciel"],
-    detailsEN: ["Expected September 2026 - Master's Degree in Software Architecture & Development"],
+    detailsFR: ["En alternance à la CPAM de Côte-d'Or (septembre 2026 – août 2028)"],
+    detailsEN: ["Work-study at CPAM de Côte-d'Or (September 2026 – August 2028)"],
   },
   {
     diplomaFR: "Bachelor Coordinateur de Projets Informatiques (CPI)",

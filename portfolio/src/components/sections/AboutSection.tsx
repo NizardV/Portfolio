@@ -14,7 +14,7 @@ export default function AboutSection({ lang, t }: Props) {
         <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Dijon, France</span>
         <span className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          {lang === "fr" ? "Disponible dès sept. 2026" : "Available from Sept 2026"}
+          {lang === "fr" ? "Alternance sept. 2026 – août 2028" : "Work-study Sept 2026 – Aug 2028"}
         </span>
       </div>
     </GlowCard>

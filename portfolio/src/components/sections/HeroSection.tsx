@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Download, Github, Linkedin, Mail } from "lucide-react";
+import { ChevronDown, Github, Linkedin, Mail } from "lucide-react";
 import HeroCanvas from "@/components/fx/HeroCanvas";
 import AboutSection from "./AboutSection";
 import { useSound } from "@/lib/sound";
@@ -31,12 +31,12 @@ export default function HeroSection({ lang, t, scrollToId }: Props) {
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-5">
         <div className="space-y-6 md:col-span-3">
           <motion.div custom={0} variants={item} initial="hidden" animate="show"
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
             </span>
-            {lang === "fr" ? "Disponible en alternance · sept. 2026" : "Open to work-study · Sept 2026"}
+            {lang === "fr" ? "En alternance · CPAM de Côte-d'Or" : "Work-study · CPAM de Côte-d'Or"}
           </motion.div>
 
           <motion.h1 custom={1} variants={item} initial="hidden" animate="show"
@@ -50,12 +50,6 @@ export default function HeroSection({ lang, t, scrollToId }: Props) {
 
           <motion.div custom={3} variants={item} initial="hidden" animate="show" className="flex flex-wrap gap-3">
             <Button asChild>
-              <a href={t.cvPath} download={t.cvFilename} onClick={() => play("click")}>
-                <Download className="mr-2 h-4 w-4" />
-                {t.ctaCV}
-              </a>
-            </Button>
-            <Button variant="secondary" asChild>
               <a href="#contact" onClick={(e) => { play("click"); scrollToId(e, "contact"); }}>
                 <Mail className="mr-2 h-4 w-4" />
                 {t.ctaContact}

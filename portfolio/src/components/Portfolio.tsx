@@ -12,22 +12,17 @@ import ExperienceSection from "@/components/sections/ExperienceSection";
 import EducationSection from "@/components/sections/EducationSection";
 import SkillsSection from "@/components/sections/SkillsSection";
 import ContactSection from "@/components/sections/ContactSection";
-import { FALLBACK_DICT } from "@/lib/dict";
+import { DICT } from "@/lib/dict";
+import { projects } from "@/data/projects";
 import { useKonami } from "@/lib/useKonami";
 import EggHint from "@/components/EggHint";
 import CursorGlow from "@/components/fx/CursorGlow";
 import { SoundProvider, useSound } from "@/lib/sound";
 import { useIdleHeader } from "@/lib/useIdleHeader";
-import type { Lang, AllDict, Project } from "@/types";
+import type { Lang } from "@/types";
 
 const SECTION_IDS = ["about", "projects", "experience", "education", "skills", "contact"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
-
-function isAllDict(x: unknown): x is AllDict {
-  if (!x || typeof x !== "object") return false;
-  const obj = x as Record<string, unknown>;
-  return "fr" in obj && "en" in obj;
-}
 
 function SoundToggle({ lang }: { lang: Lang }) {
   const { enabled, toggle } = useSound();
@@ -50,13 +45,11 @@ export default function Portfolio() {
 
 function PortfolioPage() {
   const [lang, setLang] = useState<Lang>("fr");
-  const [dict, setDict] = useState<AllDict>(FALLBACK_DICT);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<SectionId>("about");
   const { visible: showHeader, show: showHeaderNow, headerProps } = useIdleHeader(30_000);
   const { play } = useSound();
-  const t = dict[lang];
+  const t = DICT[lang];
 
   // Easter egg: Konami code opens the 3D hub.
   const router = useRouter();
@@ -86,21 +79,6 @@ function PortfolioPage() {
     window.scrollTo({ top: y, behavior: "smooth" });
     window.history.replaceState(null, "", `#${id}`);
   };
-
-  useEffect(() => {
-    fetch("/dict.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: unknown) => { if (isAllDict(data)) setDict(data); else setDict(FALLBACK_DICT); })
-      .catch(() => setDict(FALLBACK_DICT));
-  }, []);
-
-  useEffect(() => {
-    fetch("/projects.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: unknown) => (Array.isArray(data) ? (data as Project[]) : []))
-      .then(setProjects)
-      .catch(() => setProjects([]));
-  }, []);
 
   useEffect(() => {
     const sections = SECTION_IDS.flatMap((id) => { const el = document.getElementById(id); return el ? [el] : []; });

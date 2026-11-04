@@ -2,6 +2,15 @@ import type { Experience } from "@/types";
 
 export const experiences: Experience[] = [
   {
+    roleFR: "Concepteur Développeur (alternance)",
+    roleEN: "Software Designer & Developer (work-study)",
+    org: "CPAM de Côte-d'Or",
+    location: "Dijon, France",
+    timeframe: "2026 – 2028",
+    pointsFR: ["Alternance de 2 ans (septembre 2026 – août 2028) en parallèle du Mastère EADL au DIIAGE"],
+    pointsEN: ["2-year work-study (September 2026 – August 2028) alongside the EADL Master's at DIIAGE"],
+  },
+  {
     roleFR: "Stagiaire DATA / Architecture",
     roleEN: "DATA / Architecture Intern",
     org: "APRR (Eiffage Group)",

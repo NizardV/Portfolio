@@ -1,6 +1,7 @@
 import type { AllDict } from "@/types";
 
-export const FALLBACK_DICT: AllDict = {
+/** All UI copy, FR and EN. Single source of truth (no runtime JSON). */
+export const DICT: AllDict = {
   fr: {
     nav: {
       about: "À propos",
@@ -12,14 +13,10 @@ export const FALLBACK_DICT: AllDict = {
     },
     heroTitle: "Nizard Verdenal",
     heroSub:
-      "Développeur full-stack (Bachelor CPI - DIIAGE) • En recherche d'alternance à partir de septembre 2026",
-    ctaCV: "Télécharger le CV",
-    // TODO: mettre à jour avec le chemin du nouveau CV quand il sera prêt
-    cvPath: "/brand/resume-nizard-public-updated-06-2026-fr.pdf",
-    cvFilename: "CV_Nizard-Verdenal_FR.pdf",
+      "Concepteur Développeur en alternance à la CPAM de Côte-d'Or • Mastère EADL au DIIAGE",
     ctaContact: "Me contacter",
     about:
-      "Étudiant en informatique (BTS SIO SLAM → Bachelor CPI) avec un fort intérêt pour les stacks web modernes (Laravel/.NET + React/Next) et la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
+      "Concepteur Développeur en alternance à la CPAM de Côte-d'Or et étudiant en Mastère EADL au DIIAGE, après un BTS SIO SLAM et un Bachelor CPI. Je m'intéresse aux stacks web modernes (.NET, React/Next) et à la mise en place d'environnements fiables (Docker, CI/CD). J'aime concevoir des applis utiles et propres, documentées et faciles à maintenir.",
     projectsTitle: "Projets",
     projectsPersonalTitle: "Projets personnels",
     experienceTitle: "Expérience",
@@ -27,7 +24,7 @@ export const FALLBACK_DICT: AllDict = {
     skillsTitle: "Compétences",
     contactTitle: "Contact",
     contactBlurb:
-      "Un projet, une opportunité d'alternance (sept. 2026) ou une question ? Écrivez-moi.",
+      "Un projet, une question ou simplement envie d'échanger ? Écrivez-moi.",
     form: { name: "Nom", email: "Email", message: "Message", send: "Envoyer" },
     footer: "© 2026 - Nizard Verdenal.",
   },
@@ -42,14 +39,10 @@ export const FALLBACK_DICT: AllDict = {
     },
     heroTitle: "Nizard Verdenal",
     heroSub:
-      "Full-stack developer (Bachelor CPI - DIIAGE) • Seeking apprenticeship from September 2026",
-    ctaCV: "Download Resume",
-    // TODO: update with new CV path when ready
-    cvPath: "/brand/resume-nizard-public-updated-06-2026-gb.pdf",
-    cvFilename: "Resume_Nizard-Verdenal_EN.pdf",
+      "Software Designer & Developer (work-study) at CPAM de Côte-d'Or • EADL Master's at DIIAGE",
     ctaContact: "Contact me",
     about:
-      "Software student (BTS SIO SLAM → Bachelor CPI) focused on modern web stacks (Laravel/.NET + React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
+      "Software Designer & Developer in a work-study program at CPAM de Côte-d'Or, and EADL Master's student at DIIAGE (after a BTS SIO SLAM and a Bachelor CPI). Focused on modern web stacks (.NET, React/Next) and reliable environments (Docker, CI/CD). I build useful, clean apps with maintainable docs.",
     projectsTitle: "Projects",
     projectsPersonalTitle: "Personal projects",
     experienceTitle: "Experience",
@@ -57,7 +50,7 @@ export const FALLBACK_DICT: AllDict = {
     skillsTitle: "Skills",
     contactTitle: "Contact",
     contactBlurb:
-      "Got a project, apprenticeship opportunity (Sept. 2026), or a question? Drop a line.",
+      "Got a project, a question, or just want to chat? Drop a line.",
     form: { name: "Name", email: "Email", message: "Message", send: "Send" },
     footer: "© 2026 - Nizard Verdenal.",
   },

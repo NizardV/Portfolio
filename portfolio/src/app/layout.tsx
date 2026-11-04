@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "Nizard Verdenal - Portfolio",
-  description: "Portfolio",
+  description: "Nizard Verdenal, Concepteur Développeur en alternance à la CPAM de Côte-d'Or et étudiant en Mastère EADL au DIIAGE (Dijon).",
   icons: {
     icon: [
       { url: "/brand/nv-icon.png", type: "image/png" },
@@ -14,7 +14,6 @@ export const metadata = {
     apple: "/brand/nv-icon.png",
     other: [
       { rel: "apple-touch-icon", url: "/brand/nv-icon.png" },
-      { rel: "manifest", url: "/site.webmanifest" }
     ]
   },
   keywords: [
@@ -29,7 +28,6 @@ export const metadata = {
     "Node.js",
     "Next.js",
     "Python",
-    "Django",
     "Student",
     "Computer Science",
   ],

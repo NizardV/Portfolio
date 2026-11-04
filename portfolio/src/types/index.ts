@@ -13,9 +13,6 @@ export type Dict = {
   };
   heroTitle: string;
   heroSub: string;
-  ctaCV: string;
-  cvPath: string;
-  cvFilename: string;
   ctaContact: string;
   about: string;
   projectsTitle: string;
