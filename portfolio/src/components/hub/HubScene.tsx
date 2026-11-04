@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, Stars } from "@react-three/drei";
@@ -56,6 +56,13 @@ export default function HubScene() {
   const [locked, setLocked] = useState<Universe | null>(null);
   const [hovered, setHovered] = useState<Universe | null>(null);
 
+  useEffect(() => {
+    if (!locked) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLocked(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [locked]);
+
   const select = (u: Universe) => {
     if (u.href) router.push(u.href);
     else setLocked(u);
@@ -100,8 +107,14 @@ export default function HubScene() {
       </div>
 
       {locked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4" onClick={() => setLocked(null)}>
-          <div className="max-w-sm rounded-2xl border border-white/15 bg-[#0b0d14] p-6 text-center" style={{ boxShadow: `0 0 40px ${locked.color}40` }}>
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Fermer"
+            className="absolute inset-0 cursor-default bg-black/60"
+            onClick={() => setLocked(null)}
+          />
+          <div role="dialog" aria-modal="true" aria-label={locked.name} className="relative max-w-sm rounded-2xl border border-white/15 bg-[#0b0d14] p-6 text-center" style={{ boxShadow: `0 0 40px ${locked.color}40` }}>
             <div className="text-xl font-semibold tracking-widest" style={{ color: locked.color }}>
               {locked.name.toUpperCase()}
             </div>
