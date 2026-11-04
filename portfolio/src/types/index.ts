@@ -1,5 +1,3 @@
-import type React from "react";
-
 export type Lang = "fr" | "en";
 
 export type Dict = {
@@ -8,21 +6,16 @@ export type Dict = {
     projects: string;
     experience: string;
     education: string;
-    skills: string;
     contact: string;
   };
   heroTitle: string;
   heroSub: string;
-  ctaCV: string;
-  cvPath: string;
-  cvFilename: string;
   ctaContact: string;
   about: string;
   projectsTitle: string;
   projectsPersonalTitle?: string;
   experienceTitle: string;
   educationTitle: string;
-  skillsTitle: string;
   contactTitle: string;
   contactBlurb: string;
   form: { name: string; email: string; message: string; send: string };
@@ -67,13 +60,3 @@ export type Project = {
   evidence?: "private_repo" | "not_hosted" | "coming_soon";
   personal?: boolean;
 };
-
-export type SkillGroup = {
-  label?: string;
-  labelFR?: string;
-  labelEN?: string;
-  icon?: string;
-  items: StackItem[];
-};
-
-export type SectionIconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;

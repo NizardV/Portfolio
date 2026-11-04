@@ -1,0 +1,62 @@
+import type { Project } from "@/types";
+import { tech } from "./tech";
+
+export const projects: Project[] = [
+  {
+    title: "AgeOfCode",
+    timeframe: "2025",
+    location: "Dijon, France",
+    descriptionFR: "Application client-serveur temps réel développée en équipe. API ASP.NET Core avec SignalR (WebSockets), client CLI en Terminal.Gui, PostgreSQL via Entity Framework Core. Conteneurisation Docker et bases de CI/CD.",
+    descriptionEN: "Real-time client-server application built as a team. ASP.NET Core API with SignalR (WebSockets), Terminal.Gui CLI client, PostgreSQL via Entity Framework Core. Docker containerization and CI/CD basics.",
+    stack: [tech.csharp, tech.net8, tech.signalr, tech.terminalgui, tech.postgresql, tech.docker],
+    repo: "https://github.com/NizardV/AgeOfCode",
+  },
+  {
+    title: "Cybedu",
+    timeframe: "2025",
+    location: "Dijon, France",
+    descriptionFR: "Application mobile Android éducative sur la cybersécurité (quiz, articles). App Kotlin/Jetpack Compose avec architecture MVVM, API Node.js/TypeScript avec authentification JWT et PostgreSQL. Mock API documentée OpenAPI.",
+    descriptionEN: "Educational Android mobile app about cybersecurity (quizzes, articles). Kotlin/Jetpack Compose app with MVVM architecture, Node.js/TypeScript API with JWT auth and PostgreSQL. OpenAPI-documented mock API.",
+    stack: [tech.kotlin, tech.jetpackcompose, tech.nodejs, tech.typescript, tech.postgresql, tech.docker],
+    repo: "https://github.com/NizardV/Cybedu",
+  },
+  {
+    title: "SkyByDns",
+    timeframe: "2026",
+    location: "Dijon, France",
+    descriptionFR: "Application web de gestion de domaines et d'enregistrements DNS, développée en équipe. API REST ASP.NET Core en clean architecture (Domain/Application/Infrastructure), frontend React/Vite avec shadcn/ui. CI/CD Azure DevOps, conteneurisation Docker.",
+    descriptionEN: "Web application for managing DNS domains and records, built as a team. ASP.NET Core REST API in clean architecture (Domain/Application/Infrastructure), React/Vite frontend with shadcn/ui. Azure DevOps CI/CD, Docker containerization.",
+    stack: [tech.csharp, tech.aspnetcore, tech.react, tech.typescript, tech.postgresql, tech.docker],
+    repo: "https://github.com/NizardV/SkyByDns",
+  },
+  {
+    title: "Webzine",
+    timeframe: "2026",
+    location: "Dijon, France",
+    descriptionFR: "Webzine musical développé en équipe avec ASP.NET Core MVC (architecture en couches). Intègre un chatbot RAG sur les artistes Deezer via LangChain, ChromaDB et Ollama. Déploiement Docker avec PostgreSQL.",
+    descriptionEN: "Music webzine built as a team with ASP.NET Core MVC (layered architecture). Includes a RAG chatbot about Deezer artists using LangChain, ChromaDB and Ollama. Docker deployment with PostgreSQL.",
+    stack: [tech.csharp, tech.aspnetcore, tech.python, tech.langchain, tech.postgresql, tech.docker],
+    repo: "https://github.com/NizardV/Webzine",
+  },
+  {
+    title: "CYNA",
+    timeframe: "2026",
+    location: "Dijon, France",
+    descriptionFR: "Plateforme SaaS e-commerce de services cybersécurité, développée en équipe au DIIAGE (Sup de Vinci). Frontend React/TypeScript, API ASP.NET Core, app Android Kotlin/Jetpack Compose. CI/CD Azure DevOps, déploiement Docker sur VPS OVH avec Nginx et SSL.",
+    descriptionEN: "SaaS cybersecurity e-commerce platform built as a team at DIIAGE (Sup de Vinci). React/TypeScript frontend, ASP.NET Core API, Kotlin/Jetpack Compose Android app. Azure DevOps CI/CD, Docker deployment on OVH VPS with Nginx and SSL.",
+    stack: [tech.react, tech.typescript, tech.aspnetcore, tech.csharp, tech.kotlin, tech.docker, tech.azuredevops],
+    demo: "https://cyna.nizard.dev",
+    repo: "https://github.com/DiiageCUCDB/DI1-P5-E3_Cyna-Web",
+  },
+  {
+    title: "Portfolio (nizard.dev)",
+    timeframe: "2025 - Today",
+    location: "Dijon, France",
+    descriptionFR: "Portfolio personnel en Next.js 16 + React, Tailwind et Framer Motion : hero animé en canvas, interactions et sons d'interface, formulaire de contact branché sur une API interne. Déployé sur Vercel.",
+    descriptionEN: "Personal portfolio built with Next.js 16 + React, Tailwind and Framer Motion: animated canvas hero, interactions and UI sounds, contact form wired to an internal API. Deployed on Vercel.",
+    stack: [tech.nextjs, tech.react, tech.tailwindcss, tech.shadcnui, tech.framermotion],
+    demo: "https://nizard.dev",
+    repo: "https://github.com/NizardV/Portfolio",
+    personal: true,
+  },
+];

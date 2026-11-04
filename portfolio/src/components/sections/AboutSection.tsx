@@ -1,27 +1,22 @@
 "use client";
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Calendar } from "lucide-react";
+import GlowCard from "@/components/fx/GlowCard";
 import type { Lang, Dict } from "@/types";
 
 type Props = { lang: Lang; t: Dict };
 
 export default function AboutSection({ lang, t }: Props) {
   return (
-    <Card className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
-      <CardHeader>
-        <CardTitle>{lang === "fr" ? "À propos" : "About"}</CardTitle>
-        <CardDescription>{lang === "fr" ? "Résumé rapide" : "Quick summary"}</CardDescription>
-      </CardHeader>
-      <CardContent className="text-sm text-white/70 space-y-3">
-        <p>{t.about}</p>
-        <div className="flex items-center gap-2 text-xs">
-          <MapPin className="w-4 h-4" /> Dijon, France
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Calendar className="w-4 h-4" />
-          {lang === "fr" ? "Disponible dès sept. 2026" : "Available from Sept 2026"}
-        </div>
-      </CardContent>
-    </Card>
+    <GlowCard className="p-6">
+      <h2 className="text-lg font-semibold">{lang === "fr" ? "À propos" : "About"}</h2>
+      <p className="mt-3 text-sm leading-relaxed text-white/75">{t.about}</p>
+      <div className="mt-4 flex flex-col gap-2 text-xs text-white/70">
+        <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Dijon, France</span>
+        <span className="flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
+          {lang === "fr" ? "Alternance sept. 2026 – août 2028" : "Work-study Sept 2026 – Aug 2028"}
+        </span>
+      </div>
+    </GlowCard>
   );
 }

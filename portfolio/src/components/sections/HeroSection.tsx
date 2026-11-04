@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Download, Github, Linkedin, Mail } from "lucide-react";
-import Image from "next/image";
+import { ChevronDown, Github, Linkedin, Mail } from "lucide-react";
+import HeroCanvas from "@/components/fx/HeroCanvas";
 import AboutSection from "./AboutSection";
 import type { Lang, Dict } from "@/types";
 
@@ -12,75 +12,72 @@ type Props = {
   scrollToId: <T extends HTMLElement>(e: React.MouseEvent<T>, id: string) => void;
 };
 
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.1 + i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } }),
+};
+
 export default function HeroSection({ lang, t, scrollToId }: Props) {
   return (
-    <section id="about" className="max-w-6xl mx-auto px-4 py-16 md:py-24">
-      <div className="mb-10">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl ring-1 ring-white/10">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(1200px_300px_at_80%_-50%,rgba(0,179,255,0.18),transparent)]" />
-          <Image
-            src="/brand/nizardv-banner-mobile.png"
-            alt="Bannière mobile"
-            priority
-            sizes="(max-width: 768px) 100vw, 0px"
-            width={1280}
-            height={400}
-            className="block md:hidden w-full aspect-[21/6] object-cover"
-            draggable={false}
-          />
-          <Image
-            src="/brand/nizardv-banner.png"
-            alt="Bannière"
-            priority
-            sizes="(max-width: 768px) 0px, 960px"
-            width={1280}
-            height={400}
-            className="hidden md:block w-full aspect-[21/6] md:aspect-[21/5] object-cover"
-            draggable={false}
-          />
-        </div>
-      </div>
+    <section id="about" className="relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden">
+      <HeroCanvas />
+      {/* fade the particle field into the page */}
+      <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0b1020_85%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#0b1020]" />
 
-      <div className="grid md:grid-cols-5 gap-8 items-center">
-        <div className="md:col-span-3 space-y-6">
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-5xl font-bold leading-tight"
-          >
+      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-5">
+        <div className="space-y-6 md:col-span-3">
+          <motion.div custom={0} variants={item} initial="hidden" animate="show"
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+            </span>
+            {lang === "fr" ? "En alternance · CPAM de Côte-d'Or" : "Work-study · CPAM de Côte-d'Or"}
+          </motion.div>
+
+          <motion.h1 custom={1} variants={item} initial="hidden" animate="show"
+            className="hero-name text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-7xl">
             {t.heroTitle}
           </motion.h1>
-          <p className="text-white/80 text-base md:text-lg">{t.heroSub}</p>
-          <div className="flex flex-wrap gap-3">
+
+          <motion.p custom={2} variants={item} initial="hidden" animate="show" className="max-w-xl text-base text-white/80 md:text-lg">
+            {t.heroSub}
+          </motion.p>
+
+          <motion.div custom={3} variants={item} initial="hidden" animate="show" className="flex flex-wrap gap-3">
             <Button asChild>
-              <a href={t.cvPath} download={t.cvFilename}>
-                <Download className="w-4 h-4 mr-2" />
-                {t.ctaCV}
-              </a>
-            </Button>
-            <Button variant="secondary" asChild>
               <a href="#contact" onClick={(e) => scrollToId(e, "contact")}>
-                <Mail className="w-4 h-4 mr-2" />
+                <Mail className="mr-2 h-4 w-4" />
                 {t.ctaContact}
               </a>
             </Button>
             <Button variant="outline" asChild>
               <a href="https://github.com/NizardV" target="_blank" rel="noreferrer">
-                <Github className="w-4 h-4 mr-2" /> GitHub
+                <Github className="mr-2 h-4 w-4" /> GitHub
               </a>
             </Button>
             <Button variant="outline" asChild>
               <a href="https://www.linkedin.com/in/nizard-verdenal" target="_blank" rel="noreferrer">
-                <Linkedin className="w-4 h-4 mr-2" /> LinkedIn
+                <Linkedin className="mr-2 h-4 w-4" /> LinkedIn
               </a>
             </Button>
-          </div>
+          </motion.div>
         </div>
-        <div className="md:col-span-2">
+
+        <motion.div custom={4} variants={item} initial="hidden" animate="show" className="md:col-span-2">
           <AboutSection lang={lang} t={t} />
-        </div>
+        </motion.div>
       </div>
+
+      <a
+        href="#projects"
+        onClick={(e) => scrollToId(e, "projects")}
+        aria-label={lang === "fr" ? "Voir les projets" : "See projects"}
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 animate-bounce rounded-full p-2 text-white/50 transition hover:text-white md:block"
+      >
+        <ChevronDown className="h-6 w-6" />
+      </a>
     </section>
   );
 }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
-import { Menu, X, Github, Linkedin, Mail } from "lucide-react";
+import { Menu, X, Github, Linkedin, Mail, Volume2, VolumeX } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import LangToggle from "@/components/LangToggle";
@@ -10,31 +10,44 @@ import HeroSection from "@/components/sections/HeroSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import ExperienceSection from "@/components/sections/ExperienceSection";
 import EducationSection from "@/components/sections/EducationSection";
-import SkillsSection from "@/components/sections/SkillsSection";
 import ContactSection from "@/components/sections/ContactSection";
-import { FALLBACK_DICT } from "@/lib/dict";
+import { DICT } from "@/lib/dict";
+import { projects } from "@/data/projects";
 import { useKonami } from "@/lib/useKonami";
 import EggHint from "@/components/EggHint";
-import type { Lang, AllDict, Project } from "@/types";
+import CursorGlow from "@/components/fx/CursorGlow";
+import { SoundProvider, useSound } from "@/lib/sound";
+import { useIdleHeader } from "@/lib/useIdleHeader";
+import type { Lang } from "@/types";
 
-const SECTION_IDS = ["about", "projects", "experience", "education", "skills", "contact"] as const;
+const SECTION_IDS = ["about", "projects", "experience", "education", "contact"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
-function isAllDict(x: unknown): x is AllDict {
-  if (!x || typeof x !== "object") return false;
-  const obj = x as Record<string, unknown>;
-  return "fr" in obj && "en" in obj;
+function SoundToggle({ lang }: { lang: Lang }) {
+  const { enabled, toggle } = useSound();
+  const label = enabled ? (lang === "fr" ? "Couper le son" : "Mute sounds") : (lang === "fr" ? "Activer le son" : "Enable sounds");
+  return (
+    <button type="button" onClick={toggle} data-sound="off" aria-pressed={enabled} aria-label={label} title={label}
+      className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white">
+      {enabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+    </button>
+  );
 }
 
 export default function Portfolio() {
+  return (
+    <SoundProvider>
+      <PortfolioPage />
+    </SoundProvider>
+  );
+}
+
+function PortfolioPage() {
   const [lang, setLang] = useState<Lang>("fr");
-  const [dict, setDict] = useState<AllDict>(FALLBACK_DICT);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<SectionId>("about");
-  const [showHeader, setShowHeader] = useState(true);
-  const lastY = React.useRef(0);
-  const t = dict[lang];
+  const { visible: showHeader, show: showHeaderNow, headerProps } = useIdleHeader(30_000);
+  const t = DICT[lang];
 
   // Easter egg: Konami code opens the 3D hub.
   const router = useRouter();
@@ -56,7 +69,7 @@ export default function Portfolio() {
 
   const scrollToId = <T extends HTMLElement>(e: React.MouseEvent<T>, id: string) => {
     e.preventDefault();
-    setShowHeader(true);
+    showHeaderNow();
     setIsMenuOpen(false);
     const el = document.getElementById(id);
     if (!el) return;
@@ -64,40 +77,6 @@ export default function Portfolio() {
     window.scrollTo({ top: y, behavior: "smooth" });
     window.history.replaceState(null, "", `#${id}`);
   };
-
-  useEffect(() => {
-    fetch("/dict.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: unknown) => { if (isAllDict(data)) setDict(data); else setDict(FALLBACK_DICT); })
-      .catch(() => setDict(FALLBACK_DICT));
-  }, []);
-
-  useEffect(() => {
-    fetch("/projects.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: unknown) => (Array.isArray(data) ? (data as Project[]) : []))
-      .then(setProjects)
-      .catch(() => setProjects([]));
-  }, []);
-
-  useEffect(() => {
-    let ticking = false;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const delta = y - lastY.current;
-          if (delta > 4 && y > 80) setShowHeader(false);
-          else if (delta < -4 || y < 120) setShowHeader(true);
-          lastY.current = y;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const sections = SECTION_IDS.flatMap((id) => { const el = document.getElementById(id); return el ? [el] : []; });
@@ -116,12 +95,13 @@ export default function Portfolio() {
 
   return (
     <MotionConfig reducedMotion="user">
+    <CursorGlow />
     <div className="min-h-screen relative overflow-hidden bg-[#0b1020] text-white bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.05),transparent_60%)]">
       <div className="pointer-events-none absolute inset-0 opacity-10 [background:repeating-linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px),repeating-linear-gradient(0deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_48px)]" />
       <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(0,179,255,0.35),transparent_70%)]" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]" />
 
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
+      <header {...headerProps} className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-500 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
         <div className="mx-auto max-w-6xl px-6">
           <div className="h-14 mt-2 mb-2 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,32,0.85),rgba(10,16,32,0.65))] backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.35)] flex items-center justify-between px-4">
             <Link href="/" onClick={onLogoTap} className="group flex items-center gap-3 shrink-0" aria-label="Accueil">
@@ -152,13 +132,15 @@ export default function Portfolio() {
               })}
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <SoundToggle lang={lang} />
               <div className="hidden md:block">
                 <LangToggle lang={lang} onChange={setLang} />
               </div>
               <button
                 type="button"
                 onClick={() => setIsMenuOpen((v) => !v)}
+                data-sound={isMenuOpen ? "close" : "open"}
                 className="md:hidden p-2 rounded-md hover:bg-white/10 focus:outline-none text-white"
                 aria-label="Ouvrir le menu"
               >
@@ -197,7 +179,6 @@ export default function Portfolio() {
         <ProjectsSection lang={lang} t={t} projects={projects} />
         <ExperienceSection lang={lang} t={t} />
         <EducationSection lang={lang} t={t} />
-        <SkillsSection lang={lang} t={t} />
         <ContactSection lang={lang} t={t} />
 
         <footer className="border-t border-white/10 mt-12">
