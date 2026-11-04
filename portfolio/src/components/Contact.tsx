@@ -3,6 +3,7 @@
 import { useRef, useState, useSyncExternalStore } from "react";
 import { Loader2, User2, Mail, Type as TypeIcon, MessageSquareText } from "lucide-react";
 import { useToast } from "@/components/ui/toast-context";
+import { useSound } from "@/lib/sound";
 
 type Lang = "fr" | "en";
 
@@ -15,6 +16,7 @@ export default function Contact({
 }) {
   const formRef = useRef<HTMLFormElement | null>(null);
   const { toast } = useToast();
+  const { play } = useSound();
   const [loading, setLoading] = useState(false);
 
   // useSyncExternalStore évite le double-rendu de useEffect(setState, [])
@@ -90,6 +92,7 @@ export default function Contact({
 
     const error = validate(payload);
     if (error) {
+      play("error");
       toast({ message: `❗ ${error}`, variant: "error" });
       return;
     }
@@ -110,15 +113,18 @@ export default function Contact({
       if (!res.ok) {
         const j = await res.text().catch(() => "");
         setLoading(false);
+        play("error");
         toast({ message: `${t.fail}${j || "API error"}`, variant: "error" });
         return;
       }
 
+      play("success");
       toast({ message: t.success, variant: "success" });
       formRef.current.reset();
       setLoading(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t.retry;
+      play("error");
       toast({ message: `${t.fail}${msg}`, variant: "error" });
       setLoading(false);
     }

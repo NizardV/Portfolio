@@ -1,7 +1,6 @@
 "use client";
 import { useRef } from "react";
 import { twMerge } from "tailwind-merge";
-import { useSound } from "@/lib/sound";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   /** slight 3D tilt following the mouse (desktop only) */
@@ -10,11 +9,10 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 
 /**
  * Card with a light spot that follows the mouse (`.glow-card` in globals.css),
- * an optional tilt, and a soft hover sound when sound is on.
+ * an optional tilt, and a soft hover sound when sound is on (via data-sound-hover).
  */
 export default function GlowCard({ className, tilt = false, onPointerMove, onPointerEnter, onPointerLeave, ...props }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const { play } = useSound();
 
   return (
     <div
@@ -24,7 +22,8 @@ export default function GlowCard({ className, tilt = false, onPointerMove, onPoi
         tilt && "will-change-transform",
         className,
       )}
-      onPointerEnter={(e) => { if (e.pointerType === "mouse") play("hover"); onPointerEnter?.(e); }}
+      data-sound-hover
+      onPointerEnter={onPointerEnter}
       onPointerMove={(e) => {
         const el = ref.current;
         if (el) {

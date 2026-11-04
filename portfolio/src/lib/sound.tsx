@@ -4,9 +4,20 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 /**
  * Tiny UI sound kit, synthesised with WebAudio (no audio files to download).
  * Off by default; the choice is remembered in localStorage.
+ *
+ * Sounds are wired globally: any link, button, tab or form field plays a sound
+ * on hover / click / focus, so new UI gets sounds without extra code.
+ * Per element, `data-sound` overrides the click sound ("open", "close", …)
+ * and `data-sound="off"` silences it (for elements that play their own).
+ * `data-sound-hover` adds a hover sound to a non-interactive element, and
+ * `data-no-hover` mutes the hover sound (e.g. a modal backdrop that appears under the cursor).
  */
 
-export type SoundKind = "hover" | "click" | "open" | "close" | "toggle";
+export type SoundKind = "hover" | "click" | "open" | "close" | "toggle" | "success" | "error";
+
+const KINDS: readonly SoundKind[] = ["hover", "click", "open", "close", "toggle", "success", "error"];
+const INTERACTIVE = 'a[href], button, [role="tab"], [role="button"], summary, label[for]';
+const FIELDS = "input, textarea, select";
 
 type SoundCtx = { enabled: boolean; toggle: () => void; play: (kind: SoundKind) => void };
 
@@ -35,6 +46,8 @@ const RECIPES: Record<SoundKind, (ac: AudioContext) => void> = {
   open: (ac) => { blip(ac, 440, 880, 0.14, 0.04); setTimeout(() => blip(ac, 660, 1320, 0.12, 0.025), 60); },
   close: (ac) => blip(ac, 700, 300, 0.12, 0.04),
   toggle: (ac) => { blip(ac, 660, 660, 0.06, 0.05, "square"); setTimeout(() => blip(ac, 990, 990, 0.08, 0.04, "square"), 70); },
+  success: (ac) => { blip(ac, 523, 523, 0.1, 0.04); setTimeout(() => blip(ac, 659, 659, 0.1, 0.04), 90); setTimeout(() => blip(ac, 784, 1046, 0.18, 0.04), 180); },
+  error: (ac) => { blip(ac, 220, 180, 0.14, 0.05, "sawtooth"); setTimeout(() => blip(ac, 180, 140, 0.18, 0.045, "sawtooth"), 120); },
 };
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
@@ -78,6 +91,37 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, next ? "on" : "off"); } catch { /* storage blocked */ }
     if (next) playRaw("toggle"); // confirms sound is on (and unlocks audio on iOS)
   }, [enabled, playRaw]);
+
+  // Global wiring (see header comment).
+  const playRef = useRef(play);
+  playRef.current = play;
+  useEffect(() => {
+    let lastHover: Element | null = null;
+    const onOver = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const el = (e.target as Element | null)?.closest(`${INTERACTIVE}, [data-sound-hover]`) ?? null;
+      if (el && el !== lastHover && !el.closest('[data-sound="off"], [data-no-hover]')) playRef.current("hover");
+      lastHover = el;
+    };
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as Element | null)?.closest(INTERACTIVE);
+      if (!el) return;
+      const tagged = el.closest("[data-sound]")?.getAttribute("data-sound");
+      if (tagged === "off") return;
+      playRef.current(KINDS.includes(tagged as SoundKind) ? (tagged as SoundKind) : "click");
+    };
+    const onFocus = (e: FocusEvent) => {
+      if ((e.target as Element | null)?.matches?.(FIELDS)) playRef.current("hover");
+    };
+    document.addEventListener("pointerover", onOver, { passive: true });
+    document.addEventListener("click", onClick, true);
+    document.addEventListener("focusin", onFocus);
+    return () => {
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("focusin", onFocus);
+    };
+  }, []);
 
   const value = useMemo(() => ({ enabled, toggle, play }), [enabled, toggle, play]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

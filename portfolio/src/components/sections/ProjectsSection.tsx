@@ -59,6 +59,7 @@ function ProjectCard({ p, lang, onOpen }: { p: Project; lang: Lang; onOpen: () =
         onClick={onOpen}
         className="flex h-full w-full flex-col p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60 rounded-2xl"
         aria-haspopup="dialog"
+        data-sound="open"
       >
         <div className="flex items-start justify-between gap-3">
           <h3 className="text-lg font-semibold">{p.title}</h3>
@@ -79,21 +80,21 @@ function ProjectCard({ p, lang, onOpen }: { p: Project; lang: Lang; onOpen: () =
   );
 }
 
-function ProjectModal({ p, lang, onClose }: { p: Project; lang: Lang; onClose: () => void }) {
+function ProjectModal({ p, lang, onClose, onEscape }: { p: Project; lang: Lang; onClose: () => void; onEscape: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onEscape(); };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [onClose]);
+  }, [onEscape]);
 
   return (
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <button type="button" aria-label={lang === "fr" ? "Fermer" : "Close"} onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm" />
+      <button type="button" data-sound="close" data-no-hover aria-label={lang === "fr" ? "Fermer" : "Close"} onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm" />
       <motion.div
         role="dialog"
         aria-modal="true"
@@ -104,7 +105,7 @@ function ProjectModal({ p, lang, onClose }: { p: Project; lang: Lang; onClose: (
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/15 bg-[#0f1528] p-6 shadow-[0_0_60px_rgba(0,179,255,0.15)] md:p-8"
       >
-        <button ref={closeRef} type="button" onClick={onClose} aria-label={lang === "fr" ? "Fermer" : "Close"}
+        <button ref={closeRef} type="button" data-sound="close" onClick={onClose} aria-label={lang === "fr" ? "Fermer" : "Close"}
           className="absolute right-4 top-4 rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white">
           <X className="h-5 w-5" />
         </button>
@@ -136,8 +137,10 @@ export default function ProjectsSection({ lang, t, projects }: Props) {
   const schoolProjects = projects.filter((p) => !p.personal);
   const personalProjects = projects.filter((p) => p.personal);
 
-  const openProject = (p: Project) => { play("open"); setOpen(p); };
-  const close = useCallback(() => { play("close"); setOpen(null); }, [play]);
+  const openProject = (p: Project) => setOpen(p);
+  const close = useCallback(() => setOpen(null), []);
+  // Escape has no click, so it plays its own sound
+  const closeWithKey = useCallback(() => { play("close"); setOpen(null); }, [play]);
 
   const grid = (list: Project[]) => (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -166,7 +169,7 @@ export default function ProjectsSection({ lang, t, projects }: Props) {
       )}
 
       <AnimatePresence>
-        {open && <ProjectModal key={open.title} p={open} lang={lang} onClose={close} />}
+        {open && <ProjectModal key={open.title} p={open} lang={lang} onClose={close} onEscape={closeWithKey} />}
       </AnimatePresence>
     </section>
   );

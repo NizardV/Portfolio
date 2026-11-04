@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Github, Linkedin, Mail } from "lucide-react";
 import HeroCanvas from "@/components/fx/HeroCanvas";
 import AboutSection from "./AboutSection";
-import { useSound } from "@/lib/sound";
 import type { Lang, Dict } from "@/types";
 
 type Props = {
@@ -19,8 +18,6 @@ const item = {
 };
 
 export default function HeroSection({ lang, t, scrollToId }: Props) {
-  const { play } = useSound();
-
   return (
     <section id="about" className="relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden">
       <HeroCanvas />
@@ -50,18 +47,18 @@ export default function HeroSection({ lang, t, scrollToId }: Props) {
 
           <motion.div custom={3} variants={item} initial="hidden" animate="show" className="flex flex-wrap gap-3">
             <Button asChild>
-              <a href="#contact" onClick={(e) => { play("click"); scrollToId(e, "contact"); }}>
+              <a href="#contact" onClick={(e) => scrollToId(e, "contact")}>
                 <Mail className="mr-2 h-4 w-4" />
                 {t.ctaContact}
               </a>
             </Button>
             <Button variant="outline" asChild>
-              <a href="https://github.com/NizardV" target="_blank" rel="noreferrer" onClick={() => play("click")}>
+              <a href="https://github.com/NizardV" target="_blank" rel="noreferrer">
                 <Github className="mr-2 h-4 w-4" /> GitHub
               </a>
             </Button>
             <Button variant="outline" asChild>
-              <a href="https://www.linkedin.com/in/nizard-verdenal" target="_blank" rel="noreferrer" onClick={() => play("click")}>
+              <a href="https://www.linkedin.com/in/nizard-verdenal" target="_blank" rel="noreferrer">
                 <Linkedin className="mr-2 h-4 w-4" /> LinkedIn
               </a>
             </Button>

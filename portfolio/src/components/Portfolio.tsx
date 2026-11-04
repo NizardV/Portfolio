@@ -27,7 +27,7 @@ function SoundToggle({ lang }: { lang: Lang }) {
   const { enabled, toggle } = useSound();
   const label = enabled ? (lang === "fr" ? "Couper le son" : "Mute sounds") : (lang === "fr" ? "Activer le son" : "Enable sounds");
   return (
-    <button type="button" onClick={toggle} aria-pressed={enabled} aria-label={label} title={label}
+    <button type="button" onClick={toggle} data-sound="off" aria-pressed={enabled} aria-label={label} title={label}
       className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white">
       {enabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
     </button>
@@ -47,7 +47,6 @@ function PortfolioPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<SectionId>("about");
   const { visible: showHeader, show: showHeaderNow, headerProps } = useIdleHeader(30_000);
-  const { play } = useSound();
   const t = DICT[lang];
 
   // Easter egg: Konami code opens the 3D hub.
@@ -118,8 +117,7 @@ function PortfolioPage() {
                   <button
                     type="button"
                     key={id}
-                    onClick={(e) => { play("click"); scrollToId<HTMLButtonElement>(e, id); }}
-                    onPointerEnter={(e) => { if (e.pointerType === "mouse") play("hover"); }}
+                    onClick={(e) => scrollToId<HTMLButtonElement>(e, id)}
                     className={`relative px-3 py-2 rounded-lg transition hover:bg-white/5 focus:outline-none ${isActive ? "text-white" : "text-white/80"}`}
                   >
                     {t.nav[id]}
@@ -141,7 +139,8 @@ function PortfolioPage() {
               </div>
               <button
                 type="button"
-                onClick={() => { play(isMenuOpen ? "close" : "open"); setIsMenuOpen((v) => !v); }}
+                onClick={() => setIsMenuOpen((v) => !v)}
+                data-sound={isMenuOpen ? "close" : "open"}
                 className="md:hidden p-2 rounded-md hover:bg-white/10 focus:outline-none text-white"
                 aria-label="Ouvrir le menu"
               >
