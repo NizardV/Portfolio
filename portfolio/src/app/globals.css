@@ -53,3 +53,39 @@ body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui rév
 .toast-exit {
   animation: toast-exit 0.3s ease-in forwards;
 }
+
+/* Easter egg hint — near-invisible, flashes with an RGB split every ~9s */
+.egg-hint {
+  position: relative;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.06);
+  user-select: none;
+  animation: egg-flash 9s steps(1) infinite;
+}
+.egg-hint::before,
+.egg-hint::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: egg-split 9s steps(1) infinite;
+}
+.egg-hint::before { color: #ff2bd6; transform: translateX(-2px); }
+.egg-hint::after  { color: #22e5ff; transform: translateX(2px); animation-delay: 0.05s; }
+@keyframes egg-flash {
+  0%, 93%, 96%, 100% { color: rgba(255, 255, 255, 0.06); }
+  94% { color: rgba(255, 255, 255, 0.85); }
+  95% { color: rgba(255, 255, 255, 0.3); }
+}
+@keyframes egg-split {
+  0%, 93%, 96%, 100% { opacity: 0; }
+  94%, 95% { opacity: 0.7; }
+}
+
+/* Header logo — tiny chromatic jitter now and then (hint that it reacts) */
+.egg-logo { animation: egg-jitter 11s steps(1) infinite; }
+@keyframes egg-jitter {
+  0%, 96%, 98%, 100% { filter: none; }
+  97% { filter: drop-shadow(-2px 0 #ff2bd6) drop-shadow(2px 0 #22e5ff); }
+}
