@@ -1,4 +1,5 @@
 import type { Experience } from "@/types";
+import { tech } from "./tech";
 
 export const experiences: Experience[] = [
   {
@@ -7,13 +8,7 @@ export const experiences: Experience[] = [
     org: "CPAM de Côte-d'Or",
     location: "Dijon, France",
     timeframe: "2026 – 2028",
-    stack: [
-      { label: "Symfony", icon: "symfony" },
-      { label: "PostgreSQL", icon: "postgresql" },
-      { label: "Podman", icon: "podman" },
-      { label: "Python", icon: "python" },
-      { label: "FastAPI", icon: "fastapi" },
-    ],
+    stack: [tech.symfony, tech.postgresql, tech.podman, tech.python, tech.fastapi],
     pointsFR: [
       "Recueil des besoins auprès des services internes, d'autres CPAM et de partenaires (CARSAT), rédaction du cahier des charges fonctionnel",
       "Développement d'applications web Symfony + PostgreSQL conteneurisées avec Podman, avec des services Python / FastAPI pour les modules externes",
@@ -33,13 +28,7 @@ export const experiences: Experience[] = [
     org: "APRR (Eiffage Group)",
     location: "Saint-Apollinaire, France",
     timeframe: "2026",
-    stack: [
-      { label: "Talend", icon: "talend" },
-      { label: "Snowflake", icon: "snowflake" },
-      { label: "Power BI", icon: "powerbi" },
-      { label: "PostgreSQL", icon: "postgresql" },
-      { label: "Docker", icon: "docker" },
-    ],
+    stack: [tech.talend, tech.snowflake, tech.powerbi, tech.postgresql, tech.docker],
     pointsFR: [
       "Intégration et transformation de données avec Talend",
       "Modélisation et requêtage sur Snowflake",
@@ -59,12 +48,7 @@ export const experiences: Experience[] = [
     org: "InnovQube",
     location: "Noisy-le-Grand, France",
     timeframe: "2025",
-    stack: [
-      { label: "Laravel", icon: "laravel" },
-      { label: "Livewire", icon: "livewire" },
-      { label: "Filament" },
-      { label: "Vue.js", icon: "vuedotjs" },
-    ],
+    stack: [tech.laravel, tech.livewire, tech.filament, tech.vuejs],
     pointsFR: [
       "Stage full remote sur une solution SaaS de guide de voyage",
       "Ajout des traductions dynamiques selon les préférences utilisateurs",
@@ -84,12 +68,7 @@ export const experiences: Experience[] = [
     org: "Association O.R.E.",
     location: "Quetigny, France",
     timeframe: "2024",
-    stack: [
-      { label: "PHP", icon: "php" },
-      { label: "MySQL", icon: "mysql" },
-      { label: "Apache", icon: "apache" },
-      { label: "phpMyAdmin", icon: "phpmyadmin" },
-    ],
+    stack: [tech.php, tech.mysql, tech.apache, tech.phpmyadmin],
     pointsFR: [
       "Stage en présentiel au sein du FabLab de l'association",
       "Gestion et maintenance d'un Extranet",

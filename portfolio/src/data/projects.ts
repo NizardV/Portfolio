@@ -1,27 +1,5 @@
-import type { Project, StackItem } from "@/types";
-
-/** Technologies used across projects, defined once. */
-const tech = {
-  aspnetcore: { label: "ASP.NET Core", icon: "dotnet" },
-  azuredevops: { label: "Azure DevOps", icon: "azuredevops" },
-  csharp: { label: "C#", icon: "csharp" },
-  docker: { label: "Docker", icon: "docker" },
-  framermotion: { label: "Framer Motion", icon: "react" },
-  jetpackcompose: { label: "Jetpack Compose", icon: "jetpackcompose" },
-  kotlin: { label: "Kotlin", icon: "kotlin" },
-  langchain: { label: "LangChain", icon: "langchain" },
-  net8: { label: ".NET 8", icon: "dotnet" },
-  nextjs: { label: "Next.js", icon: "nextdotjs" },
-  nodejs: { label: "Node.js", icon: "nodedotjs" },
-  postgresql: { label: "PostgreSQL", icon: "postgresql" },
-  python: { label: "Python", icon: "python" },
-  react: { label: "React", icon: "react" },
-  shadcnui: { label: "shadcn/ui", icon: "shadcnui" },
-  signalr: { label: "SignalR", icon: "dotnet" },
-  tailwindcss: { label: "Tailwind CSS", icon: "tailwindcss" },
-  terminalgui: { label: "Terminal.Gui", icon: "windowsterminal" },
-  typescript: { label: "TypeScript", icon: "typescript" },
-} satisfies Record<string, StackItem>;
+import type { Project } from "@/types";
+import { tech } from "./tech";
 
 export const projects: Project[] = [
   {
