@@ -18,24 +18,21 @@ const describe = (p: Project, lang: Lang) =>
   lang === "fr" ? p.descriptionFR ?? p.descriptionEN : p.descriptionEN ?? p.descriptionFR;
 
 function ProjectLinks({ p, lang }: { p: Project; lang: Lang }) {
-  if (p.demo || p.repo || p.caseStudy) {
+  const links = [
+    { href: p.demo, label: "Demo", external: true },
+    { href: p.repo, label: "Repo", external: true },
+    { href: p.caseStudy, label: "Case Study", external: false },
+  ].filter((l): l is { href: string; label: string; external: boolean } => Boolean(l.href));
+  if (links.length > 0) {
     return (
       <div className="flex flex-wrap gap-3">
-        {p.demo && (
-          <a href={p.demo} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm transition hover:bg-white/20">
-            Demo <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+        {links.map((l) => (
+          <a key={l.label} href={l.href} {...(l.external ? { target: "_blank", rel: "noreferrer" } : {})}
+            className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm transition hover:bg-white/20">
+            {l.label}
+            {l.external ? <ExternalLink className="ml-1.5 h-3.5 w-3.5" /> : <LinkIcon className="ml-1.5 h-3.5 w-3.5" />}
           </a>
-        )}
-        {p.repo && (
-          <a href={p.repo} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm transition hover:bg-white/20">
-            Repo <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-          </a>
-        )}
-        {p.caseStudy && (
-          <a href={p.caseStudy} className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm transition hover:bg-white/20">
-            Case Study <LinkIcon className="ml-1.5 h-3.5 w-3.5" />
-          </a>
-        )}
+        ))}
       </div>
     );
   }
