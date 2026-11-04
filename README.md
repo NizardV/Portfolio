@@ -33,7 +33,7 @@ portfolio/
     ├── app/
     │   ├── page.tsx       # page d'accueil
     │   ├── layout.tsx     # métadonnées, providers
-    │   └── api/           # contact (Resend), veille (Notion)
+    │   └── api/contact/   # envoi du formulaire (Resend)
     ├── components/
     │   ├── Portfolio.tsx  # page principale : header, sections, footer
     │   ├── sections/      # Hero, Projets, Expérience, Formation, Compétences, Contact
@@ -78,7 +78,6 @@ Autres commandes : `pnpm build`, `pnpm start`, `pnpm lint`.
 | `RESEND_API_KEY` | clé API Resend pour le formulaire de contact |
 | `MAIL_TO` | adresse qui reçoit les messages |
 | `MAIL_FROM` | expéditeur des mails (domaine vérifié sur Resend) |
-| `NOTION_TOKEN`, `NOTION_DB_ID` | route `/api/veille` (veille technologique depuis une base Notion) |
 
 ## Déploiement
 

@@ -11,8 +11,8 @@ export const educations: Education[] = [
     detailsEN: ["Work-study at CPAM de Côte-d'Or (September 2026 – August 2028)"],
   },
   {
-    diplomaFR: "Bachelor Coordinateur de Projets Informatiques (CPI)",
-    diplomaEN: "Bachelor in IT Project Coordination (CPI)",
+    diplomaFR: "Bachelor Coordinateur de Projets Informatiques (CPI) - Admis",
+    diplomaEN: "Bachelor in IT Project Coordination (CPI) - Passed",
     school: "DIIAGE - CUCDB",
     timeframe: "2025 – 2026",
     location: "Dijon, France",
