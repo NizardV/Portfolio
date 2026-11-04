@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { Menu, X, Github, Linkedin, Mail } from "lucide-react";
 import Image from "next/image";
@@ -12,6 +13,7 @@ import EducationSection from "@/components/sections/EducationSection";
 import SkillsSection from "@/components/sections/SkillsSection";
 import ContactSection from "@/components/sections/ContactSection";
 import { FALLBACK_DICT } from "@/lib/dict";
+import { useKonami } from "@/lib/useKonami";
 import type { Lang, AllDict, Project } from "@/types";
 
 const SECTION_IDS = ["about", "projects", "experience", "education", "skills", "contact"] as const;
@@ -32,6 +34,10 @@ export default function Portfolio() {
   const [showHeader, setShowHeader] = useState(true);
   const lastY = React.useRef(0);
   const t = dict[lang];
+
+  // Easter egg: Konami code opens the 3D hub.
+  const router = useRouter();
+  useKonami(useCallback(() => router.push("/hub"), [router]));
 
   const HEADER_OFFSET = 100;
 
