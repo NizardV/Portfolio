@@ -10,7 +10,6 @@ import HeroSection from "@/components/sections/HeroSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import ExperienceSection from "@/components/sections/ExperienceSection";
 import EducationSection from "@/components/sections/EducationSection";
-import SkillsSection from "@/components/sections/SkillsSection";
 import ContactSection from "@/components/sections/ContactSection";
 import { DICT } from "@/lib/dict";
 import { projects } from "@/data/projects";
@@ -21,7 +20,7 @@ import { SoundProvider, useSound } from "@/lib/sound";
 import { useIdleHeader } from "@/lib/useIdleHeader";
 import type { Lang } from "@/types";
 
-const SECTION_IDS = ["about", "projects", "experience", "education", "skills", "contact"] as const;
+const SECTION_IDS = ["about", "projects", "experience", "education", "contact"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 function SoundToggle({ lang }: { lang: Lang }) {
@@ -181,7 +180,6 @@ function PortfolioPage() {
         <ProjectsSection lang={lang} t={t} projects={projects} />
         <ExperienceSection lang={lang} t={t} />
         <EducationSection lang={lang} t={t} />
-        <SkillsSection lang={lang} t={t} />
         <ContactSection lang={lang} t={t} />
 
         <footer className="border-t border-white/10 mt-12">

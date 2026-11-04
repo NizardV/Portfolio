@@ -36,10 +36,10 @@ portfolio/
     │   └── api/contact/   # envoi du formulaire (Resend)
     ├── components/
     │   ├── Portfolio.tsx  # page principale : header, sections, footer
-    │   ├── sections/      # Hero, Projets, Expérience, Formation, Compétences, Contact
+    │   ├── sections/      # Hero, Projets, Expérience, Formation, Contact
     │   ├── fx/            # effets : hero canvas, cartes lumineuses, frise, apparitions…
     │   └── ui/            # primitives (button, card, badge, toast)
-    ├── data/              # contenu : projets, expériences, formations, compétences
+    ├── data/              # contenu : projets, expériences, formations
     ├── lib/               # textes FR/EN (dict.ts), sons, hooks
     ├── types/             # types partagés
     └── middleware.ts      # CSP
@@ -52,10 +52,9 @@ Tout le contenu est dans le code, typé, à un seul endroit :
 | Contenu | Fichier |
 | --- | --- |
 | Textes de l'interface (hero, à propos, contact…) en FR et EN | `src/lib/dict.ts` |
-| Projets (`personal: true` pour un projet perso) | `src/data/projects.ts` |
-| Expériences | `src/data/experiences.ts` |
+| Projets (`personal: true` pour un projet perso) et leurs technos | `src/data/projects.ts` |
+| Expériences (avec leurs technos en `stack`) | `src/data/experiences.ts` |
 | Formations | `src/data/educations.ts` |
-| Compétences | `src/data/skills.ts` |
 
 ## Lancer en local
 

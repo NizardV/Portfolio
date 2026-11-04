@@ -67,7 +67,7 @@ export const projects: Project[] = [
     descriptionFR: "Plateforme SaaS e-commerce de services cybersécurité, développée en équipe au DIIAGE (Sup de Vinci). Frontend React/TypeScript, API ASP.NET Core, app Android Kotlin/Jetpack Compose. CI/CD Azure DevOps, déploiement Docker sur VPS OVH avec Nginx et SSL.",
     descriptionEN: "SaaS cybersecurity e-commerce platform built as a team at DIIAGE (Sup de Vinci). React/TypeScript frontend, ASP.NET Core API, Kotlin/Jetpack Compose Android app. Azure DevOps CI/CD, Docker deployment on OVH VPS with Nginx and SSL.",
     stack: [tech.react, tech.typescript, tech.aspnetcore, tech.csharp, tech.kotlin, tech.docker, tech.azuredevops],
-    demo: "https://projet-cyna.fr",
+    demo: "https://cyna.nizard.dev",
     repo: "https://github.com/DiiageCUCDB/DI1-P5-E3_Cyna-Web",
   },
   {

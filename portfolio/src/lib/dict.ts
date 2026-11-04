@@ -8,7 +8,6 @@ export const DICT: AllDict = {
       projects: "Projets",
       experience: "Expérience",
       education: "Formation",
-      skills: "Compétences",
       contact: "Contact",
     },
     heroTitle: "Nizard Verdenal",
@@ -21,7 +20,6 @@ export const DICT: AllDict = {
     projectsPersonalTitle: "Projets personnels",
     experienceTitle: "Expérience",
     educationTitle: "Formation",
-    skillsTitle: "Compétences",
     contactTitle: "Contact",
     contactBlurb:
       "Un projet, une question ou simplement envie d'échanger ? Écrivez-moi.",
@@ -34,7 +32,6 @@ export const DICT: AllDict = {
       projects: "Projects",
       experience: "Experience",
       education: "Education",
-      skills: "Skills",
       contact: "Contact",
     },
     heroTitle: "Nizard Verdenal",
@@ -47,7 +44,6 @@ export const DICT: AllDict = {
     projectsPersonalTitle: "Personal projects",
     experienceTitle: "Experience",
     educationTitle: "Education",
-    skillsTitle: "Skills",
     contactTitle: "Contact",
     contactBlurb:
       "Got a project, a question, or just want to chat? Drop a line.",

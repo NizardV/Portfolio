@@ -48,6 +48,12 @@ import {
   SiNodedotjs,
   SiSnowflake,
   SiPowerbi,
+  SiSymfony,
+  SiPodman,
+  SiFastapi,
+  SiVuedotjs,
+  SiLivewire,
+  SiPhpmyadmin,
 } from "react-icons/si";
 
 /* -------------------- Icon maps & helpers -------------------- */
@@ -98,6 +104,12 @@ const iconMap = {
   nodedotjs: SiNodedotjs,
   snowflake: SiSnowflake,
   powerbi: SiPowerbi,
+  symfony: SiSymfony,
+  podman: SiPodman,
+  fastapi: SiFastapi,
+  vuedotjs: SiVuedotjs,
+  livewire: SiLivewire,
+  phpmyadmin: SiPhpmyadmin,
 } as const;
 
 type IconKey = keyof typeof iconMap;
@@ -121,6 +133,11 @@ const iconKeyAlias: Record<string, IconKey> = {
   aspnetcore: "dotnet",
   php: "php",
   laravel: "laravel",
+  symfony: "symfony",
+  livewire: "livewire",
+  vue: "vuedotjs",
+  vuejs: "vuedotjs",
+  fastapi: "fastapi",
   linq: "dotnet",
   efcore: "dotnet",
   terminalgui: "windowsterminal",
@@ -138,9 +155,11 @@ const iconKeyAlias: Record<string, IconKey> = {
   mysql: "mysql",
   mariadb: "mariadb",
   dbeaver: "dbeaver",
+  phpmyadmin: "phpmyadmin",
 
   // DevOps / Infra
   docker: "docker",
+  podman: "podman",
   dockercompose: "docker",
   github: "github",
   gitlab: "gitlab",
