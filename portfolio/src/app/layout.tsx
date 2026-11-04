@@ -6,7 +6,6 @@ import "./globals.css";
 export const metadata = {
   title: "Nizard Verdenal - Portfolio",
   description: "Portfolio",
-  themeColor: "#ffffff",
   icons: {
     icon: [
       { url: "/brand/nv-icon.png", type: "image/png" },
@@ -35,6 +34,8 @@ export const metadata = {
     "Computer Science",
   ],
 };
+
+export const viewport = { themeColor: "#0b1020" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;

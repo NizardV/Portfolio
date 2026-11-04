@@ -1,5 +1,7 @@
 "use client";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import GlowCard from "@/components/fx/GlowCard";
+import Reveal from "@/components/fx/Reveal";
+import SectionTitle from "@/components/fx/SectionTitle";
 import { Server, Layout, Database, Wrench, FlaskConical, Workflow, Hammer, GraduationCap } from "lucide-react";
 import SkillBadge from "@/components/SkillBadge";
 import { skills } from "@/data/skills";
@@ -25,8 +27,8 @@ function getGroupIcon(key?: string): SectionIconType {
 
 export default function SkillsSection({ lang, t }: Props) {
   return (
-    <section id="skills" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.skillsTitle}</h2>
+    <section id="skills" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 md:py-24">
+      <SectionTitle index={4}>{t.skillsTitle}</SectionTitle>
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
         {skills.map((group, i) => {
           const Icon = getGroupIcon(group.icon);
@@ -34,17 +36,17 @@ export default function SkillsSection({ lang, t }: Props) {
             ? group.labelFR ?? group.labelEN ?? group.label
             : group.labelEN ?? group.labelFR ?? group.label;
           return (
-            <Card key={i} className="rounded-2xl border border-white/10 bg-white/[0.08] backdrop-blur-md shadow-lg hover:bg-white/[0.12] transition-colors">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Icon className="w-4 h-4 opacity-80" />
+            <Reveal key={i} delay={(i % 3) * 0.06}>
+              <GlowCard className="h-full p-6">
+                <h3 className="flex items-center gap-2 text-lg font-semibold">
+                  <Icon className="h-4 w-4 text-cyan-300/80" />
                   {label}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                {group.items.map((s, idx) => <SkillBadge key={idx} item={s} />)}
-              </CardContent>
-            </Card>
+                </h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {group.items.map((s, idx) => <SkillBadge key={idx} item={s} />)}
+                </div>
+              </GlowCard>
+            </Reveal>
           );
         })}
       </div>

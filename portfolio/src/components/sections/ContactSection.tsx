@@ -1,16 +1,20 @@
 "use client";
 import Contact from "@/components/Contact";
+import Reveal from "@/components/fx/Reveal";
+import SectionTitle from "@/components/fx/SectionTitle";
 import type { Lang, Dict } from "@/types";
 
 type Props = { lang: Lang; t: Dict };
 
 export default function ContactSection({ lang, t }: Props) {
   return (
-    <section id="contact" className="scroll-mt-24 max-w-6xl mx-auto px-4 py-12 md:py-16">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.contactTitle}</h2>
-      <p className="text-white/70 mb-6">{t.contactBlurb}</p>
-      {/* Contact form — pointe vers /api/contact */}
-      <Contact lang={lang} showTitle={false} />
+    <section id="contact" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 md:py-24">
+      <SectionTitle index={5}>{t.contactTitle}</SectionTitle>
+      <Reveal>
+        <p className="mb-8 text-white/70">{t.contactBlurb}</p>
+        {/* Contact form — posts to /api/contact */}
+        <Contact lang={lang} showTitle={false} />
+      </Reveal>
     </section>
   );
 }

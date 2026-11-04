@@ -85,8 +85,8 @@
     "title": "Portfolio (nizard.dev)",
     "timeframe": "2025 - Today",
     "location": "Dijon, France",
-    "descriptionFR": "Portfolio personnel avec Next.js 15 + React, Tailwind, Framer Motion et shadcn/ui. Identité visuelle alignée LinkedIn, déploiement Vercel. Formulaire de contact branché sur API interne.",
-    "descriptionEN": "Personal portfolio using Next.js 15 + React, Tailwind, Framer Motion and shadcn/ui. Visual identity aligned with LinkedIn, deployed on Vercel. Contact form wired to an internal API.",
+    "descriptionFR": "Portfolio personnel avec Next.js 16 + React, Tailwind, Framer Motion et shadcn/ui. Identité visuelle alignée LinkedIn, déploiement Vercel. Formulaire de contact branché sur API interne.",
+    "descriptionEN": "Personal portfolio using Next.js 16 + React, Tailwind, Framer Motion and shadcn/ui. Visual identity aligned with LinkedIn, deployed on Vercel. Contact form wired to an internal API.",
     "stack": [
       { "label": "Next.js", "icon": "nextdotjs" },
       { "label": "React", "icon": "react" },

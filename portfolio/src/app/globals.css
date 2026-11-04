@@ -97,3 +97,30 @@ body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui rév
   0%, 96%, 98%, 100% { filter: none; }
   97% { filter: drop-shadow(-2px 0 #ff2bd6) drop-shadow(2px 0 #22e5ff); }
 }
+
+/* Cards: light spot that follows the mouse (vars set by GlowCard) */
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 179, 255, 0.10), rgba(168, 85, 247, 0.05) 40%, transparent 70%);
+}
+.glow-card:hover::before { opacity: 1; }
+
+/* Hero name: slow shimmering gradient */
+.hero-name {
+  background: linear-gradient(90deg, #fff 0%, #fff 35%, #67e8f9 50%, #e879f9 60%, #fff 75%, #fff 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-shimmer 7s ease-in-out infinite;
+}
+@keyframes hero-shimmer {
+  0%, 100% { background-position: 100% 0; }
+  50% { background-position: 0% 0; }
+}
