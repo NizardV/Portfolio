@@ -1,0 +1,58 @@
+name: E2E tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only token: the workflow only checks out code and uploads an artifact.
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: portfolio
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: portfolio/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & typecheck
+        run: |
+          pnpm lint
+          pnpm exec tsc --noEmit
+
+      - name: Install browsers (Chromium + WebKit for iPhone)
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      - name: Run tests (desktop, Android, small phone, iPhone/WebKit)
+        run: pnpm test:e2e
+
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: portfolio/playwright-report/
+          retention-days: 14

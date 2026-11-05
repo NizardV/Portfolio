@@ -11,6 +11,10 @@
 html { scroll-behavior: smooth; }
 /* Empêche l'arrière-plan blanc visible lors du sur-défilement (haut/bas) */
 :root, html, body { background-color: #0b1020; }
+/* no grey flash on tap (Android/iOS); focus stays visible via focus-visible styles */
+html { -webkit-tap-highlight-color: transparent; }
+/* no double-tap zoom on controls: iOS Safari otherwise swallows quick repeated taps (e.g. the 5-tap logo) */
+a, button, [role="button"] { touch-action: manipulation; }
 body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui révèle le bg de page */
 
 /* Respect OS prefers-reduced-motion — couvre les transitions non-Framer (scroll, CSS) */
@@ -109,7 +113,15 @@ body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui rév
   transition: opacity 0.3s;
   background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 179, 255, 0.10), rgba(168, 85, 247, 0.05) 40%, transparent 70%);
 }
-.glow-card:hover::before { opacity: 1; }
+@media (hover: hover) {
+  .glow-card:hover::before { opacity: 1; }
+}
+
+/* Overlays (project dialog): enter animations; exits are CSS transitions driven by usePresence */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+.animate-fade-in { animation: fade-in 0.2s ease-out both; }
+.animate-modal-in { animation: modal-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* Hero name: slow shimmering gradient */
 .hero-name {

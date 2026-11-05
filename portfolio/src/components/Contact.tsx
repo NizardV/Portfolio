@@ -28,7 +28,7 @@ export default function Contact({
     // Skeleton placeholder to avoid white flash on hydration
     return (
       <div className="relative max-w-2xl mx-auto">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md shadow-xl animate-pulse h-72" />
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] shadow-xl animate-pulse h-72" />
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function Contact({
       {/* halo subtil pour rappeler tes blobs */}
       <div className="pointer-events-none absolute -inset-x-10 -top-10 h-40 rounded-full blur-3xl opacity-30
                       bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]" />
-      <div className="rounded-2xl border bg-white/5 border-white/10 shadow-xl backdrop-blur-md">
+      <div className="rounded-2xl border bg-white/5 border-white/10 shadow-xl">
         {showTitle && (
           <div className="px-6 pt-6">
             <h2 className="text-2xl md:text-3xl font-bold">{t.title}</h2>

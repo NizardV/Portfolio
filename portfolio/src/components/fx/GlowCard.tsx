@@ -18,7 +18,7 @@ export default function GlowCard({ className, tilt = false, onPointerMove, onPoi
     <div
       ref={ref}
       className={twMerge(
-        "glow-card relative rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md shadow-lg transition-[transform,background-color,border-color] duration-200 hover:border-white/20 hover:bg-white/[0.09]",
+        "glow-card relative rounded-2xl border border-white/10 bg-white/[0.06] shadow-lg transition-[transform,background-color,border-color] duration-200 hover:border-white/20 hover:bg-white/[0.09]",
         tilt && "will-change-transform",
         className,
       )}

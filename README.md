@@ -68,6 +68,24 @@ pnpm dev        # http://localhost:3000
 
 Autres commandes : `pnpm build`, `pnpm start`, `pnpm lint`.
 
+### Tests end-to-end
+
+Tests [Playwright](https://playwright.dev) dans `portfolio/e2e/`, lancés sur le build de production :
+
+```bash
+cd portfolio
+pnpm exec playwright install chromium webkit   # une seule fois
+pnpm test:e2e                                  # ou pnpm test:e2e:ui pour le mode interactif
+```
+
+| Fichier | Contenu |
+| --- | --- |
+| `shared.spec.ts` | tous les appareils : chargement sans erreur, aucun débordement horizontal, header qui ne masque pas la page, langue, fiches projets (ouverture, fermeture, enchaînements rapides, scroll restauré), hub |
+| `mobile.spec.ts` | menu mobile (tap à l'extérieur, scroll, liens, toggles rapides), scroll bloqué derrière une fiche, survol qui ne reste pas collé, taille des zones tactiles, accès au hub par le logo |
+| `desktop.spec.ts` | navigation, barre qui se replie après 30 s d'inactivité, code Konami, préférence de son mémorisée |
+
+Projets : desktop Chrome, Pixel 7, iPhone SE (Chromium) et, en CI, iPhone 13 sous WebKit (moteur de Safari). La CI (`.github/workflows/e2e.yml`) les lance sur chaque PR, avec lint et typecheck.
+
 ### Variables d'environnement
 
 À mettre dans `portfolio/.env.local` (ou dans les réglages du projet Vercel) :
