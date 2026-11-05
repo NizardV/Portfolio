@@ -6,7 +6,7 @@ Salle liminale façon Backrooms où chaque **porte** mène à un **projet perso*
 
 ## Accès
 - Clavier : code Konami ↑↑↓↓←→←→BA n'importe où sur l'accueil (`lib/useKonami.ts`).
-- Tactile : 5 taps sur le logo NV en moins de 2 s (`Portfolio.tsx`, `onLogoTap`).
+- Tactile : 5 taps sur le logo NV en moins de 3 s (`Portfolio.tsx`, `onLogoPointerDown` : compté au pointerdown, Safari peut fusionner des taps rapides).
 - Indice : `components/EggHint.tsx` (footer) + `.egg-logo` (globals.css). Statique et discret sous reduced-motion.
 
 ## Fichiers

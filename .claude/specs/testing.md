@@ -13,7 +13,7 @@
 - Speed Insights renvoie 404 hors Vercel : erreur console ignorée dans `trackErrors`.
 - Le conteneur cloud est lent : un « timeout while setting up context » isolé n'est pas un bug ; relancer le test seul pour confirmer. En CI : `retries: 1`.
 - WebKit mobile n'a pas de `mouse.wheel` : passer par `window.scrollBy` (voir `mobile.spec.ts`).
-- iOS Safari avale les taps rapprochés (double-tap zoom) → `touch-action: manipulation` sur liens/boutons (globals.css).
+- Taps rapides : `locator.tap()` est lent (re-vérifie l'élément) → `page.touchscreen.tap(x, y)` pour les séquences chronométrées ; côté app, compter au `pointerdown` (Safari peut fusionner des taps en double-tap).
 - Quitter `/hub` (démontage WebGL logiciel) peut faire planter le navigateur en CI : le test vérifie seulement le lien retour.
 - WebKit n'est pas installable dans le conteneur cloud : il ne tourne qu'en CI.
 

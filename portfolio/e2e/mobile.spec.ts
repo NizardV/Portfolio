@@ -89,8 +89,9 @@ test.describe("mobile", () => {
 
   test("tapping the logo 5 times opens the hub", async ({ page }) => {
     await gotoHome(page);
-    const logo = page.getByRole("link", { name: "Accueil" });
-    for (let i = 0; i < 5; i++) await logo.tap();
+    // raw taps on the logo's position: locator.tap() re-checks the element each time and is too slow for a 3s window
+    const box = (await page.getByRole("link", { name: "Accueil" }).boundingBox())!;
+    for (let i = 0; i < 5; i++) await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
     await expect(page).toHaveURL(/\/hub$/);
   });
 });

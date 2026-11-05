@@ -53,16 +53,22 @@ function PortfolioPage() {
   const router = useRouter();
   useKonami(useCallback(() => router.push("/hub"), [router]));
 
-  // Touch alternative: tap the header logo 5 times within 2s.
+  // Touch alternative: tap the header logo 5 times within 3s.
+  // Counted on pointerdown: Safari can merge quick taps into a double-tap and drop the clicks.
   const logoTaps = React.useRef<number[]>([]);
-  const onLogoTap = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const hubOpenedAt = React.useRef(0);
+  const onLogoPointerDown = () => {
     const now = Date.now();
-    logoTaps.current = [...logoTaps.current.filter((t) => now - t < 2000), now];
+    logoTaps.current = [...logoTaps.current.filter((t) => now - t < 3000), now];
     if (logoTaps.current.length >= 5) {
       logoTaps.current = [];
-      e.preventDefault(); // otherwise the logo's own link to "/" wins
+      hubOpenedAt.current = now;
       router.push("/hub");
     }
+  };
+  const onLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // the click that follows the 5th tap must not send the logo's own link to "/"
+    if (Date.now() - hubOpenedAt.current < 1000) e.preventDefault();
   };
 
   // Lets end-to-end tests know when the page is interactive.
@@ -133,7 +139,7 @@ function PortfolioPage() {
         {/* The header box itself lets taps through; only the bar and the open menu catch them. */}
         <div className="pointer-events-auto mx-auto max-w-6xl px-6">
           <div className="h-14 mt-2 mb-2 rounded-2xl border border-white/10 bg-[#0a1020] md:bg-[linear-gradient(180deg,rgba(10,16,32,0.85),rgba(10,16,32,0.65))] md:backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.35)] flex items-center justify-between px-4">
-            <Link href="/" onClick={onLogoTap} className="group flex items-center gap-3 shrink-0" aria-label="Accueil">
+            <Link href="/" onPointerDown={onLogoPointerDown} onClick={onLogoClick} className="group flex items-center gap-3 shrink-0" aria-label="Accueil">
               <div className="relative h-8 w-8 md:h-9 md:w-9">
                 <Image src="/brand/nv-icon.png" alt="NV" fill priority sizes="(min-width: 768px) 36px, 32px" className="egg-logo object-contain transition-transform group-hover:scale-110" />
               </div>
