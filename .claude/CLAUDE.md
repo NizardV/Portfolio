@@ -31,6 +31,10 @@ Ce dossier remplace l'historique des conversations : lire ce fichier, puis le sp
 - Branche de travail imposée par la session (`claude/...`). Quand sa PR est mergée, repartir de `origin/main` sur la même branche.
 - Une PR par sujet, description en français (résumé, tests). Surveiller : Vercel (preview), SonarCloud, CodeQL, workflow E2E. Détails : `skills/ship-change`.
 
+## À reprendre (au 2026-11-05)
+- **Audit de sécurité** mis de côté : à reprendre en entier. Point de départ : 69 alertes Dependabot sur `main` (10 critiques, 28 hautes) → une PR de mise à jour des dépendances (vérifier build + `pnpm test:e2e`).
+- **Vigil** va être refait : porte du hub en attente (voir `decisions.md`). Le repo Vigil n'est pas dans ce repo, l'ajouter à la session si besoin.
+
 ## Liens
 - Prod : https://nizard.dev — Hub secret : https://nizard.dev/hub
 - Notion (Personal OS) : fiche « Hub nizard.dev » et « Refonte nizard.dev » (backlog à jour).
