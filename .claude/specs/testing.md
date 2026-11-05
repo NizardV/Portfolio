@@ -11,7 +11,11 @@
 - Fausse horloge : l'installer **après** l'hydratation (`html[data-hydrated]`) et utiliser `clock.fastForward`, jamais `runFor` (rejoue chaque frame du canvas).
 - WebGL sans GPU : lancer Chromium avec SwiftShader (`chromiumGL` dans la config), sinon `/hub` sature le thread principal.
 - Speed Insights renvoie 404 hors Vercel : erreur console ignorée dans `trackErrors`.
-- Le conteneur cloud est lent : un « timeout while setting up context » isolé n'est pas un bug ; relancer le test seul pour confirmer.
+- Le conteneur cloud est lent : un « timeout while setting up context » isolé n'est pas un bug ; relancer le test seul pour confirmer. En CI : `retries: 1`.
+- WebKit mobile n'a pas de `mouse.wheel` : passer par `window.scrollBy` (voir `mobile.spec.ts`).
+- iOS Safari avale les taps rapprochés (double-tap zoom) → `touch-action: manipulation` sur liens/boutons (globals.css).
+- Quitter `/hub` (démontage WebGL logiciel) peut faire planter le navigateur en CI : le test vérifie seulement le lien retour.
+- WebKit n'est pas installable dans le conteneur cloud : il ne tourne qu'en CI.
 
 ## Non-régressions couvertes
 Fiche bloquée après ouvertures/fermetures rapides · page qui glisse sur le côté (éléments fixes compris) ·

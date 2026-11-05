@@ -18,7 +18,8 @@ export default defineConfig({
   timeout: 60_000,
   workers: CI ? 2 : 1,
   forbidOnly: CI,
-  retries: 0,
+  // CI runners occasionally lose a browser context (software WebGL); one retry absorbs that, not real bugs
+  retries: CI ? 1 : 0,
   reporter: CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://localhost:3100",

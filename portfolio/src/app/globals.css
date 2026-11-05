@@ -13,6 +13,8 @@ html { scroll-behavior: smooth; }
 :root, html, body { background-color: #0b1020; }
 /* no grey flash on tap (Android/iOS); focus stays visible via focus-visible styles */
 html { -webkit-tap-highlight-color: transparent; }
+/* no double-tap zoom on controls: iOS Safari otherwise swallows quick repeated taps (e.g. the 5-tap logo) */
+a, button, [role="button"] { touch-action: manipulation; }
 body { overscroll-behavior-y: none; }   /* évite l'effet "glow/bounce" qui révèle le bg de page */
 
 /* Respect OS prefers-reduced-motion — couvre les transitions non-Framer (scroll, CSS) */

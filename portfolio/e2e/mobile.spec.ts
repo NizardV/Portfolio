@@ -55,12 +55,14 @@ test.describe("mobile", () => {
     await expect(page.locator("header")).not.toHaveClass(/-translate-y-full/);
   });
 
-  test("page behind the project dialog does not scroll", async ({ page }) => {
+  test("page behind the project dialog does not scroll", async ({ page, browserName }) => {
     await gotoHome(page);
     await openFirstProject(page);
     await expect(page.locator("body")).toHaveCSS("position", "fixed");
     const before = await scrollY(page);
-    await page.mouse.wheel(0, 800);
+    // mobile WebKit has no mouse wheel: try a programmatic scroll there instead
+    if (browserName === "webkit") await page.evaluate(() => window.scrollBy(0, 800));
+    else await page.mouse.wheel(0, 800);
     await page.waitForTimeout(300);
     expect(await scrollY(page)).toBe(before);
   });
