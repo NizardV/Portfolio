@@ -12,3 +12,4 @@ Format : date · décision · pourquoi. Ajouter en bas, ne pas réécrire l'hist
 - **2026-11-04 · Suppressions** : bouton CV (non maintenu, liens cassés), section Compétences (les technos sont des badges sur projets et expériences), route `/api/veille` (Vigil la remplacera dans le hub).
 - **2026-11-05 · Overlays sans `AnimatePresence`** (exit bloqué observé) → `usePresence` + CSS. Menu mobile toujours monté, positionné en absolu sous la barre.
 - **2026-11-05 · Tests end-to-end Playwright** sur le build de production, desktop + Android + petit iPhone (Chromium) + iPhone WebKit en CI.
+- **2026-11-05 · Porte Vigil en attente.** L'utilisateur reprend Vigil (l'outil ne lui convient pas tel quel) : ne pas construire la porte du hub sur la version actuelle.

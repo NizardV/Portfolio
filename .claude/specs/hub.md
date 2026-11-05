@@ -18,7 +18,7 @@ Salle liminale façon Backrooms où chaque **porte** mène à un **projet perso*
 ## Portes
 | Porte | Idée | État |
 | --- | --- | --- |
-| 🟩 Vigil | salle de contrôle, stats live (remplacera l'ancienne route veille) | à faire, **prioritaire** |
+| 🟩 Vigil | salle de contrôle, stats live (remplacera l'ancienne route veille) | **en attente** : Vigil va être refait, ne pas construire la porte avant |
 | 🟨 Backrooms | teaser jouable (1-2 couloirs) + bouton « Jouer sur Roblox » | à faire |
 | 🟪 Blindtest | mini blindtest de 3 extraits | idée (projet pas encore commencé) |
 | 🟦 Infra | état du VPS en direct, salle serveur | à faire |
