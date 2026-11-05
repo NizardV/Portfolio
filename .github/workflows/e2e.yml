@@ -1,0 +1,52 @@
+name: E2E tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: portfolio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: portfolio/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & typecheck
+        run: |
+          pnpm lint
+          pnpm exec tsc --noEmit
+
+      - name: Install browsers (Chromium + WebKit for iPhone)
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      - name: Run tests (desktop, Android, small phone, iPhone/WebKit)
+        run: pnpm test:e2e
+
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: portfolio/playwright-report/
+          retention-days: 14

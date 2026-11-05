@@ -20,10 +20,8 @@ const item = {
 export default function HeroSection({ lang, t, scrollToId }: Props) {
   return (
     <section id="about" className="relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden">
+      {/* faded with a mask (not a coloured overlay) so it blends into any page background, no seam */}
       <HeroCanvas />
-      {/* fade the particle field into the page */}
-      <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0b1020_85%)]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#0b1020]" />
 
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-5">
         <div className="space-y-6 md:col-span-3">

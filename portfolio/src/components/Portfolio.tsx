@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { Menu, X, Github, Linkedin, Mail, Volume2, VolumeX } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,7 +46,7 @@ function PortfolioPage() {
   const [lang, setLang] = useState<Lang>("fr");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeId, setActiveId] = useState<SectionId>("about");
-  const { visible: showHeader, show: showHeaderNow, headerProps } = useIdleHeader(30_000);
+  const { visible: showHeader, show: showHeaderNow, headerProps } = useIdleHeader(30_000, isMenuOpen);
   const t = DICT[lang];
 
   // Easter egg: Konami code opens the 3D hub.
@@ -64,6 +64,20 @@ function PortfolioPage() {
       router.push("/hub");
     }
   };
+
+  // Lets end-to-end tests know when the page is interactive.
+  useEffect(() => { document.documentElement.dataset.hydrated = "true"; }, []);
+
+  // Mobile menu: close on Escape or as soon as the page scrolls (it would float over the content otherwise).
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const startY = window.scrollY;
+    const onScroll = () => { if (Math.abs(window.scrollY - startY) > 40) setIsMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setIsMenuOpen(false); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("keydown", onKey); };
+  }, [isMenuOpen]);
 
   const HEADER_OFFSET = 100;
 
@@ -101,9 +115,24 @@ function PortfolioPage() {
       <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(0,179,255,0.35),transparent_70%)]" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl bg-[radial-gradient(closest-side,rgba(168,85,247,0.25),transparent_70%)]" />
 
-      <header {...headerProps} className={`fixed top-0 left-0 right-0 z-40 transition-transform duration-500 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="h-14 mt-2 mb-2 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,32,0.85),rgba(10,16,32,0.65))] backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.35)] flex items-center justify-between px-4">
+      {/* Mobile menu backdrop: dims the page, tap to close. Outside the header,
+          whose transform would otherwise make it the containing block. */}
+      {/* Always mounted and toggled with CSS: nothing can get stuck half-closed. */}
+      <button
+        type="button"
+        aria-label={lang === "fr" ? "Fermer le menu" : "Close menu"}
+        aria-hidden={!isMenuOpen}
+        tabIndex={-1}
+        data-sound="close"
+        data-no-hover
+        onClick={() => setIsMenuOpen(false)}
+        className={`fixed inset-0 z-30 cursor-default bg-black/60 transition-[opacity,visibility] duration-200 md:hidden ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0"}`}
+      />
+
+      <header {...headerProps} className={`pointer-events-none fixed top-0 left-0 right-0 z-40 transition-transform duration-500 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
+        {/* The header box itself lets taps through; only the bar and the open menu catch them. */}
+        <div className="pointer-events-auto mx-auto max-w-6xl px-6">
+          <div className="h-14 mt-2 mb-2 rounded-2xl border border-white/10 bg-[#0a1020] md:bg-[linear-gradient(180deg,rgba(10,16,32,0.85),rgba(10,16,32,0.65))] md:backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.35)] flex items-center justify-between px-4">
             <Link href="/" onClick={onLogoTap} className="group flex items-center gap-3 shrink-0" aria-label="Accueil">
               <div className="relative h-8 w-8 md:h-9 md:w-9">
                 <Image src="/brand/nv-icon.png" alt="NV" fill priority sizes="(min-width: 768px) 36px, 32px" className="egg-logo object-contain transition-transform group-hover:scale-110" />
@@ -142,7 +171,9 @@ function PortfolioPage() {
                 onClick={() => setIsMenuOpen((v) => !v)}
                 data-sound={isMenuOpen ? "close" : "open"}
                 className="md:hidden p-2 rounded-md hover:bg-white/10 focus:outline-none text-white"
-                aria-label="Ouvrir le menu"
+                aria-label={isMenuOpen ? (lang === "fr" ? "Fermer le menu" : "Close menu") : (lang === "fr" ? "Ouvrir le menu" : "Open menu")}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -150,14 +181,11 @@ function PortfolioPage() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-              className="md:hidden relative mx-3 mt-2 rounded-2xl border border-white/10 bg-gradient-to-br from-[#0b1020]/70 via-[#12192f]/60 to-[#1c1230]/50 backdrop-blur-xl shadow-[0_0_25px_rgba(0,0,0,0.5)] flex flex-col text-center py-4 space-y-1 overflow-hidden"
+        <nav
+              id="mobile-menu"
+              aria-hidden={!isMenuOpen}
+              inert={!isMenuOpen}
+              className={`transition-[opacity,transform,visibility] duration-200 ${isMenuOpen ? "pointer-events-auto visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0"} md:hidden absolute inset-x-3 top-full rounded-2xl border border-white/10 bg-gradient-to-br from-[#0b1020] via-[#12192f] to-[#1c1230] shadow-[0_0_25px_rgba(0,0,0,0.5)] flex flex-col text-center py-4 space-y-1 overflow-hidden`}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,179,255,0.25),transparent_70%)] opacity-40 pointer-events-none" />
               {SECTION_IDS.map((id) => (
@@ -169,9 +197,7 @@ function PortfolioPage() {
               <div className="flex justify-center pt-1">
                 <LangToggle lang={lang} onChange={setLang} />
               </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
+        </nav>
       </header>
 
       <main className="pt-16">

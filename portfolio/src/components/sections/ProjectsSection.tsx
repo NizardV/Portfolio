@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Link as LinkIcon, MapPin, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import SkillBadge from "@/components/SkillBadge";
@@ -8,6 +7,8 @@ import GlowCard from "@/components/fx/GlowCard";
 import Reveal from "@/components/fx/Reveal";
 import SectionTitle from "@/components/fx/SectionTitle";
 import { useSound } from "@/lib/sound";
+import { useScrollLock } from "@/lib/useScrollLock";
+import { usePresence } from "@/lib/usePresence";
 import type { Lang, Dict, Project } from "@/types";
 
 type Props = { lang: Lang; t: Dict; projects: Project[] };
@@ -80,30 +81,27 @@ function ProjectCard({ p, lang, onOpen }: { p: Project; lang: Lang; onOpen: () =
   );
 }
 
-function ProjectModal({ p, lang, onClose, onEscape }: { p: Project; lang: Lang; onClose: () => void; onEscape: () => void }) {
+type ModalProps = { p: Project; lang: Lang; leaving: boolean; onClose: () => void; onEscape: () => void };
+
+function ProjectModal({ p, lang, leaving, onClose, onEscape }: ModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  useScrollLock(true);
 
   useEffect(() => {
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onEscape(); };
     window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+    return () => window.removeEventListener("keydown", onKey);
   }, [onEscape]);
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <button type="button" data-sound="close" data-no-hover aria-label={lang === "fr" ? "Fermer" : "Close"} onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm" />
-      <motion.div
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${leaving ? "pointer-events-none opacity-0" : "animate-fade-in"}`}>
+      <button type="button" data-sound="close" data-no-hover aria-label={lang === "fr" ? "Fermer" : "Close"} onClick={onClose} className="absolute inset-0 cursor-default bg-black/75 md:bg-black/70 md:backdrop-blur-sm" />
+      <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
-        initial={{ opacity: 0, y: 24, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/15 bg-[#0f1528] p-6 shadow-[0_0_60px_rgba(0,179,255,0.15)] md:p-8"
+        className={`relative transition duration-200 ${leaving ? "translate-y-4 scale-[0.98]" : "animate-modal-in"} max-h-[85svh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-white/15 bg-[#0f1528] p-6 shadow-[0_0_60px_rgba(0,179,255,0.15)] md:p-8`}
       >
         <button ref={closeRef} type="button" data-sound="close" onClick={onClose} aria-label={lang === "fr" ? "Fermer" : "Close"}
           className="absolute right-4 top-4 rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white">
@@ -126,13 +124,14 @@ function ProjectModal({ p, lang, onClose, onEscape }: { p: Project; lang: Lang; 
           </>
         )}
         <div className="mt-7"><ProjectLinks p={p} lang={lang} /></div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
 export default function ProjectsSection({ lang, t, projects }: Props) {
   const [open, setOpen] = useState<Project | null>(null);
+  const { shown, leaving } = usePresence(open);
   const { play } = useSound();
   const schoolProjects = projects.filter((p) => !p.personal);
   const personalProjects = projects.filter((p) => p.personal);
@@ -168,9 +167,7 @@ export default function ProjectsSection({ lang, t, projects }: Props) {
         </div>
       )}
 
-      <AnimatePresence>
-        {open && <ProjectModal key={open.title} p={open} lang={lang} onClose={close} onEscape={closeWithKey} />}
-      </AnimatePresence>
+      {shown && <ProjectModal key={shown.title} p={shown} lang={lang} leaving={leaving} onClose={close} onEscape={closeWithKey} />}
     </section>
   );
 }

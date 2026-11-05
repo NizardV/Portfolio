@@ -115,5 +115,11 @@ export default function HeroCanvas() {
     };
   }, []);
 
-  return <canvas ref={ref} aria-hidden="true" className="absolute inset-0 h-full w-full" />;
+  return (
+    <canvas
+      ref={ref}
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_78%)] [-webkit-mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_78%)]"
+    />
+  );
 }
