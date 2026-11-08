@@ -117,6 +117,7 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
                   ))}
                 </div>
               </Row>
+              <Toggle label="Filtre de rêve (grain, couleurs)" checked={settings.filter} onChange={(filter) => onSettings({ filter })} />
               <Toggle label="Balancement de la marche" checked={headBob} onChange={(headBob) => onSettings({ headBob })} />
               {fullscreen.available && fullscreen.mode !== "browser" && (
                 <Toggle label="Plein écran" checked={fullscreen.mode === "page"} onChange={fullscreen.toggle} />
@@ -147,7 +148,7 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
               <p className="mt-3 text-xs leading-relaxed text-white/50">
                 {touch
                   ? "Joystick à gauche pour marcher (poussé à fond : courir), glisse à droite pour regarder."
-                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · Tab ou Échap : ouvrir / fermer le menu."}
+                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · E ou clic : utiliser · Tab ou Échap : ouvrir / fermer le menu."}
               </p>
             </>
           )}

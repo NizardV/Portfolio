@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { loadJSON, saveJSON } from "./env";
 
 /** Player preferences, remembered in the browser (silently in-memory only if storage is blocked). */
@@ -12,6 +12,8 @@ export type Settings = {
   invertY: boolean;
   /** null = follow the system « reduce motion » setting; true/false = the player's explicit choice */
   headBob: boolean | null;
+  /** light « dream » grade: grain, softer colours, vignette */
+  filter: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -21,6 +23,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sensitivity: 1,
   invertY: false,
   headBob: null,
+  filter: true,
 };
 
 const STORE = "hub-v2-settings";
@@ -30,6 +33,17 @@ export function useSettings() {
   useEffect(() => saveJSON(STORE, settings), [settings]);
   const update = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
   return [settings, update] as const;
+}
+
+/** True when WebGL runs on the CPU (SwiftShader, llvmpipe…): every effect costs a lot there. */
+export function isSoftwareRenderer(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
+  try {
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+    return /swiftshader|llvmpipe|software|basic render/i.test(name);
+  } catch {
+    return false;
+  }
 }
 
 /** Canvas pixel ratio range for a quality level: phones stay lighter on « auto ». */
@@ -91,4 +105,18 @@ export function toggleFullscreen() {
   } catch {
     /* refused by the browser: nothing to do */
   }
+}
+
+/* ---------- quality seen by the scenes (grass density, later shadows and effects) ---------- */
+
+/** weak = no real GPU (software rendering): « auto » then behaves like « low ». */
+export type QualityLevel = { quality: Quality; touch: boolean; weak: boolean };
+export const QualityContext = createContext<QualityLevel>({ quality: "auto", touch: false, weak: false });
+export const useQuality = () => useContext(QualityContext);
+
+/** Pick a value per quality level; « auto » means the lighter one on phones. */
+export function byQuality<T>({ quality, touch, weak }: QualityLevel, values: { low: T; phone: T; desktop: T; high: T }): T {
+  if (quality === "low" || (quality === "auto" && weak)) return values.low;
+  if (quality === "high") return values.high;
+  return touch ? values.phone : values.desktop;
 }

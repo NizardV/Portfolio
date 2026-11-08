@@ -102,10 +102,10 @@ test.describe("page (all devices)", () => {
   test("hub v2: first-person world and places menu", async ({ page }) => {
     await page.goto("/hub/v2");
     await expect(page.locator("canvas")).toBeVisible({ timeout: 30_000 });
-    await page.getByRole("button", { name: "MENU" }).click();
+    await page.getByRole("button", { name: /^MENU/ }).click();
     const menu = page.getByRole("dialog", { name: "Menu" });
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole("button", { name: /Prairie \(essai\)/ })).toBeVisible();
+    await expect(menu.getByRole("button", { name: /La prairie/ })).toBeVisible();
     await expect(menu.getByText("???")).toBeVisible(); // the room is not found yet
     await expect(menu.getByRole("link", { name: /SE RÉVEILLER/ })).toHaveAttribute("href", "/");
     for (const [tab, setting] of [["Graphismes", "Balancement de la marche"], ["Audio", "Volume"], ["Contrôles", "Sensibilité"]]) {
