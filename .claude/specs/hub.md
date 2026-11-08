@@ -48,7 +48,7 @@ Code : `components/hub/world/`
 - **Prairie** (`scenes/meadow/`) : relief = `terrain.ts` (fonction TS + même formule en GLSL, utilisée par le sol,
   le joueur et l'herbe) ; herbe instanciée qui suit le joueur (vertex shader) ; ciel en dégradé + cumulus en sprites ;
   densité selon la qualité (`byQuality`, `QualityContext`). Sans GPU (SwiftShader…), « Auto » = Basse.
-  Herbe en 2 couches (proche dense / lointaine clairsemée) en fondu. Ciel : direction normalisée PAR PIXEL.
+  Herbe en 3 couches en fondu (proche animée ~30 m, moyenne la plus dense ~70 m, lointaine peu animée ~135 m). Ciel : direction normalisée PAR PIXEL.
 - Interactions : `Zone.interactables` (E, clic, bouton mobile) ; `blocker` = mur tant que non utilisé ;
   `Portal.requires` / `opens`. État partagé avec les scènes via `state.ts` (`used`). Sons : `audio.ts`
   (rafales, oiseaux, pas selon `Zone.floor`, grincement). Filtre de rêve : `DreamFilter.tsx` (coupé en Basse).

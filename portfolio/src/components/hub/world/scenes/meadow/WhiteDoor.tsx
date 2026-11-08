@@ -12,7 +12,7 @@ const POST = 0.14;
 const SINK = 0.4; // the frame goes into the ground: it never floats on the slope
 const PAINT = "#f7f6f0";
 const WARM = "#ffe6bd"; // light from the other side: the hotel hall
-const OPEN_ANGLE = 1.45; // radians, swung away from the meadow
+const OPEN_ANGLE = -1.45; // radians: swings towards the player, like pulling it open
 
 /** A soft dark blot under the door, so it sits on the grass instead of hovering. */
 function useShadowTexture() {
