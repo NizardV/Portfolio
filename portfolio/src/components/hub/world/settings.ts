@@ -12,6 +12,8 @@ export type Settings = {
   invertY: boolean;
   /** null = follow the system « reduce motion » setting; true/false = the player's explicit choice */
   headBob: boolean | null;
+  /** light « dream » grade: grain, softer colours, vignette */
+  filter: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -21,6 +23,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sensitivity: 1,
   invertY: false,
   headBob: null,
+  filter: true,
 };
 
 const STORE = "hub-v2-settings";

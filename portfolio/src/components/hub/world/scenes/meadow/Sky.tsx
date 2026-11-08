@@ -23,10 +23,11 @@ uniform vec3 uSun;
 varying vec3 vDir;
 #include <common>
 void main() {
-  float h = max(vDir.y, 0.0);
+  vec3 dir = normalize(vDir); // per pixel: interpolated directions drew the sphere's facets around the sun
+  float h = max(dir.y, 0.0);
   vec3 c = mix(uHorizon, uMid, smoothstep(0.0, 0.18, h));
   c = mix(c, uZenith, smoothstep(0.18, 0.85, h));
-  float sun = max(dot(vDir, normalize(uSun)), 0.0);
+  float sun = max(dot(dir, normalize(uSun)), 0.0);
   c += vec3(1.0, 0.97, 0.88) * (pow(sun, 600.0) * 3.0 + pow(sun, 12.0) * 0.18); // sun disc + glow
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
