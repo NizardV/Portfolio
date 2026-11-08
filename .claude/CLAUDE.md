@@ -33,7 +33,7 @@ Ce dossier remplace l'historique des conversations : lire ce fichier, puis le sp
 
 ## À reprendre (au 2026-11-05)
 - **Audit de sécurité** mis de côté : à reprendre en entier. Point de départ : 69 alertes Dependabot sur `main` (10 critiques, 28 hautes) → une PR de mise à jour des dépendances (vérifier build + `pnpm test:e2e`).
-- **Hub v2** (2026-11-08) : refonte en monde liminal à la première personne, voir `specs/hub.md` et `decisions.md`. Prochaine étape : PR 1 (fondations). Le nouveau Vigil est en prod (repo `NizardV/vigil-app`, pas dans ce repo).
+- **Hub** (2026-11-08) : monde liminal à la première personne en prod sur `/hub` (prairie → salle jaune). Prochaine étape : le hall d'hôtel, puis les branches (voir `specs/hub.md` et Notion). Le nouveau Vigil est en prod (repo `NizardV/vigil-app`, pas dans ce repo).
 
 ## Liens
 - Prod : https://nizard.dev — Hub secret : https://nizard.dev/hub

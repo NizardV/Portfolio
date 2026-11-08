@@ -5,7 +5,7 @@
  */
 export type AmbienceId = "wind" | "hum" | "none";
 export type Surface = "grass" | "hard";
-export type Sfx = "door-open";
+export type Sfx = "door-open" | "door-locked";
 
 const MAX_VOLUME = 0.35; // « 100 % » stays a background level
 const CROSSFADE = 1.5; // seconds
@@ -200,8 +200,27 @@ export class Ambience {
   /** One-shot effects. */
   sfx(name: Sfx) {
     const { ctx, master, noise } = this;
-    if (!ctx || !master || !noise || name !== "door-open") return;
+    if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
+    if (name === "door-locked") {
+      // the handle turns, the latch knocks against the strike plate a few times
+      for (let i = 0; i < 3; i++) {
+        const at = t + i * rand(0.09, 0.13);
+        const knock = ctx.createBufferSource();
+        knock.buffer = noise.white;
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = rand(500, 800);
+        bp.Q.value = 2;
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(0.0001, at);
+        env.gain.exponentialRampToValueAtTime(0.35, at + 0.005);
+        env.gain.exponentialRampToValueAtTime(0.0001, at + 0.07);
+        knock.connect(bp).connect(env).connect(master);
+        knock.start(at, rand(0, NOISE_SECONDS - 1), 0.1);
+      }
+      return;
+    }
     // latch click
     const click = ctx.createBufferSource();
     click.buffer = noise.white;
