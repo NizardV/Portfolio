@@ -72,7 +72,8 @@ export default function Player({ zone, spawn, controls, paused, touch, sensitivi
     s.phase += walking ? dt * (move.run ? 11 : 8) : 0;
     s.bob = MathUtils.damp(s.bob, walking && bob ? 1 : 0, 6, dt);
     const sway = Math.sin(s.phase / 2) * SWAY * s.bob;
-    camera.position.set(s.x + cos * sway, EYE - Math.abs(Math.sin(s.phase / 2)) * BOB * s.bob, s.z - sin * sway);
+    const floor = zone.ground?.(s.x, s.z) ?? 0;
+    camera.position.set(s.x + cos * sway, floor + EYE - Math.abs(Math.sin(s.phase / 2)) * BOB * s.bob, s.z - sin * sway);
     camera.rotation.set(s.pitch, s.yaw, 0);
 
     if (!s.gone) {

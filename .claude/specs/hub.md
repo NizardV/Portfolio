@@ -45,6 +45,9 @@ Code : `components/hub/world/`
 - `Player.tsx` (1re personne, collisions cercle/boîtes de `collision.ts`), `input.ts` (`KeyboardEvent.code` :
   ZQSD et WASD), `TouchControls.tsx` (joystick + glisser), `audio.ts` (ambiances Web Audio synthétisées),
   `Fallback.tsx` (sans WebGL), `env.ts` (reduced motion, tactile, localStorage protégé).
+- **Prairie** (`scenes/meadow/`) : relief = `terrain.ts` (fonction TS + même formule en GLSL, utilisée par le sol,
+  le joueur et l'herbe) ; herbe instanciée qui suit le joueur (vertex shader) ; ciel en dégradé + cumulus en sprites ;
+  densité selon la qualité (`byQuality`, `QualityContext`). Sans GPU (SwiftShader…), « Auto » = Basse.
 - Piège : dans une scène, `<color attach="background">` / `<fog>` doivent être enfants directs de la scène
   (pas d'un `<group>`), sinon ils s'attachent au groupe et le ciel reste noir.
 

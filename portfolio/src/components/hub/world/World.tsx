@@ -1,9 +1,9 @@
 "use client";
-import { Fragment, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Ambience } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
-import { canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
+import { QualityContext, isSoftwareRenderer, canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
 import { createControls, useKeyboard } from "./input";
 import GameMenu from "./GameMenu";
@@ -65,9 +65,12 @@ export default function World() {
   const [fullscreen, setFullscreen] = useState<ReturnType<typeof fullscreenMode>>(null);
   const [fsAvailable] = useState(canFullscreen);
   const [hint, setHint] = useState(true);
+  const [waking, setWaking] = useState(true);
   const touch = useTouch();
   const reducedMotion = useReducedMotion();
   const discovered = useDiscovered(arrival.zone);
+  const [weak, setWeak] = useState(false);
+  const quality = useMemo(() => ({ quality: settings.quality, touch, weak }), [settings.quality, touch, weak]);
   const headBob = settings.headBob ?? !reducedMotion; // an explicit choice wins over the system setting
   const zone = ZONES[arrival.zone];
 
@@ -121,6 +124,7 @@ export default function World() {
   const onReady = useCallback(() => {
     travelling.current = false;
     setVeil((v) => ({ ...v, opaque: false }));
+    setTimeout(() => setWaking(false), 400); // eyes adjusting: the blur clears after the first fade
   }, []);
   const onMove = useCallback(() => setHint(false), []);
 
@@ -193,11 +197,17 @@ export default function World() {
     <div className="absolute inset-0">
       <Canvas
         ref={canvas}
+        style={{
+          filter: waking && !reducedMotion ? "blur(10px)" : "none",
+          transition: reducedMotion ? undefined : "filter 2.6s ease-out",
+        }}
         camera={{ fov: 70, near: 0.05, far: 600 }}
-        dpr={pixelRatio(settings.quality, touch)}
+        dpr={pixelRatio(weak && settings.quality === "auto" ? "low" : settings.quality, touch)}
+        onCreated={({ gl }) => setWeak(isSoftwareRenderer(gl.getContext()))}
         onClick={() => !menu && lock()}
         aria-label={`Rêve à la première personne : ${zone.name}`}
       >
+        <QualityContext.Provider value={quality}>
         <Suspense fallback={null}>
           {/* Fragment, not group: the scene's <color>/<fog> must attach to the three.js scene itself */}
           <Fragment key={arrival.n}>
@@ -205,6 +215,7 @@ export default function World() {
             <Ready onReady={onReady} />
           </Fragment>
         </Suspense>
+        </QualityContext.Provider>
         <Player
           key={arrival.n}
           zone={zone}

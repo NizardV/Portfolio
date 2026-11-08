@@ -1,12 +1,13 @@
 import { box, type Box } from "./collision";
 import type { AmbienceId } from "./audio";
+import { MEADOW_DOOR, meadowHeight } from "./terrain";
 
 /**
  * The world's map: each zone is a separate scene loaded on demand (see scenes/index.ts).
  * Collisions and portals live here, as data, so movement never depends on a scene's meshes having loaded.
- * PR 1 ships two test zones only; the real places (meadow, hotel, offices…) replace them one PR at a time.
+ * The real places replace the test room one PR at a time (hotel, offices…).
  */
-export type ZoneId = "test-meadow" | "test-room";
+export type ZoneId = "meadow" | "test-room";
 
 /** Where the player stands and looks (yaw 0 = looking towards -Z, π = towards +Z). */
 export type Spawn = { x: number; z: number; yaw: number };
@@ -30,13 +31,14 @@ export type Zone = {
   colliders: readonly Box[];
   portals: readonly Portal[];
   ambience: AmbienceId;
+  /** ground height under the player (default: flat floor at 0) */
+  ground?: (x: number, z: number) => number;
 };
 
-/* ---------- test meadow: open field, a lone white door, a few rocks to bump into ---------- */
+/* ---------- the meadow: where the dream starts. Open hills, a lone white door ---------- */
 
-export const MEADOW_DOOR_Z = -12;
-export const MEADOW_ROCKS: readonly Box[] = [box(-6, -4, 2, 1.6), box(7, -9, 1.4, 2.4), box(4, 3, 1.2, 1.2)];
-const MEADOW_LIMIT = 60; // invisible edge: hills beyond it are scenery only
+const MEADOW_DOOR_Z = MEADOW_DOOR.z;
+const MEADOW_LIMIT = 70; // invisible edge: the hills beyond it are scenery only
 const MEADOW_EDGES = [
   box(0, -MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(0, MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
@@ -62,12 +64,14 @@ export const ROOM_PILLARS: readonly Box[] = [box(-3, -1.5, 0.6, 0.6), box(3, -1.
 const ROOM_DOOR_BACK = box(0, ROOM.halfDepth + WALL + 0.3, ROOM_DOOR.width + 0.6, 0.2); // nothing beyond the light
 
 export const ZONES: Record<ZoneId, Zone> = {
-  "test-meadow": {
-    id: "test-meadow",
-    name: "Prairie (essai)",
-    description: "Collines à perte de vue et une porte blanche posée au milieu de nulle part.",
-    spawn: { x: 0, z: 8, yaw: 0 },
-    colliders: [...MEADOW_ROCKS, ...MEADOW_EDGES, ...MEADOW_DOOR_POSTS],
+  meadow: {
+    id: "meadow",
+    name: "La prairie",
+    description: "Des collines vertes à perte de vue, le vent dans l'herbe, et une porte blanche posée au milieu de nulle part.",
+    // a little off-axis, facing the door 35 m away: it is the only landmark
+    spawn: { x: 6, z: 22, yaw: 0.175 },
+    colliders: [...MEADOW_EDGES, ...MEADOW_DOOR_POSTS],
+    ground: meadowHeight,
     portals: [
       {
         box: { minX: -0.6, maxX: 0.6, minZ: MEADOW_DOOR_Z - 0.15, maxZ: MEADOW_DOOR_Z + 0.15 },
@@ -86,7 +90,7 @@ export const ZONES: Record<ZoneId, Zone> = {
     portals: [
       {
         box: { minX: -ROOM_DOOR.width / 2, maxX: ROOM_DOOR.width / 2, minZ: ROOM.halfDepth + 0.05, maxZ: ROOM.halfDepth + WALL + 0.5 },
-        to: "test-meadow",
+        to: "meadow",
         arrive: { x: 0, z: MEADOW_DOOR_Z + 1.2, yaw: Math.PI },
         veil: "#ffffff",
       },
@@ -96,5 +100,5 @@ export const ZONES: Record<ZoneId, Zone> = {
 };
 
 /** Menu order, and where the dream starts. */
-export const ZONE_ORDER: readonly ZoneId[] = ["test-meadow", "test-room"];
-export const START_ZONE: ZoneId = "test-meadow";
+export const ZONE_ORDER: readonly ZoneId[] = ["meadow", "test-room"];
+export const START_ZONE: ZoneId = "meadow";
