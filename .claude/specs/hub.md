@@ -18,10 +18,28 @@ Salle liminale façon Backrooms où chaque **porte** mène à un **projet perso*
 ## Portes
 | Porte | Idée | État |
 | --- | --- | --- |
-| 🟩 Vigil | salle de contrôle, stats live (remplacera l'ancienne route veille) | **en attente** : Vigil va être refait, ne pas construire la porte avant |
+| 🟩 Vigil | salle de contrôle, stats live (remplacera l'ancienne route veille) | à faire : nouveau Vigil en prod (vigil.nizard.dev) |
 | 🟨 Backrooms | teaser jouable (1-2 couloirs) + bouton « Jouer sur Roblox » | à faire |
-| 🟪 Blindtest | mini blindtest de 3 extraits | idée (projet pas encore commencé) |
-| 🟦 Infra | état du VPS en direct, salle serveur | à faire |
+| 🟦 Infra | état du VPS en direct, salle serveur | **intégrée à Vigil** (salles serveurs), plus de porte dédiée |
+
+Blindtest abandonné (2026-11-08) : sa porte disparaît.
+
+## Refonte v2 (en cours)
+Le hub devient un monde liminal à la première personne : prairie dreamcore → porte blanche → hall d'hôtel (hub)
+→ Poolrooms, centre commercial, étage de bureaux (Vigil : poste de surveillance + salles serveurs au sous-sol),
+entrée Backrooms glitchée. Design complet et étapes (une PR chacune) : Notion « Design — Hub liminal v2 »
+(sous-page de « Hub nizard.dev »).
+
+En construction sur **`/hub/v2`** (noindex, lié nulle part ; `/hub` reste l'ancien hub jusqu'à la bascule).
+Code : `components/hub/world/`
+- `zones.ts` : carte du monde en **données** (spawn, collisions, portails, ambiance). Ajouter un lieu = une entrée
+  ici + une scène dans `scenes/` + une ligne dans `scenes/index.ts` (une scène = un chunk chargé à la demande).
+- `World.tsx` : orchestration (voile de transition, menu « Lieux découverts », pointer lock, son, mobile).
+- `Player.tsx` (1re personne, collisions cercle/boîtes de `collision.ts`), `input.ts` (`KeyboardEvent.code` :
+  ZQSD et WASD), `TouchControls.tsx` (joystick + glisser), `audio.ts` (ambiances Web Audio synthétisées),
+  `Fallback.tsx` (sans WebGL), `env.ts` (reduced motion, tactile, localStorage protégé).
+- Piège : dans une scène, `<color attach="background">` / `<fog>` doivent être enfants directs de la scène
+  (pas d'un `<group>`), sinon ils s'attachent au groupe et le ciel reste noir.
 
 ## Idées en attente
 - Bourdonnement des néons (démarre au premier clic).
