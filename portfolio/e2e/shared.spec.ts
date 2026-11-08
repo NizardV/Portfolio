@@ -114,5 +114,7 @@ test.describe("page (all devices)", () => {
     }
     await menu.getByRole("button", { name: "REPRENDRE" }).click();
     await expect(menu).toBeHidden();
+    await page.keyboard.press("Tab"); // Tab also opens the menu
+    await expect(menu).toBeVisible();
   });
 });

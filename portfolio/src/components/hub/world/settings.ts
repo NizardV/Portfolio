@@ -10,7 +10,8 @@ export type Settings = {
   muted: boolean;
   sensitivity: number; // look speed multiplier
   invertY: boolean;
-  headBob: boolean;
+  /** null = follow the system « reduce motion » setting; true/false = the player's explicit choice */
+  headBob: boolean | null;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -19,7 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   muted: false,
   sensitivity: 1,
   invertY: false,
-  headBob: true,
+  headBob: null,
 };
 
 const STORE = "hub-v2-settings";
@@ -36,6 +37,17 @@ export function pixelRatio(quality: Quality, touch: boolean): [number, number] {
   if (quality === "low") return [0.75, 1];
   if (quality === "high") return [1, 2];
   return touch ? [1, 1.5] : [1, 2];
+}
+
+/** iPhone / iPod (and iPad pretending to be a Mac): no Fullscreen API there, only « Add to Home Screen ». */
+export function isIOS(): boolean {
+  const ua = navigator.userAgent;
+  return /iP(hone|od|ad)/.test(ua) || (ua.includes("Macintosh") && navigator.maxTouchPoints > 1);
+}
+
+/** Launched from the home screen (no browser bars). */
+export function isStandalone(): boolean {
+  return (navigator as Navigator & { standalone?: boolean }).standalone === true || window.matchMedia("(display-mode: standalone)").matches;
 }
 
 /* ---------- fullscreen (not available on iPhone Safari: the button is then hidden) ---------- */

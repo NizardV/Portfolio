@@ -13,7 +13,8 @@ const RUN = 5;
 const MOUSE = 0.0022; // rad per pixel
 const TOUCH = 0.005;
 const PITCH_MAX = 1.35;
-const BOB = 0.03;
+const BOB = 0.05; // vertical, metres
+const SWAY = 0.03; // sideways, half the step frequency (one sway per two steps)
 
 type Props = {
   zone: Zone;
@@ -70,7 +71,8 @@ export default function Player({ zone, spawn, controls, paused, touch, sensitivi
     // gentle head bob, faded in and out; none at all under reduced motion or when turned off
     s.phase += walking ? dt * (move.run ? 11 : 8) : 0;
     s.bob = MathUtils.damp(s.bob, walking && bob ? 1 : 0, 6, dt);
-    camera.position.set(s.x, EYE + Math.sin(s.phase) * BOB * s.bob, s.z);
+    const sway = Math.sin(s.phase / 2) * SWAY * s.bob;
+    camera.position.set(s.x + cos * sway, EYE - Math.abs(Math.sin(s.phase / 2)) * BOB * s.bob, s.z - sin * sway);
     camera.rotation.set(s.pitch, s.yaw, 0);
 
     if (!s.gone) {

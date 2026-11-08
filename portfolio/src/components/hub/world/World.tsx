@@ -58,6 +58,8 @@ export default function World() {
   const [arrival, setArrival] = useState<Arrival>({ zone: START_ZONE, spawn: ZONES[START_ZONE].spawn, n: 0 });
   const [veil, setVeil] = useState<Veil>({ color: "#ffffff", opaque: true, ms: WAKE_MS });
   const [menu, setMenu] = useState(false);
+  const menuRef = useRef(menu);
+  menuRef.current = menu;
   const [settings, updateSettings] = useSettings();
   const [fullscreen, setFullscreen] = useState(false);
   const [fsAvailable] = useState(canFullscreen);
@@ -65,6 +67,7 @@ export default function World() {
   const touch = useTouch();
   const reducedMotion = useReducedMotion();
   const discovered = useDiscovered(arrival.zone);
+  const headBob = settings.headBob ?? !reducedMotion; // an explicit choice wins over the system setting
   const zone = ZONES[arrival.zone];
 
   useKeyboard(controls, !menu);
@@ -145,6 +148,14 @@ export default function World() {
       controls.look.dy += e.movementY;
     };
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Tab" && !menuRef.current) {
+        // Tab opens the menu (Escape is partly swallowed by the browser while the mouse is captured).
+        // Inside the menu, Tab keeps its usual job: moving between buttons.
+        e.preventDefault();
+        if (document.pointerLockElement) document.exitPointerLock(); // the unlock opens the menu
+        else setMenu(true);
+        return;
+      }
       // Escape while locked already opened the menu through the unlock: don't toggle it shut again
       if (e.key !== "Escape" || performance.now() - lastUnlock.current < 400) return;
       setMenu((open) => !open);
@@ -200,7 +211,7 @@ export default function World() {
           touch={touch}
           sensitivity={settings.sensitivity}
           invertY={settings.invertY}
-          bob={settings.headBob && !reducedMotion}
+          bob={headBob}
           onMove={onMove}
           onPortal={onPortal}
         />
@@ -237,6 +248,7 @@ export default function World() {
           current={arrival.zone}
           discovered={discovered}
           settings={settings}
+          headBob={headBob}
           touch={touch}
           fullscreen={{ available: fsAvailable, active: fullscreen, toggle: toggleFullscreen }}
           onSettings={updateSettings}

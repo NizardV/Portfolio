@@ -1,13 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import type { Quality, Settings } from "./settings";
+import { isIOS, isStandalone, type Quality, type Settings } from "./settings";
 import { ZONE_ORDER, ZONES, type ZoneId } from "./zones";
 
 type Props = {
   current: ZoneId;
   discovered: ReadonlySet<ZoneId>;
   settings: Settings;
+  /** effective head bob (the setting, or the system default) */
+  headBob: boolean;
   touch: boolean;
   fullscreen: { available: boolean; active: boolean; toggle: () => void };
   onSettings: (patch: Partial<Settings>) => void;
@@ -83,7 +85,7 @@ function Places({ current, discovered, onTravel }: Pick<Props, "current" | "disc
 }
 
 /** Pause menu, by category: places found (direct travel), graphics, audio, controls. */
-export default function GameMenu({ current, discovered, settings, touch, fullscreen, onSettings, onTravel, onClose }: Props) {
+export default function GameMenu({ current, discovered, settings, headBob, touch, fullscreen, onSettings, onTravel, onClose }: Props) {
   const [tab, setTab] = useState<Tab>("places");
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center p-4">
@@ -115,8 +117,14 @@ export default function GameMenu({ current, discovered, settings, touch, fullscr
                   ))}
                 </div>
               </Row>
-              <Toggle label="Balancement de la marche" checked={settings.headBob} onChange={(headBob) => onSettings({ headBob })} />
+              <Toggle label="Balancement de la marche" checked={headBob} onChange={(headBob) => onSettings({ headBob })} />
               {fullscreen.available && <Toggle label="Plein écran" checked={fullscreen.active} onChange={fullscreen.toggle} />}
+              {!fullscreen.available && isIOS() && !isStandalone() && (
+                <p className="mt-2 text-xs leading-relaxed text-white/50">
+                  Plein écran sur iPhone : touche Partager, puis « Sur l&apos;écran d&apos;accueil ». Le rêve s&apos;ouvrira alors sans les barres du navigateur.
+                </p>
+              )}
+              <p className="mt-2 text-xs leading-relaxed text-white/40">La qualité règle pour l&apos;instant la résolution ; les ombres et effets suivront avec les vrais décors.</p>
             </>
           )}
           {tab === "audio" && (
@@ -132,7 +140,7 @@ export default function GameMenu({ current, discovered, settings, touch, fullscr
               <p className="mt-3 text-xs leading-relaxed text-white/50">
                 {touch
                   ? "Joystick à gauche pour marcher (poussé à fond : courir), glisse à droite pour regarder."
-                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · Échap : menu."}
+                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · Tab ou Échap : menu."}
               </p>
             </>
           )}
