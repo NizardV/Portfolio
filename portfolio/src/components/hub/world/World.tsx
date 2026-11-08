@@ -118,7 +118,16 @@ export default function World() {
       window.removeEventListener("pointerdown", wake);
     };
   }, [touch]);
-  const chromeVisible = menu || (touch ? chromeAwake : !locked);
+  // phones: hidden after a few idle seconds. Desktop: always there but faint (with its Tab shortcut),
+  // fully visible when the free mouse comes near it
+  const [mouseNear, setMouseNear] = useState(false);
+  const chromeClass = touch
+    ? menu || chromeAwake
+      ? "opacity-100"
+      : "pointer-events-none opacity-0"
+    : !locked && mouseNear
+      ? "opacity-100"
+      : "opacity-30";
 
   /* ---------- sound: starts on the first gesture (browser rule), one ambience per zone ---------- */
   useEffect(() => {
@@ -198,6 +207,7 @@ export default function World() {
       setMenu(true); // leaving mouse look (Escape) opens the menu
     };
     const onMouse = (e: MouseEvent) => {
+      if (!document.pointerLockElement) setMouseNear(e.clientX > window.innerWidth - 240 && e.clientY < 140);
       if (document.pointerLockElement !== canvas.current) return;
       if (Math.abs(e.movementX) > MAX_MOUSE_STEP || Math.abs(e.movementY) > MAX_MOUSE_STEP) return;
       controls.look.dx += e.movementX;
@@ -320,7 +330,7 @@ export default function World() {
       )}
 
       <div
-        className={`absolute right-4 top-4 z-10 flex gap-2 transition-opacity duration-500 ${chromeVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`absolute right-4 top-4 z-10 flex gap-2 transition-opacity duration-500 ${chromeClass}`}
       >
         {touch && fsAvailable && fullscreen === null && (
           <button type="button" onClick={toggleFullscreen} className={TOP_BUTTON}>
@@ -328,7 +338,7 @@ export default function World() {
           </button>
         )}
         <button type="button" onClick={openMenu} className={TOP_BUTTON}>
-          MENU
+          {touch ? "MENU" : "MENU · TAB"}
         </button>
       </div>
 
