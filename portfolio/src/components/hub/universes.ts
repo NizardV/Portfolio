@@ -11,6 +11,5 @@ export type Universe = {
 export const UNIVERSES: Universe[] = [
   { id: "backrooms", name: "Backrooms", tagline: "Game dev · Roblox & Unity", color: "#e8c547", href: null },
   { id: "vigil", name: "Vigil", tagline: "Monitoring · data · automatisation", color: "#4fd1c5", href: null },
-  { id: "blindtest", name: "Blindtest", tagline: "Musique · Tauri", color: "#d36bf0", href: null },
   { id: "infra", name: "Infra", tagline: "VPS · Docker · self-hosting", color: "#5b8cff", href: null },
 ];

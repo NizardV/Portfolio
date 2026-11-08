@@ -13,3 +13,5 @@ Format : date · décision · pourquoi. Ajouter en bas, ne pas réécrire l'hist
 - **2026-11-05 · Overlays sans `AnimatePresence`** (exit bloqué observé) → `usePresence` + CSS. Menu mobile toujours monté, positionné en absolu sous la barre.
 - **2026-11-05 · Tests end-to-end Playwright** sur le build de production, desktop + Android + petit iPhone (Chromium) + iPhone WebKit en CI.
 - **2026-11-05 · Porte Vigil en attente.** L'utilisateur reprend Vigil (l'outil ne lui convient pas tel quel) : ne pas construire la porte du hub sur la version actuelle.
+- **2026-11-08 · Refonte du hub en monde liminal à la première personne** (prairie dreamcore, hall d'hôtel, Poolrooms, centre commercial, bureaux Vigil, entrée Backrooms). Espaces grands et réalistes, les projets n'en occupent qu'une petite partie. Mobile : expérience complète allégée. Assets CC0 hébergés dans le site. Détails : Notion « Design — Hub liminal v2 ».
+- **2026-11-08 · Blindtest abandonné** (sa porte disparaît) ; **Infra intégrée à Vigil** (salles serveurs). La porte Vigil n'est plus en attente : le nouveau Vigil est en prod.

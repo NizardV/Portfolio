@@ -1,0 +1,10 @@
+{
+  "name": "Le rêve — nizard.dev",
+  "short_name": "Le rêve",
+  "start_url": "/hub/v2",
+  "scope": "/hub/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#000000"
+}

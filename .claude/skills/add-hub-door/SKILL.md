@@ -1,6 +1,6 @@
 ---
 name: add-hub-door
-description: Ajouter ou ouvrir une porte du hub 3D secret (/hub) — nouvelle porte pour un projet perso, ou construction de l'univers derrière une porte existante (Vigil, Backrooms, Blindtest, Infra).
+description: Ajouter ou ouvrir une porte du hub 3D secret (/hub) — nouvelle porte pour un projet perso, ou construction de l'univers derrière une porte existante (Vigil avec Infra intégrée, Backrooms).
 ---
 
 # Ajouter / ouvrir une porte du hub

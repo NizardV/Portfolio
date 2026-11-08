@@ -98,4 +98,25 @@ test.describe("page (all devices)", () => {
     // Only check the way back: tearing down software WebGL on navigation can crash the CI browser.
     await expect(page.getByRole("link", { name: /RETOUR/ })).toHaveAttribute("href", "/");
   });
+
+  test("hub v2: first-person world and places menu", async ({ page }) => {
+    await page.goto("/hub/v2");
+    await expect(page.locator("canvas")).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: "MENU" }).click();
+    const menu = page.getByRole("dialog", { name: "Menu" });
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole("button", { name: /Prairie \(essai\)/ })).toBeVisible();
+    await expect(menu.getByText("???")).toBeVisible(); // the room is not found yet
+    await expect(menu.getByRole("link", { name: /SE RÉVEILLER/ })).toHaveAttribute("href", "/");
+    for (const [tab, setting] of [["Graphismes", "Balancement de la marche"], ["Audio", "Volume"], ["Contrôles", "Sensibilité"]]) {
+      await menu.getByRole("tab", { name: tab }).click();
+      await expect(menu.getByLabel(setting)).toBeVisible();
+    }
+    await menu.getByRole("button", { name: "REPRENDRE" }).click();
+    await expect(menu).toBeHidden();
+    await page.keyboard.press("Tab"); // Tab also opens the menu
+    await expect(menu).toBeVisible();
+    await page.keyboard.press("Tab"); // …and closes it
+    await expect(menu).toBeHidden();
+  });
 });
