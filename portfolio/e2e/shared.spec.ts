@@ -116,5 +116,7 @@ test.describe("page (all devices)", () => {
     await expect(menu).toBeHidden();
     await page.keyboard.press("Tab"); // Tab also opens the menu
     await expect(menu).toBeVisible();
+    await page.keyboard.press("Tab"); // …and closes it
+    await expect(menu).toBeHidden();
   });
 });

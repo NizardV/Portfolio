@@ -60,6 +60,7 @@ export default function World() {
   const [menu, setMenu] = useState(false);
   const menuRef = useRef(menu);
   menuRef.current = menu;
+  const resumeRef = useRef(() => {});
   const [settings, updateSettings] = useSettings();
   const [fullscreen, setFullscreen] = useState(false);
   const [fsAvailable] = useState(canFullscreen);
@@ -148,11 +149,12 @@ export default function World() {
       controls.look.dy += e.movementY;
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Tab" && !menuRef.current) {
-        // Tab opens the menu (Escape is partly swallowed by the browser while the mouse is captured).
-        // Inside the menu, Tab keeps its usual job: moving between buttons.
+      if (e.key === "Tab" && !e.shiftKey) {
+        // Tab toggles the menu (Escape is partly swallowed by the browser while the mouse is captured).
+        // Shift+Tab still moves between the menu's buttons for keyboard users.
         e.preventDefault();
-        if (document.pointerLockElement) document.exitPointerLock(); // the unlock opens the menu
+        if (menuRef.current) resumeRef.current();
+        else if (document.pointerLockElement) document.exitPointerLock(); // the unlock opens the menu
         else setMenu(true);
         return;
       }
@@ -178,6 +180,7 @@ export default function World() {
     setMenu(false);
     lock();
   };
+  resumeRef.current = resume;
   const travelTo = (id: ZoneId) => {
     setMenu(false);
     travel(id, ZONES[id].spawn, "#000000");

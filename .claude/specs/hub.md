@@ -37,7 +37,7 @@ Code : `components/hub/world/`
 - `World.tsx` : orchestration (voile de transition, pointer lock, son, mobile, plein écran).
 - `GameMenu.tsx` (bouton MENU / Échap) : onglets Lieux, Graphismes, Audio, Contrôles ; réglages dans `settings.ts`
   (mémorisés dans le navigateur). Souris : `unadjustedMovement` + filtre des sauts aberrants (bug Chrome/Windows
-  qui faisait « recentrer » la vue). Menu : Tab ou Échap. Balancement : suit « réduire les animations » du
+  qui faisait « recentrer » la vue). Menu : Tab (ouvre et ferme ; Maj+Tab navigue dans le menu) ou Échap. Balancement : suit « réduire les animations » du
   système tant que le joueur n'a pas choisi (`headBob: null`).
 - iPhone : pas d'API plein écran (tous les navigateurs iOS = WebKit). `/hub/v2` porte `apple-mobile-web-app-capable`
   + `public/hub.webmanifest` (scope `/hub/`) : « Sur l'écran d'accueil » ouvre le rêve sans barres.

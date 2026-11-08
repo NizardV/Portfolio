@@ -140,7 +140,7 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
               <p className="mt-3 text-xs leading-relaxed text-white/50">
                 {touch
                   ? "Joystick à gauche pour marcher (poussé à fond : courir), glisse à droite pour regarder."
-                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · Tab ou Échap : menu."}
+                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · Tab ou Échap : ouvrir / fermer le menu."}
               </p>
             </>
           )}
