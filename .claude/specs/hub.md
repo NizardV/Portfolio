@@ -34,7 +34,10 @@ En construction sur **`/hub/v2`** (noindex, lié nulle part ; `/hub` reste l'anc
 Code : `components/hub/world/`
 - `zones.ts` : carte du monde en **données** (spawn, collisions, portails, ambiance). Ajouter un lieu = une entrée
   ici + une scène dans `scenes/` + une ligne dans `scenes/index.ts` (une scène = un chunk chargé à la demande).
-- `World.tsx` : orchestration (voile de transition, menu « Lieux découverts », pointer lock, son, mobile).
+- `World.tsx` : orchestration (voile de transition, pointer lock, son, mobile, plein écran).
+- `GameMenu.tsx` (bouton MENU / Échap) : onglets Lieux, Graphismes, Audio, Contrôles ; réglages dans `settings.ts`
+  (mémorisés dans le navigateur). Souris : `unadjustedMovement` + filtre des sauts aberrants (bug Chrome/Windows
+  qui faisait « recentrer » la vue).
 - `Player.tsx` (1re personne, collisions cercle/boîtes de `collision.ts`), `input.ts` (`KeyboardEvent.code` :
   ZQSD et WASD), `TouchControls.tsx` (joystick + glisser), `audio.ts` (ambiances Web Audio synthétisées),
   `Fallback.tsx` (sans WebGL), `env.ts` (reduced motion, tactile, localStorage protégé).

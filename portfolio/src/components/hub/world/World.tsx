@@ -3,9 +3,10 @@ import { Fragment, Suspense, useCallback, useEffect, useRef, useState } from "re
 import { Canvas } from "@react-three/fiber";
 import { Ambience } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
+import { canFullscreen, isFullscreen, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
 import { createControls, useKeyboard } from "./input";
-import PlacesMenu from "./PlacesMenu";
+import GameMenu from "./GameMenu";
 import Player from "./Player";
 import { SCENES } from "./scenes";
 import TouchControls from "./TouchControls";
@@ -14,7 +15,10 @@ import { START_ZONE, ZONE_ORDER, ZONES, type Portal, type Spawn, type ZoneId } f
 const WAKE_MS = 1800; // first fade from white: waking up
 const FADE_MS = 500; // between zones
 const STORE_PLACES = "hub-v2-places";
-const STORE_MUTED = "hub-v2-muted";
+/** A pointer-locked mouse sometimes reports a bogus huge jump (Chrome on Windows): the view would snap. */
+const MAX_MOUSE_STEP = 200;
+
+const TOP_BUTTON = "rounded-full border border-white/25 bg-black/30 px-4 py-2 text-xs tracking-widest text-white/80 hover:text-white";
 
 type Arrival = { zone: ZoneId; spawn: Spawn; n: number };
 type Veil = { color: string; opaque: boolean; ms: number };
@@ -54,7 +58,9 @@ export default function World() {
   const [arrival, setArrival] = useState<Arrival>({ zone: START_ZONE, spawn: ZONES[START_ZONE].spawn, n: 0 });
   const [veil, setVeil] = useState<Veil>({ color: "#ffffff", opaque: true, ms: WAKE_MS });
   const [menu, setMenu] = useState(false);
-  const [muted, setMuted] = useState(() => loadJSON(STORE_MUTED, false));
+  const [settings, updateSettings] = useSettings();
+  const [fullscreen, setFullscreen] = useState(false);
+  const [fsAvailable] = useState(canFullscreen);
   const [hint, setHint] = useState(true);
   const touch = useTouch();
   const reducedMotion = useReducedMotion();
@@ -78,10 +84,16 @@ export default function World() {
     };
   }, []);
   useEffect(() => audio.current?.play(zone.ambience), [zone.ambience]);
+  useEffect(() => audio.current?.setLevel(settings.volume, settings.muted), [settings.volume, settings.muted]);
   useEffect(() => {
-    audio.current?.setMuted(muted);
-    saveJSON(STORE_MUTED, muted);
-  }, [muted]);
+    const sync = () => setFullscreen(isFullscreen());
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      document.removeEventListener("webkitfullscreenchange", sync);
+    };
+  }, []);
 
   /* ---------- travel: veil → swap zone → (lazy load) → Ready → lift veil ---------- */
   const travel = useCallback((to: ZoneId, spawn: Spawn, color: string) => {
@@ -100,11 +112,23 @@ export default function World() {
   /* ---------- mouse look (pointer lock) and the Escape menu ---------- */
   const lock = useCallback(() => {
     if (touch) return;
+    const el = canvas.current as (HTMLCanvasElement & { requestPointerLock(o?: { unadjustedMovement?: boolean }): Promise<void> | void }) | null;
+    if (!el) return;
+    const plain = () => {
+      try {
+        (el.requestPointerLock() as Promise<void> | undefined)?.catch?.(() => {}); // refused (too soon after Escape…): a click retries
+      } catch {
+        /* unsupported */
+      }
+    };
     try {
-      const pending = canvas.current?.requestPointerLock() as Promise<void> | undefined;
-      pending?.catch?.(() => {}); // refused (too soon after Escape, iframe…): a click will retry
+      // raw mouse input: no OS acceleration, and avoids the bogus jumps that made the view snap back
+      const pending = el.requestPointerLock({ unadjustedMovement: true }) as Promise<void> | undefined;
+      pending?.catch?.((e: unknown) => {
+        if ((e as Error)?.name === "NotSupportedError") plain();
+      });
     } catch {
-      /* unsupported */
+      plain();
     }
   }, [touch]);
 
@@ -116,6 +140,7 @@ export default function World() {
     };
     const onMouse = (e: MouseEvent) => {
       if (document.pointerLockElement !== canvas.current) return;
+      if (Math.abs(e.movementX) > MAX_MOUSE_STEP || Math.abs(e.movementY) > MAX_MOUSE_STEP) return;
       controls.look.dx += e.movementX;
       controls.look.dy += e.movementY;
     };
@@ -155,7 +180,7 @@ export default function World() {
       <Canvas
         ref={canvas}
         camera={{ fov: 70, near: 0.05, far: 600 }}
-        dpr={touch ? [1, 1.5] : [1, 2]}
+        dpr={pixelRatio(settings.quality, touch)}
         onClick={() => !menu && lock()}
         aria-label={`Rêve à la première personne : ${zone.name}`}
       >
@@ -173,7 +198,9 @@ export default function World() {
           controls={controls}
           paused={menu}
           touch={touch}
-          reducedMotion={reducedMotion}
+          sensitivity={settings.sensitivity}
+          invertY={settings.invertY}
+          bob={settings.headBob && !reducedMotion}
           onMove={onMove}
           onPortal={onPortal}
         />
@@ -187,13 +214,16 @@ export default function World() {
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={openMenu}
-        className="absolute right-4 top-4 z-10 rounded-full border border-white/25 bg-black/30 px-4 py-2 text-xs tracking-widest text-white/80 hover:text-white"
-      >
-        LIEUX
-      </button>
+      <div className="absolute right-4 top-4 z-10 flex gap-2">
+        {touch && fsAvailable && !fullscreen && (
+          <button type="button" onClick={toggleFullscreen} className={TOP_BUTTON}>
+            PLEIN ÉCRAN
+          </button>
+        )}
+        <button type="button" onClick={openMenu} className={TOP_BUTTON}>
+          MENU
+        </button>
+      </div>
 
       {/* the veil hides loading between zones; always mounted, toggled in CSS (no exit animation to get stuck) */}
       <div
@@ -203,13 +233,14 @@ export default function World() {
       />
 
       {menu && (
-        <PlacesMenu
+        <GameMenu
           current={arrival.zone}
           discovered={discovered}
-          muted={muted}
+          settings={settings}
           touch={touch}
+          fullscreen={{ available: fsAvailable, active: fullscreen, toggle: toggleFullscreen }}
+          onSettings={updateSettings}
           onTravel={travelTo}
-          onToggleSound={() => setMuted((m) => !m)}
           onClose={resume}
         />
       )}

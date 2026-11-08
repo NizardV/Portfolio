@@ -5,7 +5,7 @@
  */
 export type AmbienceId = "wind" | "hum" | "none";
 
-const VOLUME = 0.22; // low by default
+const MAX_VOLUME = 0.35; // « 100 % » stays a background level
 const CROSSFADE = 1.5; // seconds
 
 type Layer = { gain: GainNode; stop: () => void };
@@ -77,7 +77,7 @@ export class Ambience {
   private noise: AudioBuffer | null = null;
   private layer: Layer | null = null;
   private current: AmbienceId = "none";
-  private muted = false;
+  private level = 0;
 
   /** Must run inside a user gesture. Safe to call repeatedly. */
   start() {
@@ -89,7 +89,7 @@ export class Ambience {
     if (!Ctor) return;
     this.ctx = new Ctor();
     this.master = this.ctx.createGain();
-    this.master.gain.value = this.muted ? 0 : VOLUME;
+    this.master.gain.value = this.level;
     this.master.connect(this.ctx.destination);
     this.noise = noiseBuffer(this.ctx);
     const wanted = this.current;
@@ -113,9 +113,10 @@ export class Ambience {
     this.layer?.gain.gain.setTargetAtTime(1, now, CROSSFADE / 4);
   }
 
-  setMuted(muted: boolean) {
-    this.muted = muted;
-    if (this.ctx && this.master) this.master.gain.setTargetAtTime(muted ? 0 : VOLUME, this.ctx.currentTime, 0.1);
+  /** volume 0..1 (from the menu); muted wins. */
+  setLevel(volume: number, muted: boolean) {
+    this.level = muted ? 0 : Math.max(0, Math.min(1, volume)) * MAX_VOLUME;
+    if (this.ctx && this.master) this.master.gain.setTargetAtTime(this.level, this.ctx.currentTime, 0.1);
   }
 
   dispose() {

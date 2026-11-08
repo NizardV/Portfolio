@@ -21,13 +21,17 @@ type Props = {
   controls: Controls;
   paused: boolean;
   touch: boolean;
-  reducedMotion: boolean;
+  /** look speed multiplier and vertical inversion, from the menu */
+  sensitivity: number;
+  invertY: boolean;
+  /** head bob wanted (already false under reduced motion) */
+  bob: boolean;
   onMove: () => void;
   onPortal: (portal: Portal) => void;
 };
 
 /** First-person camera: look, walk, slide along walls, step through portals. Remount it to respawn. */
-export default function Player({ zone, spawn, controls, paused, touch, reducedMotion, onMove, onPortal }: Props) {
+export default function Player({ zone, spawn, controls, paused, touch, sensitivity, invertY, bob, onMove, onPortal }: Props) {
   const camera = useThree((s) => s.camera);
   const me = useRef({ x: spawn.x, z: spawn.z, yaw: spawn.yaw, pitch: 0, phase: 0, bob: 0, moved: false, gone: false });
 
@@ -40,9 +44,10 @@ export default function Player({ zone, spawn, controls, paused, touch, reducedMo
     const s = me.current;
     const { look } = controls;
     if (!paused) {
-      const sens = touch ? TOUCH : MOUSE;
-      s.yaw -= look.dx * sens;
-      s.pitch = MathUtils.clamp(s.pitch - look.dy * sens, -PITCH_MAX, PITCH_MAX);
+      const sens = (touch ? TOUCH : MOUSE) * sensitivity;
+      // keep yaw in [-π, π]: an ever-growing angle loses precision over a long session
+      s.yaw = MathUtils.euclideanModulo(s.yaw - look.dx * sens + Math.PI, Math.PI * 2) - Math.PI;
+      s.pitch = MathUtils.clamp(s.pitch - look.dy * sens * (invertY ? -1 : 1), -PITCH_MAX, PITCH_MAX);
     }
     look.dx = look.dy = 0;
 
@@ -62,9 +67,9 @@ export default function Player({ zone, spawn, controls, paused, touch, reducedMo
       s.moved = true;
       onMove();
     }
-    // gentle head bob, faded in and out; none at all under reduced motion
+    // gentle head bob, faded in and out; none at all under reduced motion or when turned off
     s.phase += walking ? dt * (move.run ? 11 : 8) : 0;
-    s.bob = MathUtils.damp(s.bob, walking && !reducedMotion ? 1 : 0, 6, dt);
+    s.bob = MathUtils.damp(s.bob, walking && bob ? 1 : 0, 6, dt);
     camera.position.set(s.x, EYE + Math.sin(s.phase) * BOB * s.bob, s.z);
     camera.rotation.set(s.pitch, s.yaw, 0);
 

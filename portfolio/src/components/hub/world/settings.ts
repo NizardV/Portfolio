@@ -1,0 +1,71 @@
+import { useEffect, useState } from "react";
+import { loadJSON, saveJSON } from "./env";
+
+/** Player preferences, remembered in the browser (silently in-memory only if storage is blocked). */
+export type Quality = "low" | "auto" | "high";
+
+export type Settings = {
+  quality: Quality;
+  volume: number; // 0..1
+  muted: boolean;
+  sensitivity: number; // look speed multiplier
+  invertY: boolean;
+  headBob: boolean;
+};
+
+export const DEFAULT_SETTINGS: Settings = {
+  quality: "auto",
+  volume: 0.6,
+  muted: false,
+  sensitivity: 1,
+  invertY: false,
+  headBob: true,
+};
+
+const STORE = "hub-v2-settings";
+
+export function useSettings() {
+  const [settings, setSettings] = useState<Settings>(() => ({ ...DEFAULT_SETTINGS, ...loadJSON<Partial<Settings>>(STORE, {}) }));
+  useEffect(() => saveJSON(STORE, settings), [settings]);
+  const update = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
+  return [settings, update] as const;
+}
+
+/** Canvas pixel ratio range for a quality level: phones stay lighter on « auto ». */
+export function pixelRatio(quality: Quality, touch: boolean): [number, number] {
+  if (quality === "low") return [0.75, 1];
+  if (quality === "high") return [1, 2];
+  return touch ? [1, 1.5] : [1, 2];
+}
+
+/* ---------- fullscreen (not available on iPhone Safari: the button is then hidden) ---------- */
+
+type FsElement = HTMLElement & { webkitRequestFullscreen?: () => void };
+type FsDocument = Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => void };
+
+export function canFullscreen(): boolean {
+  const el = document.documentElement as FsElement;
+  return typeof document !== "undefined" && !!(el.requestFullscreen || el.webkitRequestFullscreen);
+}
+
+export function isFullscreen(): boolean {
+  const doc = document as FsDocument;
+  return !!(doc.fullscreenElement ?? doc.webkitFullscreenElement);
+}
+
+export function toggleFullscreen() {
+  const doc = document as FsDocument;
+  const el = document.documentElement as FsElement;
+  try {
+    if (isFullscreen()) {
+      if (doc.exitFullscreen) void doc.exitFullscreen();
+      else doc.webkitExitFullscreen?.();
+    } else if (el.requestFullscreen) {
+      void el.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+    } else {
+      el.webkitRequestFullscreen?.();
+    }
+  } catch {
+    /* refused by the browser: nothing to do */
+  }
+}
