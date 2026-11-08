@@ -65,6 +65,17 @@ export function isFullscreen(): boolean {
   return !!(doc.fullscreenElement ?? doc.webkitFullscreenElement);
 }
 
+/**
+ * "page" = the page asked for it (button, menu); "browser" = the browser's own fullscreen (F11), which a page
+ * can see but cannot leave; null = windowed.
+ */
+export function fullscreenMode(): "page" | "browser" | null {
+  if (isFullscreen()) return "page";
+  if (window.matchMedia("(pointer: coarse)").matches) return null; // phones: the window always spans the screen width
+  const fillsScreen = Math.abs(window.innerWidth - screen.width) <= 1 && Math.abs(window.innerHeight - screen.height) <= 1;
+  return fillsScreen || window.matchMedia("(display-mode: fullscreen)").matches ? "browser" : null;
+}
+
 export function toggleFullscreen() {
   const doc = document as FsDocument;
   const el = document.documentElement as FsElement;

@@ -3,7 +3,7 @@ import { Fragment, Suspense, useCallback, useEffect, useRef, useState } from "re
 import { Canvas } from "@react-three/fiber";
 import { Ambience } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
-import { canFullscreen, isFullscreen, pixelRatio, toggleFullscreen, useSettings } from "./settings";
+import { canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
 import { createControls, useKeyboard } from "./input";
 import GameMenu from "./GameMenu";
@@ -62,7 +62,7 @@ export default function World() {
   menuRef.current = menu;
   const resumeRef = useRef(() => {});
   const [settings, updateSettings] = useSettings();
-  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreen, setFullscreen] = useState<ReturnType<typeof fullscreenMode>>(null);
   const [fsAvailable] = useState(canFullscreen);
   const [hint, setHint] = useState(true);
   const touch = useTouch();
@@ -90,12 +90,23 @@ export default function World() {
   useEffect(() => audio.current?.play(zone.ambience), [zone.ambience]);
   useEffect(() => audio.current?.setLevel(settings.volume, settings.muted), [settings.volume, settings.muted]);
   useEffect(() => {
-    const sync = () => setFullscreen(isFullscreen());
+    // the page's own fullscreen fires fullscreenchange; the browser's (F11) only shows up as a resize
+    const sync = () => setFullscreen(fullscreenMode());
+    const onF11 = (e: KeyboardEvent) => {
+      if (e.key !== "F11" || fullscreenMode() === "browser") return; // already in F11 mode: let the browser leave it
+      e.preventDefault(); // where the browser allows it, F11 drives the page's fullscreen, so the menu stays in sync
+      toggleFullscreen();
+    };
+    sync();
     document.addEventListener("fullscreenchange", sync);
     document.addEventListener("webkitfullscreenchange", sync);
+    window.addEventListener("resize", sync);
+    window.addEventListener("keydown", onF11);
     return () => {
       document.removeEventListener("fullscreenchange", sync);
       document.removeEventListener("webkitfullscreenchange", sync);
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("keydown", onF11);
     };
   }, []);
 
@@ -116,23 +127,12 @@ export default function World() {
   /* ---------- mouse look (pointer lock) and the Escape menu ---------- */
   const lock = useCallback(() => {
     if (touch) return;
-    const el = canvas.current as (HTMLCanvasElement & { requestPointerLock(o?: { unadjustedMovement?: boolean }): Promise<void> | void }) | null;
-    if (!el) return;
-    const plain = () => {
-      try {
-        (el.requestPointerLock() as Promise<void> | undefined)?.catch?.(() => {}); // refused (too soon after Escape…): a click retries
-      } catch {
-        /* unsupported */
-      }
-    };
+    // No « unadjustedMovement »: on Windows, Chrome could leave the cursor trapped in the window after unlocking.
+    // Bogus mouse jumps are filtered in onMouse instead.
     try {
-      // raw mouse input: no OS acceleration, and avoids the bogus jumps that made the view snap back
-      const pending = el.requestPointerLock({ unadjustedMovement: true }) as Promise<void> | undefined;
-      pending?.catch?.((e: unknown) => {
-        if ((e as Error)?.name === "NotSupportedError") plain();
-      });
+      (canvas.current?.requestPointerLock() as Promise<void> | undefined)?.catch?.(() => {}); // refused (too soon after Escape…): a click retries
     } catch {
-      plain();
+      /* unsupported */
     }
   }, [touch]);
 
@@ -229,7 +229,7 @@ export default function World() {
       )}
 
       <div className="absolute right-4 top-4 z-10 flex gap-2">
-        {touch && fsAvailable && !fullscreen && (
+        {touch && fsAvailable && fullscreen === null && (
           <button type="button" onClick={toggleFullscreen} className={TOP_BUTTON}>
             PLEIN ÉCRAN
           </button>
@@ -253,7 +253,7 @@ export default function World() {
           settings={settings}
           headBob={headBob}
           touch={touch}
-          fullscreen={{ available: fsAvailable, active: fullscreen, toggle: toggleFullscreen }}
+          fullscreen={{ available: fsAvailable, mode: fullscreen, toggle: toggleFullscreen }}
           onSettings={updateSettings}
           onTravel={travelTo}
           onClose={resume}

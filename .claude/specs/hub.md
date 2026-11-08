@@ -36,7 +36,8 @@ Code : `components/hub/world/`
   ici + une scène dans `scenes/` + une ligne dans `scenes/index.ts` (une scène = un chunk chargé à la demande).
 - `World.tsx` : orchestration (voile de transition, pointer lock, son, mobile, plein écran).
 - `GameMenu.tsx` (bouton MENU / Échap) : onglets Lieux, Graphismes, Audio, Contrôles ; réglages dans `settings.ts`
-  (mémorisés dans le navigateur). Souris : `unadjustedMovement` + filtre des sauts aberrants (bug Chrome/Windows
+  (mémorisés dans le navigateur). Souris : filtre des sauts aberrants (bug Chrome/Windows ; PAS `unadjustedMovement`, qui laissait le curseur
+  enfermé dans la fenêtre après le menu) ; F11 détecté (redimensionnement) et reflété dans le menu ; ancien bug
   qui faisait « recentrer » la vue). Menu : Tab (ouvre et ferme ; Maj+Tab navigue dans le menu) ou Échap. Balancement : suit « réduire les animations » du
   système tant que le joueur n'a pas choisi (`headBob: null`).
 - iPhone : pas d'API plein écran (tous les navigateurs iOS = WebKit). `/hub/v2` porte `apple-mobile-web-app-capable`

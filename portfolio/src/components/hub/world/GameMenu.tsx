@@ -11,7 +11,7 @@ type Props = {
   /** effective head bob (the setting, or the system default) */
   headBob: boolean;
   touch: boolean;
-  fullscreen: { available: boolean; active: boolean; toggle: () => void };
+  fullscreen: { available: boolean; mode: "page" | "browser" | null; toggle: () => void };
   onSettings: (patch: Partial<Settings>) => void;
   onTravel: (id: ZoneId) => void;
   onClose: () => void;
@@ -118,7 +118,14 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
                 </div>
               </Row>
               <Toggle label="Balancement de la marche" checked={headBob} onChange={(headBob) => onSettings({ headBob })} />
-              {fullscreen.available && <Toggle label="Plein écran" checked={fullscreen.active} onChange={fullscreen.toggle} />}
+              {fullscreen.available && fullscreen.mode !== "browser" && (
+                <Toggle label="Plein écran" checked={fullscreen.mode === "page"} onChange={fullscreen.toggle} />
+              )}
+              {fullscreen.mode === "browser" && (
+                <Row label="Plein écran">
+                  <span className="text-xs text-white/50">Oui · F11 pour quitter</span>
+                </Row>
+              )}
               {!fullscreen.available && isIOS() && !isStandalone() && (
                 <p className="mt-2 text-xs leading-relaxed text-white/50">
                   Plein écran sur iPhone : touche Partager, puis « Sur l&apos;écran d&apos;accueil ». Le rêve s&apos;ouvrira alors sans les barres du navigateur.
