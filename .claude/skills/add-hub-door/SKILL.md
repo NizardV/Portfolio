@@ -1,21 +1,26 @@
 ---
 name: add-hub-door
-description: Ajouter ou ouvrir une porte du hub 3D secret (/hub) — nouvelle porte pour un projet perso, ou construction de l'univers derrière une porte existante (Vigil avec Infra intégrée, Backrooms).
+description: Ajouter un lieu ou ouvrir une branche du hub secret (/hub, monde liminal à la première personne) — nouveau lieu (hall d'hôtel, Poolrooms, bureaux Vigil…), nouvelle porte de projet, ou construction de la branche derrière une porte verrouillée (Vigil avec Infra intégrée, Backrooms).
 ---
 
-# Ajouter / ouvrir une porte du hub
+# Ajouter un lieu / ouvrir une branche du hub
 
-1. Lire `.claude/specs/hub.md` (principe, portes prévues) et la fiche Notion « Hub nizard.dev ».
-2. **Nouvelle porte** : ajouter une entrée dans `portfolio/src/components/hub/universes.ts`
-   (`{ id, name, tagline, color, href: null }`). `HubScene` place les portes sur les murs ; au-delà de 4,
-   adapter le placement (angles / plusieurs portes par mur).
-3. **Ouvrir une porte** : créer la route `src/app/hub/<id>/page.tsx` (noindex, comme `/hub`), charger la scène
-   avec `dynamic(..., { ssr: false })`, puis mettre `href: "/hub/<id>"` dans `universes.ts`.
-   Prévoir un bouton RETOUR vers `/hub`.
+1. Lire `.claude/specs/hub.md` (architecture, pièges) et la page Notion « Design — Hub liminal v2 » (parcours,
+   direction artistique, étape suivante).
+2. **Nouveau lieu** (une PR par lieu) :
+   - `world/zones.ts` : ajouter l'id à `ZoneId`, l'entrée dans `ZONES` (spawn, collisions, portails, interactions,
+     `floor`, `ambience`, `ground` si relief) et sa place dans `ZONE_ORDER` ;
+   - `world/scenes/<lieu>/<Lieu>.tsx` + une ligne dans `world/scenes/index.ts` (chunk chargé à la demande) ;
+   - relier par des portails (`requires` / `opens` pour les portes à ouvrir) ;
+   - densité / effets via `byQuality(useQuality(), …)` ; ambiance dans `audio.ts` si nouvelle.
+3. **Nouvelle porte de projet** : une entrée dans `components/hub/universes.ts` ; elle apparaît verrouillée dans la
+   salle jaune (`PROJECT_DOORS`, 3 emplacements). **Ouvrir une branche** : retirer `locked` de son interactable et
+   lui donner `blocker` + un portail `requires` vers le nouveau lieu.
 4. Contraintes :
-   - aucun asset réseau externe (CSP) : textures procédurales ou fichiers dans `public/` ;
-   - three.js uniquement dans les routes `/hub*` ;
-   - données live (Vigil, VPS) via une route API Next côté serveur, jamais de secret côté client ;
-   - garder le style liminal (voir `specs/design.md`) ;
-   - tester sur mobile (tap sur les portes, perf) et ajouter un test dans `e2e/shared.spec.ts`.
-5. Livrer avec le skill `ship-change` et cocher la porte dans la fiche Notion.
+   - aucun asset réseau externe (CSP) : procédural, ou fichiers CC0 dans `public/` (crédits tenus à jour) ;
+   - three.js uniquement sur `/hub` ;
+   - données live (Vigil, VPS) via une route publique agrégée côté Vigil, jamais de secret côté client ;
+   - pas de texte flottant : texte seulement sur des objets du décor (plaques, écrans) ;
+   - garder le style liminal, grand et réaliste ; tester mobile (perf, joystick, bouton d'interaction) ;
+   - test dans `e2e/shared.spec.ts` si le menu ou la navigation changent.
+5. Livrer avec le skill `ship-change` et cocher l'étape dans la page Notion du design.

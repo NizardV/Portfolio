@@ -76,7 +76,14 @@ export default function World() {
   const headBob = settings.headBob ?? !reducedMotion; // an explicit choice wins over the system setting
   const zone = ZONES[arrival.zone];
   const [used, setUsed] = useState<ReadonlySet<string>>(() => new Set());
-  const worldState = useMemo(() => ({ used }), [used]);
+  const [rattle, setRattle] = useState<{ id: string; n: number }>();
+  const worldState = useMemo(() => ({ used, rattle }), [used, rattle]);
+  const [toast, setToast] = useState<{ title: string; text: string; color: string }>();
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(undefined), 3800);
+    return () => clearTimeout(timer);
+  }, [toast]);
   const [focus, setFocus] = useState<Interactable | null>(null);
   const [locked, setLocked] = useState(false);
   const [chromeAwake, setChromeAwake] = useState(true);
@@ -95,6 +102,13 @@ export default function World() {
   const interact = useCallback(() => {
     const target = focusRef.current;
     if (!target) return;
+    if (target.locked) {
+      // a project whose place is not built yet: the door rattles and says who lives behind it
+      setRattle((r) => ({ id: target.id, n: (r?.n ?? 0) + 1 }));
+      setToast({ title: target.locked.name, text: `${target.locked.tagline} · verrouillée, quelque chose se construit de l'autre côté…`, color: target.locked.color });
+      audio.current?.sfx("door-locked");
+      return;
+    }
     markUsed([target.id]);
     setFocus(null);
     audio.current?.sfx("door-open");
@@ -312,6 +326,17 @@ export default function World() {
         <p className="pointer-events-none absolute bottom-8 w-full px-4 text-center text-xs tracking-widest text-white/70 [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
           {touch ? "JOYSTICK À GAUCHE · GLISSE À DROITE POUR REGARDER" : "CLIQUE POUR REGARDER · ZQSD / WASD POUR MARCHER"}
         </p>
+      )}
+
+      {toast && !menu && (
+        <div role="status" className="pointer-events-none absolute top-16 z-10 flex w-full justify-center px-4">
+          <div className="max-w-sm rounded-2xl bg-black/50 px-5 py-3 text-center">
+            <div className="text-sm font-semibold tracking-[0.3em]" style={{ color: toast.color }}>
+              {toast.title.toUpperCase()}
+            </div>
+            <div className="mt-1 text-xs text-white/70">{toast.text}</div>
+          </div>
+        </div>
       )}
 
       {focus && !menu && (
