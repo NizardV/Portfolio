@@ -15,7 +15,7 @@
 1. **À propos** (`#about`) — hero : canvas de particules (`fx/HeroCanvas`, masqué en CSS, pas d'overlay coloré),
    badge de statut, nom, sous-titre, CTA (Me contacter, GitHub, LinkedIn), carte « À propos ».
 2. **Projets** (`#projects`) — cartes compactes → dialog détaillé (`usePresence`, `useScrollLock`).
-   Projets d'école puis « Projets personnels » (`personal: true`). Actuellement seul le portfolio est perso.
+   Projets d'école puis « Projets personnels » (`personal: true`). Projets perso : Vigil et le portfolio.
 3. **Expérience** (`#experience`) — frise (`fx/Timeline`), technos en badges.
 4. **Formation** (`#education`) — frise.
 5. **Contact** (`#contact`) — formulaire → `/api/contact` (Resend ; env `RESEND_API_KEY`, `MAIL_TO`, `MAIL_FROM`).

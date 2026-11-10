@@ -54,6 +54,9 @@ import {
   SiVuedotjs,
   SiLivewire,
   SiPhpmyadmin,
+  SiDjango,
+  SiDiscord,
+  SiGooglegemini,
 } from "react-icons/si";
 
 /* -------------------- Icon maps & helpers -------------------- */
@@ -110,6 +113,9 @@ const iconMap = {
   vuedotjs: SiVuedotjs,
   livewire: SiLivewire,
   phpmyadmin: SiPhpmyadmin,
+  django: SiDjango,
+  discord: SiDiscord,
+  googlegemini: SiGooglegemini,
 } as const;
 
 type IconKey = keyof typeof iconMap;

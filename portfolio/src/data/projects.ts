@@ -46,7 +46,17 @@ export const projects: Project[] = [
     descriptionEN: "SaaS cybersecurity e-commerce platform built as a team at DIIAGE (Sup de Vinci). React/TypeScript frontend, ASP.NET Core API, Kotlin/Jetpack Compose Android app. Azure DevOps CI/CD, Docker deployment on OVH VPS with Nginx and SSL.",
     stack: [tech.react, tech.typescript, tech.aspnetcore, tech.csharp, tech.kotlin, tech.docker, tech.azuredevops],
     demo: "https://cyna.nizard.dev",
-    repo: "https://github.com/DiiageCUCDB/DI1-P5-E3_Cyna-Web",
+    repo: "https://github.com/NizardV/Cyna",
+  },
+  {
+    title: "Vigil",
+    timeframe: "2026 - Today",
+    location: "Dijon, France",
+    descriptionFR: "Plateforme personnelle d'automatisation et de veille, en monolithe modulaire Django. Veille RSS notée par LLM (Gemini) avec résumés Discord et retours 👍/👎, suivi des projets GitHub synchronisé dans Notion, audits de sécurité (Dependabot, code scanning, SonarCloud, VPS) avec alertes. Tâches de fond Procrastinate sur PostgreSQL, déployé en Docker sur un VPS OVH via GitHub Actions.",
+    descriptionEN: "Personal automation and tech-watch platform, built as a modular Django monolith. RSS watch scored by an LLM (Gemini) with Discord digests and 👍/👎 feedback, GitHub project tracking synced to Notion, security audits (Dependabot, code scanning, SonarCloud, VPS) with alerts. Procrastinate background jobs on PostgreSQL, deployed with Docker on an OVH VPS via GitHub Actions.",
+    stack: [tech.django, tech.python, tech.postgresql, tech.docker, tech.gemini, tech.discord],
+    repo: "https://github.com/NizardV/vigil-app",
+    personal: true,
   },
   {
     title: "Portfolio (nizard.dev)",
