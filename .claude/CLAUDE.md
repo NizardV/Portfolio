@@ -26,13 +26,20 @@ Ce dossier remplace l'historique des conversations : lire ce fichier, puis le sp
 - **Pas de `backdrop-filter` sur mobile** (cartes, overlays) : saccades et bugs Safari. Le header ne floute qu'à partir de `md:`.
 - Aucun élément (même `fixed`) ne doit dépasser à droite de l'écran : sur mobile la page glisse sur le côté.
 - Les styles `hover:` ne s'appliquent qu'aux appareils qui survolent (`hoverOnlyWhenSupported`).
+- **`react-icons` reste en 5.2.1** (ignoré par Dependabot) : à partir de 5.3, les icônes de marque Microsoft utilisées par
+  `SkillBadge` (`SiCsharp`, `SiVisualstudio`, `SiMicrosoftazure`…) disparaissent et le build casse. Pour le mettre à jour,
+  remplacer d'abord ces icônes (autres familles de react-icons ou SVG locaux).
+- Dépendances transitives vulnérables : `overrides` dans `portfolio/pnpm-workspace.yaml`, **sans changer de version
+  majeure**. Régénérer le lockfile avec **pnpm 10** (version de la CI ; `CI=true npx pnpm@10 install`).
 
 ## Workflow Git
 - Branche de travail imposée par la session (`claude/...`). Quand sa PR est mergée, repartir de `origin/main` sur la même branche.
 - Une PR par sujet, description en français (résumé, tests). Surveiller : Vercel (preview), SonarCloud, CodeQL, workflow E2E. Détails : `skills/ship-change`.
 
-## À reprendre (au 2026-11-05)
-- **Audit de sécurité** mis de côté : à reprendre en entier. Point de départ : 69 alertes Dependabot sur `main` (10 critiques, 28 hautes) → une PR de mise à jour des dépendances (vérifier build + `pnpm test:e2e`).
+## À reprendre (au 2026-11-10)
+- **Audit de sécurité : fait le 2026-11-10** (PR #50 et #51). Reste 1 alerte Dependabot modérée (`minimatch` 9 via
+  eslint-config-next, dev uniquement, corrigée seulement en 11) et 2 modérées à `pnpm audit` (+ `glob` via tailwind).
+  Suivi continu par Vigil (salon Discord #sécurité-alertes).
 - **Hub** (2026-11-08) : monde liminal à la première personne en prod sur `/hub` (prairie → salle jaune). Prochaine étape : le hall d'hôtel, puis les branches (voir `specs/hub.md` et Notion). Le nouveau Vigil est en prod (repo `NizardV/vigil-app`, pas dans ce repo).
 
 ## Liens
