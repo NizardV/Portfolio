@@ -1,0 +1,24 @@
+name: Dependabot
+# Fusionne automatiquement les mises à jour Dependabot PATCH et MINEURES, une fois les vérifications obligatoires
+# de la branche main vertes (protection de branche). Les mises à jour MAJEURES restent ouvertes pour relecture.
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Activer la fusion automatique (patch et mineures uniquement)
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
