@@ -2,6 +2,7 @@
 import { useEffect, useMemo } from "react";
 import { BufferAttribute, Color, PlaneGeometry } from "three";
 import { MEADOW_HOLE, MEADOW_HOUSE, meadowHeight } from "../../terrain";
+import Houses from "./Houses";
 import Flowers from "./Flowers";
 import Grass from "./Grass";
 import Sky, { HORIZON, SUN_DIR } from "./Sky";
@@ -14,16 +15,20 @@ const DEEP_GRASS = new Color("#3f8a24");
 /** Hills to the horizon, coloured per vertex: lighter on crests, deeper in hollows, with soft patches. */
 function useHills() {
   return useMemo(() => {
-    const geo = new PlaneGeometry(1100, 1100, 220, 220);
+    // a grid that is fine where you walk (~0.7 m) and loose towards the horizon (~15 m): x = 110 u + 440 u⁵
+    const geo = new PlaneGeometry(2, 2, 300, 300);
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
     const c = new Color();
+    const warp = (u: number) => 110 * u + 440 * u ** 5;
     for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      const z = pos.getZ(i);
+      const x = warp(pos.getX(i));
+      const z = warp(pos.getZ(i));
       const h = meadowHeight(x, z);
-      pos.setY(i, h);
+      // under the hole's lip the coarse mesh would poke through: tuck it below
+      const tuck = Math.hypot(x - MEADOW_HOLE.x, z - MEADOW_HOLE.z) < MEADOW_HOLE.rim + 0.4 ? 0.5 : 0;
+      pos.setXYZ(i, x, h - tuck, z);
       const patches = 0.5 + 0.25 * Math.sin(x * 0.11 + Math.sin(z * 0.07) * 2) + 0.25 * Math.sin(z * 0.13 - x * 0.05);
       const crest = Math.min(1, Math.max(0, (h - meadowHeight(x + 6, z + 6) + 1.5) / 3)); // rough « facing up-slope »
       c.copy(DEEP_GRASS).lerp(LIGHT_GRASS, Math.min(1, patches * 0.7 + crest * 0.4));
@@ -77,11 +82,7 @@ export default function Meadow() {
       <Flowers />
       <House />
       <WhiteDoor />
-      {/* the rabbit hole: black, perfectly round, half hidden by the grass */}
-      <mesh position={[MEADOW_HOLE.x, meadowHeight(MEADOW_HOLE.x, MEADOW_HOLE.z) + 0.04, MEADOW_HOLE.z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[MEADOW_HOLE.r, 40]} />
-        <meshBasicMaterial color="#000000" />
-      </mesh>
+      <Houses />
     </>
   );
 }
