@@ -2,7 +2,7 @@
 import { useEffect, useMemo } from "react";
 import { CircleGeometry, Color, InstancedMesh, Matrix4, MeshLambertMaterial, Quaternion, Euler, Vector3 } from "three";
 import { byQuality, useQuality } from "../../settings";
-import { meadowBare, meadowHeight } from "../../terrain";
+import { MEADOW_DOOR, meadowBare, meadowHeight } from "../../terrain";
 
 const WHITE = new Color("#fbfaf2");
 const YELLOW = new Color("#f3cf35");
@@ -27,8 +27,8 @@ export default function Flowers() {
       // half the patches along the way from the wake-up spot to the door, the rest scattered
       const onPath = Math.random() < 0.5;
       const t = Math.random();
-      const cx = onPath ? 6 * (1 - t) + (Math.random() - 0.5) * 18 : (Math.random() - 0.5) * 130;
-      const cz = onPath ? 22 - 34 * t + (Math.random() - 0.5) * 8 : (Math.random() - 0.5) * 130;
+      const cx = onPath ? 6 + (MEADOW_DOOR.x - 6) * t + (Math.random() - 0.5) * 20 : (Math.random() - 0.5) * 200;
+      const cz = onPath ? 22 + (MEADOW_DOOR.z + 6 - 22) * t + (Math.random() - 0.5) * 10 : (Math.random() - 0.5) * 200;
       const yellow = Math.random() < 0.4;
       const n = 20 + Math.floor(Math.random() * 40);
       for (let k = 0; k < n && i < count; k++, i++) {

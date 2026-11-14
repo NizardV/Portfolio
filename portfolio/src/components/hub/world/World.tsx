@@ -351,7 +351,7 @@ export default function World() {
         <Doorways key={`d${arrival.n}`} zone={zone} used={used} pose={pose} />
         </WorldStateContext.Provider>
         </QualityContext.Provider>
-        {filterOn && <DreamFilter light={touch || settings.quality === "low"} post={zone.post} />}
+        {filterOn && <DreamFilter light={touch || settings.quality === "low"} post={zone.post} lens={settings.lens} />}
         <Player
           key={arrival.n}
           zone={zone}

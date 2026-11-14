@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { loadJSON, saveJSON } from "./env";
+import type { Lens } from "./CameraLens";
 
 /** Player preferences, remembered in the browser (silently in-memory only if storage is blocked). */
 export type Quality = "low" | "auto" | "high";
@@ -14,6 +15,8 @@ export type Settings = {
   headBob: boolean | null;
   /** light « dream » grade: grain, softer colours, vignette */
   filter: boolean;
+  /** seen through a lens: a camera (static, fringing) or a tape (VHS) */
+  lens: Lens;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -24,6 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   invertY: false,
   headBob: null,
   filter: true,
+  lens: "camera",
 };
 
 const STORE = "hub-v2-settings";

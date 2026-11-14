@@ -1,11 +1,12 @@
 "use client";
 import { useMemo } from "react";
-import { BufferAttribute, Color, DoubleSide, LatheGeometry, RepeatWrapping, Shape, ShapeGeometry, Vector2 } from "three";
-import { MEADOW_HOLE, MEADOW_HOUSES, holeDrop, meadowHeight } from "../../terrain";
+import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute, RepeatWrapping, Shape, ShapeGeometry, Vector2 } from "three";
+import { HOLE_REACH, HOUSE_WALL, MEADOW_HOLE, MEADOW_HOUSES, holeDrop, meadowHeight } from "../../terrain";
+import { grassTint } from "./tint";
 import { useCanvas } from "../props";
 
 type House = (typeof MEADOW_HOUSES)[number];
-const T = 0.2; // wall thickness, as in the colliders (zones.ts)
+const T = HOUSE_WALL; // as in the colliders (zones.ts)
 const GAP = 0.65; // half the front doorway of the house with the white door
 
 /** Weatherboards: soft horizontal lines on the house colour, a board every 18 cm or so. */
@@ -40,7 +41,7 @@ function Window({ x, y, z, ry }: { x: number; y: number; z: number; ry: number }
 
 /** A house of the meadow: weatherboarded walls, a gable roof, windows; the first one is open and holds the door. */
 function MeadowHouse({ house }: { house: House }) {
-  const { x, z, w, d, h, color, roof } = house;
+  const { x, z, w, d, h, color, roof, lean } = house;
   const open = "door" in house && house.door;
   const boards = useBoards(color);
   const y = meadowHeight(x, z);
@@ -58,7 +59,7 @@ function MeadowHouse({ house }: { house: House }) {
   const slope = Math.atan2(rise, w / 2);
   const span = Math.hypot(rise, w / 2) + 0.35;
   return (
-    <group position={[x, y, z]}>
+    <group position={[x, y, z]} rotation={[0, 0, lean]}>
       {walls.map(([px, pz, ww, dd], k) => (
         <mesh key={k} position={[px, h / 2 - 0.3, pz]}>
           <boxGeometry args={[ww, h + 0.6, dd]} />
@@ -115,38 +116,64 @@ function MeadowHouse({ house }: { house: House }) {
   );
 }
 
-/** The hole: a soft lip of bare earth that rolls over into a black shaft. */
+/**
+ * The hole, part of the ground itself: a polar patch of the real relief (same heights, same grass colour) that sags
+ * into bare earth and curls over into a black shaft, ragged all round. It covers the coarse hills mesh, tucked below.
+ */
 function Hole() {
   const geometry = useMemo(() => {
-    const { x, z, r, rim } = MEADOW_HOLE;
-    const top = meadowHeight(x + rim + 0.5, z) + holeDrop(rim + 0.5); // ground level around it, before the drop
-    const pts: Vector2[] = [];
-    for (let k = 0; k <= 24; k++) {
-      const rr = rim + 0.3 - ((rim + 0.3 - r) * k) / 24;
-      pts.push(new Vector2(rr, top - holeDrop(rr) + 0.03));
-    }
-    for (let k = 1; k <= 12; k++) pts.push(new Vector2(r - 0.15 * Math.min(1, k / 4), top - holeDrop(r) - k * 2.2));
-    pts.reverse();
-    const g = new LatheGeometry(pts, 64);
-    // the lip follows the real ground (it is not quite level around the hole), the shaft hangs below it
-    const p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const px = p.getX(i);
-      const pz = p.getZ(i);
-      if (Math.hypot(px, pz) >= r - 0.01) p.setY(i, meadowHeight(x + px, z + pz) + 0.03);
-    }
-    // grass at the rim, earth on the lip, darkness down the shaft
-    const pos = g.attributes.position;
-    const col = new Float32Array(pos.count * 3);
-    const grass = new Color("#4f8a2a");
-    const earth = new Color("#5a4632");
+    const { x, z } = MEADOW_HOLE;
+    const A = 120; // around
+    const OUT = 2.6; // beyond the widest rim, over the tucked hills mesh
+    const LIP = 30; // rings from the inner edge out, denser near the edge
+    const SHAFT = 14;
+    const g = new BufferGeometry();
+    const pos: number[] = [];
+    const col: number[] = [];
+    const idx: number[] = [];
     const c = new Color();
-    for (let i = 0; i < pos.count; i++) {
-      const depth = top - pos.getY(i);
-      c.copy(grass).lerp(earth, Math.min(1, depth / 0.35)).multiplyScalar(Math.max(0, 1 - Math.max(0, depth - 0.5) / 1.4));
-      col.set([c.r, c.g, c.b], i * 3);
+    const earth = new Color("#4a3a2a");
+    const rows = LIP + SHAFT + 1;
+    for (let k = 0; k <= A; k++) {
+      const a = (k / A) * Math.PI * 2;
+      const ca = Math.cos(a);
+      const sa = Math.sin(a);
+      // the inner edge along this direction: where the shaft starts
+      let inner = MEADOW_HOLE.r * 0.7;
+      while (holeDrop(inner * ca, inner * sa) > MEADOW_HOLE.depth + 0.2) inner += 0.01;
+      const edgeY = meadowHeight(x + inner * ca, z + inner * sa);
+      for (let j = 0; j < rows; j++) {
+        let rr: number;
+        let y: number;
+        if (j <= SHAFT) {
+          // down the shaft, from 25 m deep up to the edge, narrowing a little
+          const t = j / SHAFT;
+          rr = inner * (0.85 + 0.15 * t);
+          y = edgeY - (1 - t) ** 1.5 * 25;
+        } else {
+          const t = (j - SHAFT) / LIP;
+          rr = inner + (HOLE_REACH.rim + OUT - inner) * t ** 1.6;
+          y = meadowHeight(x + rr * ca, z + rr * sa) + 0.04;
+        }
+        pos.push(rr * ca, y, rr * sa);
+        const drop = holeDrop(rr * ca, rr * sa);
+        grassTint(x + rr * ca, z + rr * sa, c);
+        c.lerp(earth, Math.min(1, Math.max(0, (drop - 0.12) / 0.7)) * (0.8 + 0.2 * Math.sin(a * 13 + rr * 5)));
+        c.multiplyScalar(Math.max(0, 1 - Math.max(0, drop - 1.1) / 1.8));
+        if (j < SHAFT) c.setRGB(0, 0, 0);
+        col.push(c.r, c.g, c.b);
+      }
     }
-    g.setAttribute("color", new BufferAttribute(col, 3));
+    for (let k = 0; k < A; k++) {
+      for (let j = 0; j < rows - 1; j++) {
+        const p0 = k * rows + j;
+        const p1 = (k + 1) * rows + j;
+        idx.push(p0, p0 + 1, p1, p1, p0 + 1, p1 + 1);
+      }
+    }
+    g.setAttribute("position", new Float32BufferAttribute(pos, 3));
+    g.setAttribute("color", new Float32BufferAttribute(col, 3));
+    g.setIndex(idx);
     g.computeVertexNormals();
     return g;
   }, []);
@@ -158,7 +185,7 @@ function Hole() {
 }
 
 /** A yellow diamond road sign on its post. */
-export function RoadSign({ x, z, ry = 0, lines }: { x: number; z: number; ry?: number; lines: string[] }) {
+export function RoadSign({ x, z, ry = 0, tilt = 0.1, lines }: { x: number; z: number; ry?: number; tilt?: number; lines: string[] }) {
   const face = useCanvas(256, 256, (ctx) => {
     ctx.translate(128, 128);
     ctx.rotate(Math.PI / 4);
@@ -178,7 +205,7 @@ export function RoadSign({ x, z, ry = 0, lines }: { x: number; z: number; ry?: n
   }, [lines.join("|")]);
   const y = meadowHeight(x, z);
   return (
-    <group position={[x, y, z]} rotation={[0, ry, 0]}>
+    <group position={[x, y - 0.1, z]} rotation={[0.04, ry, tilt]}>
       <mesh position={[0, 1.1, 0]}>
         <cylinderGeometry args={[0.035, 0.035, 2.2, 8]} />
         <meshStandardMaterial color="#9a9c98" metalness={0.6} roughness={0.4} />
@@ -198,7 +225,8 @@ export default function Houses() {
         <MeadowHouse key={`${h.x},${h.z}`} house={h} />
       ))}
       <Hole />
-      <RoadSign x={MEADOW_HOLE.x + 4.5} z={MEADOW_HOLE.z + 2.5} ry={0.5} lines={["WATCH", "YOUR", "STEP"]} />
+      <RoadSign x={MEADOW_HOLE.x + 5} z={MEADOW_HOLE.z - 3} ry={-0.9} tilt={0.14} lines={["WATCH", "YOUR", "STEP"]} />
+      <RoadSign x={-30} z={48} ry={2.6} tilt={-0.08} lines={["NO", "OUTLET"]} />
     </>
   );
 }

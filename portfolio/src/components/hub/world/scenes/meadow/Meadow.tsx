@@ -1,37 +1,34 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import { BufferAttribute, Color, PlaneGeometry } from "three";
-import { MEADOW_HOLE, MEADOW_HOUSE, meadowHeight } from "../../terrain";
+import { HOLE_REACH, MEADOW_HOLE, MEADOW_HOUSE, meadowHeight } from "../../terrain";
 import Houses from "./Houses";
+import { grassTint } from "./tint";
 import Flowers from "./Flowers";
 import Grass from "./Grass";
 import Sky, { HORIZON, SUN_DIR } from "./Sky";
 import WhiteDoor from "./WhiteDoor";
 import Atmosphere from "../../Atmosphere";
 
-const LIGHT_GRASS = new Color("#6fb83a");
-const DEEP_GRASS = new Color("#3f8a24");
 
 /** Hills to the horizon, coloured per vertex: lighter on crests, deeper in hollows, with soft patches. */
 function useHills() {
   return useMemo(() => {
-    // a grid that is fine where you walk (~0.7 m) and loose towards the horizon (~15 m): x = 110 u + 440 u⁵
-    const geo = new PlaneGeometry(2, 2, 300, 300);
+    // a grid that is fine where you walk (~0.75 m) and loose towards the horizon: x = 150 u + 400 u⁵
+    const geo = new PlaneGeometry(2, 2, 400, 400);
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
     const c = new Color();
-    const warp = (u: number) => 110 * u + 440 * u ** 5;
+    const warp = (u: number) => 150 * u + 400 * u ** 5;
     for (let i = 0; i < pos.count; i++) {
       const x = warp(pos.getX(i));
       const z = warp(pos.getZ(i));
       const h = meadowHeight(x, z);
       // under the hole's lip the coarse mesh would poke through: tuck it below
-      const tuck = Math.hypot(x - MEADOW_HOLE.x, z - MEADOW_HOLE.z) < MEADOW_HOLE.rim + 0.4 ? 0.5 : 0;
+      const tuck = Math.hypot(x - MEADOW_HOLE.x, z - MEADOW_HOLE.z) < HOLE_REACH.rim + 0.4 ? 0.6 : 0;
       pos.setXYZ(i, x, h - tuck, z);
-      const patches = 0.5 + 0.25 * Math.sin(x * 0.11 + Math.sin(z * 0.07) * 2) + 0.25 * Math.sin(z * 0.13 - x * 0.05);
-      const crest = Math.min(1, Math.max(0, (h - meadowHeight(x + 6, z + 6) + 1.5) / 3)); // rough « facing up-slope »
-      c.copy(DEEP_GRASS).lerp(LIGHT_GRASS, Math.min(1, patches * 0.7 + crest * 0.4));
+      grassTint(x, z, c);
       colors.set([c.r, c.g, c.b], i * 3);
     }
     geo.setAttribute("color", new BufferAttribute(colors, 3));
