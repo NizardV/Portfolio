@@ -56,11 +56,11 @@ function puffTexture() {
 
 type Puff = { position: [number, number, number]; scale: number; tint: string };
 
-function useClouds(): Puff[] {
+function useClouds(top: string, under: string, count: number): Puff[] {
   return useMemo(() => {
     const puffs: Puff[] = [];
-    for (let c = 0; c < 16; c++) {
-      const angle = (c / 16) * Math.PI * 2 + Math.random() * 0.3;
+    for (let c = 0; c < count; c++) {
+      const angle = (c / count) * Math.PI * 2 + Math.random() * 0.3;
       const dist = 220 + Math.random() * 200;
       const cx = Math.cos(angle) * dist;
       const cz = Math.sin(angle) * dist;
@@ -71,26 +71,27 @@ function useClouds(): Puff[] {
         puffs.push({
           position: [cx + (Math.random() - 0.5) * size * 1.6, cy + (Math.random() - 0.3) * size * 0.35, cz + (Math.random() - 0.5) * size * 0.8],
           scale: size * (0.6 + Math.random() * 0.6),
-          tint: below ? "#e3ebf5" : "#ffffff", // slightly greyer undersides
+          tint: below ? under : top, // slightly greyer undersides
         });
       }
     }
     return puffs;
-  }, []);
+  }, [top, under, count]);
 }
 
-export default function Sky() {
+/** A gradient sky dome with a sun, and drifting cumulus. Colours default to the meadow's clear day. */
+export default function Sky({ horizon = HORIZON, mid = MID, zenith = ZENITH, cloud = "#ffffff", cloudUnder = "#e3ebf5", cloudCount = 16, sun = SUN_DIR }: { horizon?: string; mid?: string; zenith?: string; cloud?: string; cloudUnder?: string; cloudCount?: number; sun?: [number, number, number] } = {}) {
   const clouds = useRef<Group>(null);
   const puff = useMemo(puffTexture, []);
-  const puffs = useClouds();
+  const puffs = useClouds(cloud, cloudUnder, cloudCount);
   const uniforms = useMemo(
     () => ({
-      uHorizon: { value: new Color(HORIZON) },
-      uMid: { value: new Color(MID) },
-      uZenith: { value: new Color(ZENITH) },
-      uSun: { value: SUN_DIR },
+      uHorizon: { value: new Color(horizon) },
+      uMid: { value: new Color(mid) },
+      uZenith: { value: new Color(zenith) },
+      uSun: { value: sun },
     }),
-    [],
+    [horizon, mid, zenith, sun],
   );
 
   useFrame((_, dt) => {

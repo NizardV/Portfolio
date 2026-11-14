@@ -8,7 +8,8 @@
     "dev": "next dev",
     "lint": "eslint",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "hub:audit": "node scripts/hub-audit.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",
