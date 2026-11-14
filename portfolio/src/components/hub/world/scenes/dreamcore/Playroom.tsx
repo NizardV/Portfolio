@@ -1,23 +1,27 @@
 "use client";
 import { memo, use, useMemo } from "react";
-import { BackSide, Color, InstancedMesh, MeshStandardMaterial, Object3D, Path, Shape, ShapeGeometry, SphereGeometry, Vector2 } from "three";
+import { BackSide, Path, Shape, ShapeGeometry, Vector2 } from "three";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
 import { BACKDROP, PLAY, playBuilt } from "../../places/dreamcore";
 import { usePreview } from "../../PortalWindow";
-import { Pieces, seeded, useCanvas } from "../props";
+import { Pieces, useCanvas } from "../props";
+import { BallPit, Bed, Bench, Garden, Hall, PurpleRoom, StageExtras, Tunnel } from "./PlayParts";
 
 const PALETTE: Palette = {
-  surfaces: { plaster: "#8fbbe6", carpet: "#3f7a3a", wallpaper: "#a9d2f2", void: "#c9c3b8", "ceil:ceiling": "#121212", ceiling: "#121212" },
+  surfaces: {
+    sky: "#7f9fd6", "ceil:sky": "#4a64a0", wallpaper: "#a9cdea", lawn: "#e6f2dc", wood: "#d2a874",
+    void: "#1d1d22", carpet: "#4b3c7c", panel: "#5a46a0", "ceil:concrete": "#241c40", plaster: "#f4f1ea", "ceil:plaster": "#fbf9f3",
+  },
   trim: "#e9e4d8",
   rail: "#ffffff",
   panel: "#fff8ea",
   light: "#fff1dc",
-  intensity: 9,
-  range: 12,
+  intensity: 16,
+  range: 18,
 };
-const AIR = "#08080a";
+const AIR = "#0c1124";
 const { stage } = PLAY;
 
 /** The painted sky on the back wall, and a cut-out sun that smiles (too much). */
@@ -90,12 +94,8 @@ function Backdrop() {
   );
 }
 
-/** Props of the set: wooden clouds on strings, a fence, a fake river and its bridge, a seesaw, alphabet blocks. */
+/** Props of the set: a fence, a fake river and its bridge, a seesaw, alphabet blocks. */
 function SetPieces() {
-  const clouds = useMemo<Piece[]>(() => [[-7, 6.2], [-3, 6.6], [3.5, 6.3], [7.5, 6.7]].flatMap(([x, y]) => [
-    { x, y, z: stage.z - 2, w: 2.4, h: 0.9, d: 0.3 },
-    { x, y: y + 0.9, z: stage.z - 2, w: 0.02, h: 1.3, d: 0.02 },
-  ]), []);
   const fence = useMemo(() => {
     const p: Piece[] = [];
     const gap = BACKDROP.gate.w / 2;
@@ -111,7 +111,6 @@ function SetPieces() {
   const cubes: [number, number, number, string][] = [[7.4, 0, stage.z + 3, "#e8c547"], [8.2, 0, stage.z + 3, "#e53b3b"], [7.8, 0.75, stage.z + 3, "#2c6fd6"]];
   return (
     <>
-      <Pieces pieces={clouds} color="#f4f4f0" roughness={0.9} />
       <Pieces pieces={fence} color="#f6f6f2" />
       <Pieces pieces={toys} color="#9b5a2c" />
       {cubes.map(([x, y, z, c], i) => (
@@ -135,32 +134,20 @@ function SetPieces() {
   );
 }
 
-/** The ball pit, to wade through. */
-function BallPit() {
-  const mesh = useMemo(() => {
-    const r = seeded(9);
-    const cols = ["#e53b3b", "#2c6fd6", "#e8c547", "#3aa65a", "#f28c28"].map((c) => new Color(c));
-    const n = 900;
-    const m = new InstancedMesh(new SphereGeometry(0.11, 8, 6), new MeshStandardMaterial({ roughness: 0.35 }), n);
-    const o = new Object3D();
-    for (let i = 0; i < n; i++) {
-      o.position.set(PLAY.pit.x + (r() - 0.5) * PLAY.pit.w * 0.96, -0.32 + r() * 0.34, PLAY.pit.z + (r() - 0.5) * PLAY.pit.d * 0.92);
-      o.updateMatrix();
-      m.setMatrixAt(i, o.matrix);
-      m.setColorAt(i, cols[i % cols.length]);
-    }
-    return m;
-  }, []);
-  return <primitive object={mesh} />;
-}
-
 function Playroom() {
   const built = use(playBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
-    <Place built={built} palette={PALETTE} air={AIR} density={0.03} hemi={0.65}>
+    <Place built={built} palette={PALETTE} air={AIR} density={0.014} hemi={1.15}>
       <Backdrop />
       <SetPieces />
+      <StageExtras />
       <BallPit />
+      <Bed />
+      <Bench />
+      <PurpleRoom />
+      <Tunnel />
+      <Hall />
+      <Garden />
       {/* the rabbit hole: a perfectly black circle in the green room's floor */}
       <mesh position={[PLAY.hole.x, -0.33, PLAY.hole.z]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[PLAY.hole.r - 0.05, 40]} />

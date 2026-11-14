@@ -6,7 +6,7 @@ import { floorAt, geomBounds, geomDist, type Geom, type Space, type Surface, typ
 
 /** world-metre size of one texture repeat, per material */
 export const TILE: Record<string, number> = {
-  wallpaper: 2, tile: 0.9, concrete: 3, plaster: 3, panel: 1.2,
+  wallpaper: 2, tile: 0.9, concrete: 3, plaster: 3, panel: 1.2, sky: 7, lawn: 5,
   carpet: 3, stain: 3, wood: 2.4, marble: 2.5, void: 3, ceiling: 1.2, trim: 1,
 };
 
@@ -361,7 +361,8 @@ function* buildSteps(space: Space): Steps<Built> {
       }
     };
     surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"]);
-    if (!s.open) surface(ceilLoops, flats.get(`c:${ceilingSurface(s.mat)}`), () => s.ceil, -1, TILE[ceilingSurface(s.mat)]);
+    const ck = s.ceilMat ?? ceilingSurface(s.mat);
+    if (!s.open) surface(ceilLoops, flats.get(`c:${ck}`), () => s.ceil, -1, TILE[ck]);
 
     /* ---- where a later shape takes over: soffits, risers, railings ---- */
     for (const loop of loops) {

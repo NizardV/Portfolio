@@ -3,7 +3,7 @@
  * of these later; the public API (play / step / sfx) stays.
  * Browsers only allow sound after a user gesture: call start() from a click / key / touch handler.
  */
-export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "none";
+export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "nursery" | "none";
 export type Surface = "grass" | "carpet" | "hard";
 export type Sfx = "door-open" | "door-locked";
 
@@ -179,6 +179,50 @@ function muzak(ctx: AudioContext, out: AudioNode): () => void {
   return () => clearInterval(id);
 }
 
+/**
+ * A music box somewhere in the room: a little tune, slow, each note a bright ping that rings out, the comb a bit
+ * out of tune, and now and then the spring runs low and the tune drags.
+ */
+function musicBox(ctx: AudioContext, out: AudioNode): () => void {
+  // a lullaby-like phrase in C major (MIDI notes), with rests (0)
+  const tune = [72, 76, 79, 76, 77, 74, 0, 71, 72, 76, 74, 72, 71, 67, 0, 0, 69, 72, 76, 74, 72, 71, 72, 0];
+  const g = ctx.createGain();
+  g.gain.value = 0.07;
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 300;
+  hp.connect(g).connect(out);
+  let k = 0;
+  let beat = 0.42;
+  let id: ReturnType<typeof setTimeout>;
+  const next = () => {
+    const n = tune[k % tune.length];
+    if (n) {
+      const t = ctx.currentTime;
+      const f = 440 * 2 ** ((n - 69) / 12) * rand(0.994, 1.006);
+      for (const [mult, level, decay] of [[1, 0.5, 1.6], [2.01, 0.18, 0.6], [3.98, 0.06, 0.25]] as const) {
+        const o = ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.value = f * mult;
+        const e = ctx.createGain();
+        e.gain.setValueAtTime(0.0001, t);
+        e.gain.exponentialRampToValueAtTime(level, t + 0.004);
+        e.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        o.connect(e).connect(hp);
+        o.start(t);
+        o.stop(t + decay + 0.05);
+      }
+    }
+    k++;
+    // the spring: every few rounds the tune slows down, then it is wound up again
+    if (k % tune.length === 0) beat = Math.random() < 0.35 ? 0.62 : 0.42;
+    else if (beat > 0.42) beat += 0.01;
+    id = setTimeout(next, beat * 1000);
+  };
+  id = setTimeout(next, 800);
+  return () => clearTimeout(id);
+}
+
 /** A synthetic room tail (decaying stereo noise): convincing for big, empty, hard spaces. */
 function impulse(ctx: AudioContext, seconds: number): AudioBuffer {
   const len = Math.floor(ctx.sampleRate * seconds);
@@ -265,6 +309,17 @@ function build(ctx: AudioContext, id: AmbienceId, noise: { brown: AudioBuffer; w
     src.connect(lp).connect(g).connect(gain);
     sources.push(src);
     timers.push(every(14, 40, () => distant(ctx, noise.white, gain)));
+  } else if (id === "nursery") {
+    // a big quiet room: soft air, the music box
+    const src = loop(ctx, noise.brown);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 500;
+    const air = ctx.createGain();
+    air.gain.value = 0.18;
+    src.connect(lp).connect(air).connect(gain);
+    sources.push(src);
+    timers.push(musicBox(ctx, gain));
   } else if (id === "mall") {
     // fluorescent hum, the far muzak, footsteps in another gallery
     const src = loop(ctx, noise.brown);

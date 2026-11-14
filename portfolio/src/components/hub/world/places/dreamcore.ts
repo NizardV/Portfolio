@@ -10,28 +10,87 @@ import { lazyBuilt, room } from "./common";
  * - le lotissement: an empty suburb at dusk, every window lit; a crater at the end of the street.
  */
 
-/* ---------- la salle de jeux ---------- */
-export const PLAY = { stage: { x: 0, z: -10, w: 22, d: 16 }, pit: { x: 0, z: -21, w: 12, d: 7 }, green: { x: 0, z: -48, w: 16, d: 14 }, hole: { x: 0, z: -50, r: 1.6 } };
+/* ---------- Dreamcore, inside: the playful zone, then the peaceful one ---------- */
+/*
+ * Playful (night-blue painted sky on every wall and ceiling): the stage set where you land, a bed in an alcove,
+ * a bench in a niche of sky; through the painted backdrop, the ball pit and its carousel; a purple room on two
+ * levels off to the side; the dome tunnel where a river of balls pours out of a round hole.
+ * Peaceful (white walls, grass, daylight from above): a great hall with wavy walls and a ring of tiny houses up on a
+ * mezzanine; a long indoor garden with a picket fence, turbines and trees in planters; a small room with the hole.
+ */
+export const PLAY = {
+  stage: { x: 0, z: -10, w: 22, d: 16 },
+  pitRoom: { x: 0, z: -26, w: 24, d: 16.6 },
+  pit: { x: 0, z: -26, w: 15, d: 10 },
+  carousel: { x: 0, z: -26, r: 1.9 },
+  bed: { x: 13.6, z: -8, w: 5.8, d: 6 },
+  bench: { x: -12.9, z: -13, w: 4.4, d: 4 },
+  purple: { x: -23, z: -27, w: 12.6, d: 14, ceil: 10, up: 2.4 },
+  tunnel: { x: 0, z: -45, w: 8, d: 22, ceil: 5.5 },
+  mouth: { x: 0, z: -58.2, w: 3, d: 5, h: 3 },
+  hall: { x: 0, z: -80, r: 13, lobe: 7.5, ceil: 8 },
+  ring: { inner: 6.5, outer: 10.5, y: 4.4 },
+  garden: { x: 0, z: -116.5, w: 14, d: 37, ceil: 9 },
+  green: { x: 0, z: -140.7, w: 12, d: 12 },
+  hole: { x: 0, z: -142.2, r: 1.6 },
+};
 /** the painted sky closes the stage: a doorway in it (and a gap in the fence before it) leads to the ball pit */
 export const BACKDROP = { z: PLAY.stage.z - PLAY.stage.d / 2 + 0.05, gate: { w: 2.6, h: 3 }, fence: PLAY.stage.z - PLAY.stage.d / 2 + 0.9 };
+
+const sky = { wall: "sky", ceilMat: "sky", lights: 0 } as const;
+const white = { wall: "plaster", ceilMat: "plaster" } as const;
+const { stage, pitRoom, pit, purple, tunnel, mouth, hall, garden, green, hole } = PLAY;
 const playShapes: Shape[] = [
-  room(PLAY.stage.x, PLAY.stage.z, PLAY.stage.w, PLAY.stage.d, { ceil: 8, mat: "carpet", wall: "plaster", lights: 0 }),
-  room(PLAY.pit.x, PLAY.pit.z, PLAY.pit.w, PLAY.pit.d, { floor: -0.4, ceil: 8, mat: "void", wall: "plaster", lights: 0 }),
-  room(0, -32.5, 3.2, 18, { ceil: 2.6, mat: "carpet", wall: "wallpaper", lights: 2.6 }),
-  room(PLAY.green.x, PLAY.green.z, PLAY.green.w, PLAY.green.d, { ceil: 3.2, mat: "carpet", wall: "plaster", lights: 3.2 }),
-  { kind: "circle", x: PLAY.hole.x, z: PLAY.hole.z, r: PLAY.hole.r, floor: -0.35, ceil: 3.2, mat: "void", wall: "plaster" },
+  // playful
+  room(stage.x, stage.z, stage.w, stage.d, { ceil: 8, mat: "lawn", ...sky }),
+  room(PLAY.bed.x, PLAY.bed.z, PLAY.bed.w, PLAY.bed.d, { ceil: 3, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }),
+  room(PLAY.bench.x, PLAY.bench.z, PLAY.bench.w, PLAY.bench.d, { ceil: 3.2, mat: "lawn", ...sky }),
+  room(pitRoom.x, pitRoom.z, pitRoom.w, pitRoom.d, { ceil: 7, mat: "wood", ...sky }),
+  room(pit.x, pit.z, pit.w, pit.d, { floor: -0.4, ceil: 7, mat: "void", ...sky }),
+  room(-14.4, -27, 5.4, 3.2, { ceil: 3, mat: "carpet", wall: "panel", ceilMat: "concrete", lights: 0 }),
+  room(purple.x, purple.z, purple.w, purple.d, { ceil: purple.ceil, mat: "carpet", wall: "panel", ceilMat: "concrete", lights: 0 }),
+  room(-19.9, -31.6, 4.4, 2.4, { ceil: purple.ceil, mat: "carpet", wall: "panel", ceilMat: "concrete", lights: 0, floor: { ax: -17.9, az: -31.6, bx: -21.9, bz: -31.6, ha: 0, hb: purple.up } }),
+  room(-25.5, -31, 7.6, 6, { floor: purple.up, ceil: purple.ceil, mat: "carpet", wall: "panel", ceilMat: "concrete", lights: 0 }),
+  room(tunnel.x, tunnel.z, tunnel.w, tunnel.d, { ceil: tunnel.ceil, mat: "lawn", ...sky }),
+  // the round hole at the end of the tunnel opens on a short passage, and the light changes
+  room(mouth.x, mouth.z, mouth.w, mouth.d, { ceil: mouth.h, mat: "lawn", ...white, lights: 0 }),
+  // peaceful: the great hall, a ring of lobes around a round floor (wavy walls)
+  { kind: "circle", x: hall.x, z: hall.z, r: hall.r + 1, ceil: hall.ceil, mat: "lawn", ...white, lights: 5.5 },
+  ...Array.from({ length: 12 }, (_, k): Shape => ({
+    kind: "circle",
+    x: hall.x + Math.sin((k * Math.PI) / 6) * hall.r,
+    z: hall.z + Math.cos((k * Math.PI) / 6) * hall.r,
+    r: hall.lobe,
+    ceil: hall.ceil,
+    mat: "lawn",
+    ...white,
+    lights: 0,
+  })),
+  room(garden.x, garden.z, garden.w, garden.d, { ceil: garden.ceil, mat: "lawn", ...white, lights: 0 }),
+  room(green.x, green.z, green.w, green.d, { ceil: 3.4, mat: "lawn", ...white, lights: 3.2 }),
+  { kind: "circle", x: hole.x, z: hole.z, r: hole.r, floor: -0.35, ceil: 3.4, mat: "void", ...white, lights: 0 },
 ];
-const half = (PLAY.stage.w + 0.2) / 2;
+const half = (stage.w + 0.2) / 2;
 const side = (half - BACKDROP.gate.w / 2) / 2 + BACKDROP.gate.w / 2;
-const playSolids: Solid[] = [-1, 1].flatMap((s) => [
-  { kind: "box" as const, x: s * side, z: BACKDROP.z - 0.08, w: half - BACKDROP.gate.w / 2, d: 0.1, mat: "plaster" as const }, // the painted wall
-  { kind: "box" as const, x: s * side, z: BACKDROP.fence, w: half - BACKDROP.gate.w / 2, d: 0.1, h: 0.95, ghost: true }, // the fence (drawn by the scene)
-]);
+/** where the garden's fence runs, and its trees in planters */
+export const GARDEN = { arches: [-108, -117, -126], fence: { x: -3.2, z0: -104, z1: -128 }, planters: [-108, -116, -124].map((z) => ({ x: 3, z })), turbines: [-110, -125].map((z) => ({ x: -5, z })) };
+export const RING_PILLARS = Array.from({ length: 8 }, (_, k) => ({ x: hall.x + Math.sin((k * Math.PI) / 4 + 0.39) * 8.5, z: hall.z + Math.cos((k * Math.PI) / 4 + 0.39) * 8.5 }));
+const playSolids: Solid[] = [
+  ...[-1, 1].flatMap((s) => [
+    { kind: "box" as const, x: s * side, z: BACKDROP.z - 0.08, w: half - BACKDROP.gate.w / 2, d: 0.1, mat: "sky" as const }, // the painted wall
+    { kind: "box" as const, x: s * side, z: BACKDROP.fence, w: half - BACKDROP.gate.w / 2, d: 0.1, h: 0.95, ghost: true }, // the fence (drawn by the scene)
+  ]),
+  { kind: "circle", x: PLAY.carousel.x, z: PLAY.carousel.z, r: PLAY.carousel.r, ghost: true },
+  ...RING_PILLARS.map((p): Solid => ({ kind: "circle", x: p.x, z: p.z, r: 0.45, mat: "plaster", h: PLAY.ring.y })),
+  { kind: "box", x: GARDEN.fence.x, z: (GARDEN.fence.z0 + GARDEN.fence.z1) / 2, w: 0.1, d: GARDEN.fence.z0 - GARDEN.fence.z1, h: 1, ghost: true },
+  ...GARDEN.planters.map((p): Solid => ({ kind: "box", x: p.x, z: p.z, w: 1.6, d: 1.6, h: 0.45, ghost: true })),
+  ...GARDEN.turbines.map((p): Solid => ({ kind: "circle", x: p.x, z: p.z, r: 0.3, ghost: true })),
+];
 export const PLAY_SPACE = new Space(playShapes, playSolids);
 export const playBuilt = lazyBuilt(PLAY_SPACE);
 export const PLAY_SPAWN = { x: 0, z: -4, yaw: 0 };
 /** falling: stepping into the rabbit hole */
-export const PLAY_FALL = box(PLAY.hole.x, PLAY.hole.z, 1.4, 1.4);
+export const PLAY_FALL = box(hole.x, hole.z, 1.4, 1.4);
 
 /* ---------- les collines ---------- */
 export const HILLS = { r: 58, house: { x: 24, z: -30, w: 6, d: 6 } };

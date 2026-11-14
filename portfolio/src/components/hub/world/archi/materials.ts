@@ -4,7 +4,7 @@ import { CanvasTexture, NoColorSpace, RepeatWrapping, SRGBColorSpace, type Textu
  * Procedural surfaces, drawn once per session (no network asset): a neutral colour map plus a bump map each.
  * Neutral on purpose: every place tints them with its own palette (yellow lobby, beige hotel, cold offices…).
  */
-export type SurfaceKey = "wallpaper" | "tile" | "concrete" | "plaster" | "panel" | "carpet" | "stain" | "wood" | "marble" | "void" | "ceiling";
+export type SurfaceKey = "wallpaper" | "tile" | "concrete" | "plaster" | "panel" | "carpet" | "stain" | "wood" | "marble" | "void" | "ceiling" | "sky" | "lawn";
 export type SurfaceTextures = { map: Texture; bump: Texture };
 
 type Draw = (ctx: CanvasRenderingContext2D, s: number, rnd: () => number) => void;
@@ -146,6 +146,50 @@ const SURFACES: Record<SurfaceKey, { map: Draw; bump: Draw; size?: number }> = {
       noise(ctx, s, 18, rnd);
     },
     bump: (ctx, s, rnd) => { fill("#909090")(ctx, s, rnd); for (let y = 0; y < s; y += 32) { ctx.fillStyle = "#303030"; ctx.fillRect(0, y, s, 2); } noise(ctx, s, 20, rnd); },
+  },
+  // a painted sky: soft clouds on blue, brushy; tinted per place (day blue, night blue…)
+  sky: {
+    size: 512,
+    map: (ctx, s, rnd) => {
+      fill("#8fb6e6")(ctx, s, rnd);
+      blots(ctx, s, 10, "rgba(70,110,180,0.35)", rnd, 0.15, 0.4);
+      for (let i = 0; i < 9; i++) {
+        // a cloud: a cluster of soft white puffs, flatter at the bottom
+        const cx = rnd() * s;
+        const cy = rnd() * s;
+        const w = s * (0.12 + rnd() * 0.16);
+        for (let k = 0; k < 9; k++) {
+          const x = cx + (rnd() - 0.5) * w * 1.6;
+          const y = cy + (rnd() - 0.6) * w * 0.5;
+          const r = w * (0.25 + rnd() * 0.35);
+          for (const [ox, oy] of [[0, 0], [s, 0], [-s, 0], [0, s], [0, -s]]) {
+            const g = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
+            g.addColorStop(0, "rgba(255,255,255,0.75)");
+            g.addColorStop(0.6, "rgba(245,248,255,0.35)");
+            g.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, s, s);
+          }
+        }
+      }
+      noise(ctx, s, 6, rnd);
+    },
+    bump: (ctx, s, rnd) => { fill("#808080")(ctx, s, rnd); noise(ctx, s, 10, rnd); },
+  },
+  // a mown lawn: broad stripes, two greens, fine blades
+  lawn: {
+    map: (ctx, s, rnd) => {
+      for (let y = 0; y < s; y += s / 2) {
+        ctx.fillStyle = y === 0 ? "#5f9a3c" : "#4f8a32";
+        ctx.fillRect(0, y, s, s / 2);
+      }
+      for (let i = 0; i < 2600; i++) {
+        ctx.fillStyle = rnd() < 0.5 ? "rgba(30,60,15,0.35)" : "rgba(150,200,90,0.3)";
+        ctx.fillRect(rnd() * s, rnd() * s, 1, 3 + rnd() * 4);
+      }
+      noise(ctx, s, 14, rnd);
+    },
+    bump: (ctx, s, rnd) => { fill("#808080")(ctx, s, rnd); noise(ctx, s, 60, rnd); },
   },
   marble: {
     map: (ctx, s, rnd) => {

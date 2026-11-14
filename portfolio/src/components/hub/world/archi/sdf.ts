@@ -16,8 +16,8 @@ export type Geom =
   | { kind: "ngon"; x: number; z: number; r: number; n: number; a?: number }
   | { kind: "capsule"; ax: number; az: number; bx: number; bz: number; r: number };
 
-export type Surface = "carpet" | "stain" | "tile" | "concrete" | "wood" | "marble" | "void";
-export type WallSurface = "wallpaper" | "tile" | "concrete" | "plaster" | "panel";
+export type Surface = "carpet" | "stain" | "tile" | "concrete" | "wood" | "marble" | "void" | "lawn";
+export type WallSurface = "wallpaper" | "tile" | "concrete" | "plaster" | "panel" | "sky";
 
 export type Shape = Geom & {
   floor?: Floor;
@@ -26,6 +26,8 @@ export type Shape = Geom & {
   mat?: Surface;
   /** wall look for the boundary owned by this shape */
   wall?: WallSurface;
+  /** ceiling look, when it is not the one that goes with the floor (a painted sky…) */
+  ceilMat?: "ceiling" | "plaster" | "tile" | "concrete" | "sky";
   /** ceiling lights: metres between panels (0 = none) */
   lights?: number;
   /** share of dead panels */

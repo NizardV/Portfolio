@@ -40,7 +40,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   // sensor static: fine, different every frame, stronger in the dark
   float n = lensHash(floor(uv * resolution) + fract(time * 61.0) * vec2(97.0, 131.0)) - 0.5;
   float l = luma(col);
-  col += n * (0.018 + 0.03 * (1.0 - l)) * (1.0 + uVhs * 0.8);
+  col += n * (0.016 + 0.014 * (1.0 - l)) * (1.0 + uVhs * 0.8);
   // exposure breathes
   col *= 1.0 + 0.012 * sin(time * 1.3) + 0.006 * sin(time * 7.1);
   outputColor = vec4(col, inputColor.a);
