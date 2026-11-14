@@ -5,12 +5,13 @@ Un **rêve liminal à la première personne**, exploré par curiosité. Chaque p
 Page `noindex`, three.js (R3F + drei + postprocessing) chargé uniquement ici via `dynamic(..., { ssr: false })`.
 Design complet, parcours et étapes (une PR chacune) : Notion « Design — Hub liminal v2 » (sous-page de « Hub nizard.dev »).
 
-Parcours cible : prairie dreamcore → porte blanche → hall d'hôtel (hub) → Poolrooms, centre commercial (futur
-magasin de disques / zone Musique), étage de bureaux (Vigil : poste de surveillance + salles serveurs au sous-sol),
-entrée Backrooms glitchée.
+Plan validé le 2026-11-14 (Atlas : https://claude.ai/artifact/Rc5UG9PqiQteK6YzhA5ZtX, détails dans Notion) :
+prairie → porte blanche → **le Lobby** (hub : labyrinthe jaune) → branches : bureaux isolés (dont 2 pièces pilotées par
+Vigil : salle de surveillance, salle serveurs), bassins → canaux → ville rouge (secret), commerce (futur disquaire) →
+studio, hôtel-atrium, Dreamcore (trou dans la prairie → salle de jeux → chutes en plein air), porte scellée du jeu
+Backrooms. Principe : « cohérent, et en même temps pas » ; pas d'architecture trop proche du réel.
 
-**En prod (2026-11-08)** : la prairie → porte blanche → **salle jaune** (l'ancien hub, refait en zone jouable,
-intérim en attendant le hall d'hôtel) : portes Backrooms et Vigil verrouillées, lumière du dehors pour revenir.
+**En prod** : la prairie → porte blanche → **le Lobby** ; ses seuils vers les branches sont fermés (bandeau au clic).
 `/hub/v2` (adresse de construction) redirige vers `/hub`.
 
 ## Accès
@@ -42,8 +43,13 @@ intérim en attendant le hall d'hôtel) : portes Backrooms et Vigil verrouillée
   le joueur et l'herbe) ; herbe instanciée qui suit le joueur, 3 couches en fondu (proche animée ~30 m, moyenne la plus
   dense ~70 m, lointaine peu animée ~135 m) ; ciel en dégradé (direction normalisée PAR PIXEL) + cumulus en sprites ;
   porte blanche fermée à ouvrir (s'ouvre vers le joueur).
-- **Salle jaune** (`scenes/yellow-room/`) : textures procédurales, néons (un qui clignote), portes de `universes.ts`
-  avec plaque et lumière de couleur sous la porte.
+- **Lobby** : données dans `world/lobby.ts` (grille 12 × 12 de cases de 5 m, labyrinthe généré avec une graine fixe
+  = identique pour tous ; pièces spéciales : grande salle de 10 m et sa galerie inaccessible, fosse + escalier + puits
+  d'étagères, estrade + escalier, champ de trous sur un « second lobby » en dessous, couloir écrasant ; plafonds de
+  hauteurs variées ; seuils des branches `EXITS`). Le sol (`lobbyGround`) suit escaliers et fosses ; un dénivelé
+  sur un côté ouvert devient une rambarde (collision). Rendu `scenes/lobby/` : `geometry.ts` fusionne murs, sols,
+  plafonds en quelques maillages (UV en mètres monde), `textures.ts` (papier peint, moquette, taches, faïence, béton).
+  Pour vérifier un changement de plan : générer une vue de dessus (transpiler `lobby.ts`) plutôt que marcher.
 - Pièges : dans une scène, `<color attach="background">` / `<fog>` doivent être enfants directs de la scène (pas d'un
   `<group>`), sinon le ciel reste noir. Ne jamais retirer une lumière (recompilation des shaders) : intensité 0.
 - Tests locaux : tuer tout `next start` resté sur le port 3100 avant de relancer (sinon chunks périmés, page blanche).
@@ -51,7 +57,7 @@ intérim en attendant le hall d'hôtel) : portes Backrooms et Vigil verrouillée
 ## Projets (`components/hub/universes.ts`)
 | Projet | Lieu prévu | État |
 | --- | --- | --- |
-| 🟩 Vigil (+ Infra) | étage de bureaux : poste de surveillance + salles serveurs au sous-sol | porte verrouillée dans la salle jaune |
-| 🟨 Backrooms | entrée glitchée, teaser jouable + « Jouer sur Roblox » | porte verrouillée dans la salle jaune |
+| 🟩 Vigil (+ Infra) | bureaux isolés : salle de surveillance + salle serveurs, pilotées par Vigil | ascenseur fermé dans le Lobby |
+| 🟨 Backrooms | porte scellée au fond du Lobby, teaser jouable + « Jouer sur Roblox » | porte scellée dans le Lobby |
 
 Blindtest abandonné (2026-11-08). Backlog détaillé : fiche Notion « Hub nizard.dev ».

@@ -4,7 +4,7 @@
  * Browsers only allow sound after a user gesture: call start() from a click / key / touch handler.
  */
 export type AmbienceId = "wind" | "hum" | "none";
-export type Surface = "grass" | "hard";
+export type Surface = "grass" | "carpet" | "hard";
 export type Sfx = "door-open" | "door-locked";
 
 const MAX_VOLUME = 0.35; // « 100 % » stays a background level
@@ -185,11 +185,12 @@ export class Ambience {
     src.buffer = noise.white;
     const filter = ctx.createBiquadFilter();
     const env = ctx.createGain();
-    const len = surface === "grass" ? rand(0.12, 0.18) : rand(0.05, 0.08);
-    filter.type = "bandpass";
-    filter.frequency.value = (surface === "grass" ? rand(1500, 2600) : rand(700, 1100)) * (run ? 1.2 : 1);
-    filter.Q.value = surface === "grass" ? 0.7 : 1.4;
-    const peak = (surface === "grass" ? 0.16 : 0.22) * (run ? 1.4 : 1) * rand(0.75, 1.1);
+    // grass: a soft brush · carpet: a muffled pat · hard floors: a short tap
+    const len = surface === "hard" ? rand(0.05, 0.08) : surface === "carpet" ? rand(0.08, 0.11) : rand(0.12, 0.18);
+    filter.type = surface === "carpet" ? "lowpass" : "bandpass";
+    filter.frequency.value = (surface === "grass" ? rand(1500, 2600) : surface === "carpet" ? rand(380, 560) : rand(700, 1100)) * (run ? 1.2 : 1);
+    filter.Q.value = surface === "grass" ? 0.7 : surface === "carpet" ? 0.5 : 1.4;
+    const peak = (surface === "grass" ? 0.16 : surface === "carpet" ? 0.3 : 0.22) * (run ? 1.4 : 1) * rand(0.75, 1.1);
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(peak, t + 0.015);
     env.gain.exponentialRampToValueAtTime(0.0001, t + len);

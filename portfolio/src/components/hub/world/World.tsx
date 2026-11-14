@@ -105,7 +105,7 @@ export default function World() {
     if (target.locked) {
       // a project whose place is not built yet: the door rattles and says who lives behind it
       setRattle((r) => ({ id: target.id, n: (r?.n ?? 0) + 1 }));
-      setToast({ title: target.locked.name, text: `${target.locked.tagline} · verrouillée, quelque chose se construit de l'autre côté…`, color: target.locked.color });
+      setToast({ title: target.locked.name, text: target.locked.text, color: target.locked.color });
       audio.current?.sfx("door-locked");
       return;
     }
