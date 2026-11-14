@@ -1,6 +1,5 @@
-import { buildSpace, type Built } from "./archi/build";
 import { geomDist, Space, type Shape, type Solid } from "./archi/sdf";
-import { back, throat } from "./places/common";
+import { back, lazyBuilt, throat } from "./places/common";
 import type { Interactable } from "./zones";
 
 /**
@@ -210,9 +209,9 @@ for (const e of EXITS) {
   const special = e.kind === "grate" ? { mat: "tile" as const, wall: "tile" as const } : e.kind === "sealed" ? { mat: "stain" as const } : {};
   const isStage = e.kind === "velvet";
   vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: e.kind === "sealed" ? 2.2 : 3, lights: 2.4, dead: 0.2, floor: isStage ? 1.8 : 0, ...special });
-  const target = isStage
-    ? STAGE
-    : ROOMS.filter((r) => !raised(r)).reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b));
+  const level = ROOMS.filter((r) => !raised(r));
+  const nearest = level.reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b), level[0]);
+  const target = isStage ? STAGE : nearest;
   if (isStage) vestibules.push({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, d: 3.2, a: Math.atan2(-(target.cz - vz), target.cx - vx), floor: 1.8, ceil: 4, lights: 3 });
   else if (e.kind === "sealed") corridor(vx, vz, target.cx, target.cz, { w: 2.1, ceil: 2.15, bend: true }); // the crawl
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
@@ -224,11 +223,8 @@ for (const e of EXITS) {
 // order matters: later shapes win where they overlap (corridors < rooms < ramps and pits < vestibules)
 export const LOBBY_SPACE = new Space([...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules], solids);
 
-let built: Built | null = null;
-/** Geometry is derived once per visit, then shared by the scene and the doorway previews. */
-export function lobbyBuilt(): Built {
-  return (built ??= buildSpace(LOBBY_SPACE));
-}
+/** Geometry is derived once per visit (a few ms per frame, see slice.ts), then shared by the scene and the doorways. */
+export const lobbyBuilt = lazyBuilt(LOBBY_SPACE);
 
 export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 

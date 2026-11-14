@@ -11,7 +11,7 @@ import Player, { type Pose } from "./Player";
 import PortalWindow from "./PortalWindow";
 import DreamFilter from "./DreamFilter";
 import { WorldStateContext } from "./state";
-import { SCENES } from "./scenes";
+import { PREPARE, SCENES } from "./scenes";
 import TouchControls from "./TouchControls";
 import { START_ZONE, ZONE_ORDER, ZONES, throughDoor, type Interactable, type Portal, type Spawn, type Zone, type ZoneId } from "./zones";
 
@@ -39,6 +39,13 @@ function Ready({ onReady }: { onReady: () => void }) {
 function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>; pose: MutableRefObject<Pose> }) {
   const [near, setNear] = useState<number[]>([]);
   const last = useRef(0);
+  // get every place behind this one's doors ready, shortly after arriving (code + geometry, a few ms per frame)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      for (const to of new Set(zone.portals.map((p) => p.to))) PREPARE[to]().catch(() => undefined);
+    }, 600);
+    return () => clearTimeout(t);
+  }, [zone]);
   useFrame(({ clock }) => {
     if (clock.elapsedTime - last.current < 0.3) return;
     last.current = clock.elapsedTime;

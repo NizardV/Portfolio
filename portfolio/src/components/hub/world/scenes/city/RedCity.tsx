@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
@@ -82,7 +82,7 @@ function Viaduct() {
 }
 
 function RedCity() {
-  const built = useMemo(cityBuilt, []);
+  const built = use(cityBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.028} hemi={0.7}>
       <Towers />

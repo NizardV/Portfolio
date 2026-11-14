@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place, Water } from "../../archi/Place";
@@ -29,7 +29,7 @@ function Pipes() {
 }
 
 function Canals() {
-  const built = useMemo(canalsBuilt, []);
+  const built = use(canalsBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.05} hemi={0.25} flicker={0.06}>
       <Water y={CHANNEL.water} x={CHANNEL.x} z={CHANNEL.z} w={CHANNEL.w + 0.4} d={CHANNEL.d} color="#2e5b45" glint="#c9f2b0" opacity={0.85} />

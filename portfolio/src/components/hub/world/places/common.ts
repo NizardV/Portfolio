@@ -1,4 +1,4 @@
-import { buildSpace, type Built } from "../archi/build";
+import { buildSpaceAsync, type Built } from "../archi/build";
 import type { Shape, Space } from "../archi/sdf";
 
 /** A point on a doorway plane; walking through it means walking along yaw (0 = towards -z). */
@@ -21,9 +21,9 @@ export function throat(a: Anchor, w: number, h: number, len = 1.6): Shape {
 export const back = (a: Anchor): Anchor => ({ ...a, yaw: a.yaw + Math.PI });
 
 /** Geometry is derived once per visit, on first need (scene or doorway preview), then shared. */
-export function lazyBuilt(space: Space): () => Built {
-  let built: Built | null = null;
-  return () => (built ??= buildSpace(space));
+export function lazyBuilt(space: Space): () => Promise<Built> {
+  let built: Promise<Built> | null = null;
+  return () => (built ??= buildSpaceAsync(space));
 }
 
 /** box helper for rotated rooms: centre, size, angle */

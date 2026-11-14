@@ -69,7 +69,7 @@ export default function Player(props: Props) {
 
   useEffect(() => {
     camera.rotation.order = "YXZ"; // yaw then pitch: no roll creeping in
-    if (camera.near !== 0.03) {
+    if (Math.abs(camera.near - 0.03) > 1e-6) {
       camera.near = 0.03; // so a doorway plane right in front of the eyes is never clipped
       camera.updateProjectionMatrix();
     }

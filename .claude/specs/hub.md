@@ -53,6 +53,13 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
   Lumière : plafonniers émissifs (bloom) + 3 à 10 point lights qui suivent le joueur sur les plafonniers proches.
 - **Collision** = le même champ : `Space.collide` teste 16 points autour du joueur (le min de l'union sous-estime la
   distance aux raccords : un gradient y bloquait). Marche : 0,45 m max sans rampe.
+- **Contours** (`contour.ts`) : le sens de chaque segment se décide sur la **topologie de la grille** (milieux d'arêtes
+  + coin intérieur), jamais en ré-échantillonnant le champ, et seules les boucles réellement fermées sont gardées.
+  Sinon (bug du 2026-11-14) : boucles ouvertes refermées de force → murs en travers des salles, sols/plafonds manquants.
+  Diagnostic : compter les fermetures de boucle hors mur et échantillonner la couverture des triangles de sol.
+- **Construction découpée** (`slice.ts`) : `buildSpace` est un générateur ; `lazyBuilt` le joue ~6 ms par tranche et
+  renvoie une promesse lue par `use()` dans la scène. `PREPARE` (`scenes/index.ts`) prépare code + géométrie des lieux
+  derrière les portes du lieu courant : la porte montre son lieu sans saccade.
 - **Piège** : deux formes qui se touchent **sans se chevaucher** créent un mur invisible d'épaisseur nulle. Toujours
   ≥ 0,3 m de recouvrement (`throat()` de `places/common.ts` le fait). Vérifier un plan : transpiler `places/*.ts` en
   .mjs et faire un parcours en largeur avec `fits` + règle de marche, plutôt que marcher.

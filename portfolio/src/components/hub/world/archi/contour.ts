@@ -2,6 +2,8 @@
  * Marching squares: turns a distance field into closed outlines (polylines), with the inside on the left.
  * Straight runs are simplified so a 30 m wall is two points, not seventy.
  */
+import { drain, type Steps } from "./slice";
+
 export type Pt = [number, number];
 
 // segments per case, as pairs of cell edges (0: top, 1: right, 2: bottom, 3: left); corners 0..3 = tl, tr, br, bl
@@ -10,13 +12,23 @@ const TABLE: number[][][] = [
   [[2, 3]], [[2, 0]], [[0, 1], [2, 3]], [[2, 1]], [[1, 3]], [[1, 0]], [[0, 3]], [],
 ];
 
-export function contours(f: (x: number, z: number) => number, x0: number, z0: number, x1: number, z1: number, step: number): Pt[][] {
+type Field = (x: number, z: number) => number;
+
+export function contours(f: Field, x0: number, z0: number, x1: number, z1: number, step: number): Pt[][] {
+  return drain(contourSteps(f, x0, z0, x1, z1, step));
+}
+
+/** the same, yielding every few rows (see slice.ts) */
+export function* contourSteps(f: Field, x0: number, z0: number, x1: number, z1: number, step: number): Steps<Pt[][]> {
   const nx = Math.ceil((x1 - x0) / step) + 1;
   const nz = Math.ceil((z1 - z0) / step) + 1;
   const v = new Float32Array(nx * nz);
-  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
-    // the border is always outside, so every outline closes
-    v[j * nx + i] = i === 0 || j === 0 || i === nx - 1 || j === nz - 1 ? 1 : f(x0 + i * step, z0 + j * step);
+  for (let j = 0; j < nz; j++) {
+    for (let i = 0; i < nx; i++) {
+      // the border is always outside, so every outline closes
+      v[j * nx + i] = i === 0 || j === 0 || i === nx - 1 || j === nz - 1 ? 1 : f(x0 + i * step, z0 + j * step);
+    }
+    if (j % 16 === 15) yield;
   }
   const val = (i: number, j: number) => v[j * nx + i];
   const pts = new Map<string, Pt>();
@@ -42,6 +54,7 @@ export function contours(f: (x: number, z: number) => number, x0: number, z0: nu
 
   const next = new Map<string, string>();
   for (let j = 0; j < nz - 1; j++) for (let i = 0; i < nx - 1; i++) {
+    if (i === 0 && j % 64 === 63) yield;
     const tl = val(i, j) < 0 ? 1 : 0;
     const tr = val(i + 1, j) < 0 ? 2 : 0;
     const br = val(i + 1, j + 1) < 0 ? 4 : 0;
@@ -53,16 +66,17 @@ export function contours(f: (x: number, z: number) => number, x0: number, z0: nu
       if (centre < 0) c = c === 5 ? 10 : 5;
     }
     for (const [ea, eb] of TABLE[c]) {
-      const [ka, pa] = edgePoint(i, j, ea);
-      const [kb, pb] = edgePoint(i, j, eb);
-      // orient: inside on the left of a→b (x right, z down → left normal is (dz, -dx))
-      const mx = (pa[0] + pb[0]) / 2;
-      const mz = (pa[1] + pb[1]) / 2;
-      const dx = pb[0] - pa[0];
-      const dz = pb[1] - pa[1];
-      const len = Math.hypot(dx, dz) || 1;
-      const inside = f(mx + (dz / len) * step * 0.25, mz - (dx / len) * step * 0.25) < 0;
-      if (inside) next.set(ka, kb);
+      const [ka] = edgePoint(i, j, ea);
+      const [kb] = edgePoint(i, j, eb);
+      // orient: inside on the left of a→b (x right, z down → left normal is (dz, -dx)). Decided from the grid's
+      // topology alone, with the cell's edge midpoints and the inside corner of the first edge: never degenerate
+      // (a real segment can shrink to a point when a corner sits exactly on the outline), and never a new sample
+      // of the field that could disagree with the grid and break the loop.
+      const [ax, az] = MID[ea];
+      const [bx, bz] = MID[eb];
+      const [p, q] = EDGE_CORNERS[ea];
+      const [cx, cz] = val(i + p[0], j + p[1]) < 0 ? p : q;
+      if ((cx - ax) * (bz - az) - (cz - az) * (bx - ax) > 0) next.set(ka, kb);
       else next.set(kb, ka);
     }
   }
@@ -78,10 +92,15 @@ export function contours(f: (x: number, z: number) => number, x0: number, z0: nu
       loop.push(pts.get(k)!);
       k = next.get(k);
     }
-    if (loop.length >= 3) loops.push(simplify(loop, 0.03));
+    // only loops that really close: an open chain closed by force would draw a chord across the room
+    if (k === start && loop.length >= 3) loops.push(simplify(loop, 0.03));
   }
   return loops;
 }
+
+/** cell-local edge midpoints and edge corners (0: top, 1: right, 2: bottom, 3: left) */
+const MID: Pt[] = [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]];
+const EDGE_CORNERS: [Pt, Pt][] = [[[0, 0], [1, 0]], [[1, 0], [1, 1]], [[0, 1], [1, 1]], [[0, 0], [0, 1]]];
 
 /** Ramer–Douglas–Peucker on a closed loop */
 function simplify(loop: Pt[], tol: number): Pt[] {

@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
@@ -215,7 +215,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
 /* ---------- scene ---------- */
 
 function Lobby() {
-  const built = useMemo(lobbyBuilt, []);
+  const built = use(lobbyBuilt());
   return (
     <>
       <Atmosphere background={FOG} fog={FOG} density={0.042} />

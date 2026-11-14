@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import { Color, InstancedMesh, MeshStandardMaterial, Object3D, SphereGeometry } from "three";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
@@ -137,7 +137,7 @@ function BallPit() {
 }
 
 function Playroom() {
-  const built = useMemo(playBuilt, []);
+  const built = use(playBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.03} hemi={0.65}>
       <Backdrop />

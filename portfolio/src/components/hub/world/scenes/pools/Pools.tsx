@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place, Water } from "../../archi/Place";
@@ -66,7 +66,7 @@ function Courtyard() {
 }
 
 function Pools() {
-  const built = useMemo(poolsBuilt, []);
+  const built = use(poolsBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.03} hemi={0.4} flicker={0.03}>
       <Water y={WATER} color="#2fb3b0" />

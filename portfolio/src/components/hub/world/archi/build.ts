@@ -1,6 +1,7 @@
 import { BoxGeometry, BufferAttribute, BufferGeometry, ShapeUtils, Vector2 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { contours, loopArea, pointInLoop, type Pt } from "./contour";
+import { contourSteps, loopArea, pointInLoop, type Pt } from "./contour";
+import { drain, sliced, type Steps } from "./slice";
 import { floorAt, geomBounds, geomDist, type Space, type Surface, type WallSurface } from "./sdf";
 
 /** world-metre size of one texture repeat, per material */
@@ -119,6 +120,15 @@ const ceilingSurface = (s: Surface | undefined) => (s === "tile" ? "tile" : s ==
 
 /** Everything visible of a place, derived from its distance field. Pure: run once, cache the result. */
 export function buildSpace(space: Space): Built {
+  return drain(buildSteps(space));
+}
+
+/** the same, a few milliseconds per frame: the dream keeps running while a place is being built */
+export function buildSpaceAsync(space: Space): Promise<Built> {
+  return sliced(buildSteps(space));
+}
+
+function* buildSteps(space: Space): Steps<Built> {
   const walls = new Bins();
   const flats = new Bins(); // floors "f:<surface>", ceilings "c:<surface>"
   const trim = new Builder();
@@ -128,7 +138,9 @@ export function buildSpace(space: Space): Built {
   const inward = (x: number, z: number, nx: number, nz: number) => [x + nx * 0.15, z + nz * 0.15] as const;
 
   /* ---- outer walls: the outline of the whole space ---- */
-  for (const loop of space.walls ? contours((x, z) => space.dist(x, z), bx0, bz0, bx1, bz1, STEP) : []) {
+  const outline = space.walls ? yield* contourSteps((x, z) => space.dist(x, z), bx0, bz0, bx1, bz1, STEP) : [];
+  yield;
+  for (const loop of outline) {
     let u = 0;
     for (let k = 0; k < loop.length; k++) {
       const [ax, az] = loop[k];
@@ -161,7 +173,8 @@ export function buildSpace(space: Space): Built {
     const [x0, z0, x1, z1] = geomBounds(so);
     const wall = so.mat ?? "wallpaper";
     const tile = TILE[wall];
-    for (const loop of contours((x, z) => geomDist(so, x, z), x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP)) {
+    const outlines = yield* contourSteps((x, z) => geomDist(so, x, z), x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
+    for (const loop of outlines) {
       if (loopArea(loop) >= 0) continue;
       const tris = ShapeUtils.triangulateShape(loop.map(([x, z]) => new Vector2(x, z)), []);
       const b = walls.get(wall);
@@ -177,11 +190,13 @@ export function buildSpace(space: Space): Built {
   }
 
   /* ---- each shape's own floor and ceiling, cut where later shapes take over ---- */
-  space.shapes.forEach((s, i) => {
+  for (let i = 0; i < space.shapes.length; i++) {
+    const s = space.shapes[i];
+    yield;
     const [x0, z0, x1, z1] = geomBounds(s);
     const g = (x: number, z: number) => Math.max(geomDist(s, x, z), -space.laterDist(i, x, z));
-    const loops = contours(g, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
-    if (!loops.length) return;
+    const loops = yield* contourSteps(g, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
+    if (!loops.length) continue;
     const outers = loops.filter((l) => loopArea(l) < 0);
     const holes = loops.filter((l) => loopArea(l) >= 0);
     const floorKey = `f:${s.mat ?? "carpet"}`;
@@ -279,7 +294,7 @@ export function buildSpace(space: Space): Built {
         panels.push({ x, y: s.ceil - 0.02, z, a, size: big ? [1.6, 1.6] : [1.2, 0.6], dead: rnd() < (s.dead ?? 0.12) });
       }
     }
-  });
+  }
 
   const flat = [...flats.geometries()];
   return {

@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
@@ -124,7 +124,7 @@ function RecordsAndHouse() {
 }
 
 function Mall() {
-  const built = useMemo(mallBuilt, []);
+  const built = use(mallBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.026} hemi={0.35} flicker={0.04}>
       <Shopfronts />

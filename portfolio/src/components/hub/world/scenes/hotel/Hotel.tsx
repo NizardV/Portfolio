@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
@@ -60,7 +60,7 @@ function FloorsBelow() {
 }
 
 function Hotel() {
-  const built = useMemo(hotelBuilt, []);
+  const built = use(hotelBuilt());
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.022} hemi={0.32} flicker={0.03}>
       <FloorsBelow />

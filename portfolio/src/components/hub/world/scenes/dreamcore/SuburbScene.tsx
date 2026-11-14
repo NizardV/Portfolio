@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, use, useMemo } from "react";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
@@ -22,7 +22,7 @@ const COLORS = ["#f2d06b", "#e9e1cf", "#d7a6a0", "#c9d6e0"];
 
 /** Le lotissement: dusk, pink and peach, an empty street, every window lit. A crater at the end. */
 function SuburbScene() {
-  const built = useMemo(suburbBuilt, []);
+  const built = use(suburbBuilt());
   const street = useMemo<Piece[]>(() => [
     { x: 0, y: -0.01, z: -SUBURB.street.len / 2 + 4, w: SUBURB.street.w, h: 0.02, d: SUBURB.street.len },
     ...[-1, 1].map((s) => ({ x: s * (SUBURB.street.w / 2 + 0.9), y: 0, z: -SUBURB.street.len / 2 + 4, w: 1.8, h: 0.12, d: SUBURB.street.len })),
