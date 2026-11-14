@@ -1,18 +1,19 @@
 "use client";
-import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Ambience } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
 import { QualityContext, isSoftwareRenderer, canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
 import { createControls, useKeyboard } from "./input";
 import GameMenu from "./GameMenu";
-import Player from "./Player";
+import Player, { type Pose } from "./Player";
+import PortalWindow from "./PortalWindow";
 import DreamFilter from "./DreamFilter";
 import { WorldStateContext } from "./state";
 import { SCENES } from "./scenes";
 import TouchControls from "./TouchControls";
-import { START_ZONE, ZONE_ORDER, ZONES, type Interactable, type Portal, type Spawn, type ZoneId } from "./zones";
+import { START_ZONE, ZONE_ORDER, ZONES, throughDoor, type Interactable, type Portal, type Spawn, type Zone, type ZoneId } from "./zones";
 
 const WAKE_MS = 1800; // first fade from white: waking up
 const FADE_MS = 500; // between zones
@@ -32,6 +33,28 @@ function Ready({ onReady }: { onReady: () => void }) {
     return () => cancelAnimationFrame(id);
   }, [onReady]);
   return null;
+}
+
+/** Doorways near the player show the place behind them, live (kept to the near ones: each costs a render). */
+function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>; pose: MutableRefObject<Pose> }) {
+  const [near, setNear] = useState<number[]>([]);
+  const last = useRef(0);
+  useFrame(({ clock }) => {
+    if (clock.elapsedTime - last.current < 0.3) return;
+    last.current = clock.elapsedTime;
+    const list = zone.portals
+      .map((p, i) => [p, i] as const)
+      .filter(([p]) => p.link && (!p.requires || used.has(p.requires)) && Math.hypot(p.link.from.x - pose.current.x, p.link.from.z - pose.current.z) < 32)
+      .map(([, i]) => i);
+    if (list.join() !== near.join()) setNear(list);
+  });
+  return (
+    <>
+      {near.map((i) => (
+        <PortalWindow key={i} portal={zone.portals[i]} />
+      ))}
+    </>
+  );
 }
 
 function useDiscovered(zone: ZoneId) {
@@ -58,6 +81,7 @@ export default function World() {
   const lastUnlock = useRef(0);
 
   const [arrival, setArrival] = useState<Arrival>({ zone: START_ZONE, spawn: ZONES[START_ZONE].spawn, n: 0 });
+  const pose = useRef<Pose>({ x: ZONES[START_ZONE].spawn.x, z: ZONES[START_ZONE].spawn.z, yaw: ZONES[START_ZONE].spawn.yaw, pitch: 0 });
   const [veil, setVeil] = useState<Veil>({ color: "#ffffff", opaque: true, ms: WAKE_MS });
   const [menu, setMenu] = useState(false);
   const menuRef = useRef(menu);
@@ -159,6 +183,7 @@ export default function World() {
   }, []);
   useEffect(() => audio.current?.play(zone.ambience), [zone.ambience]);
   useEffect(() => audio.current?.setLevel(settings.volume, settings.muted), [settings.volume, settings.muted]);
+  useEffect(() => audio.current?.setSpace(zone.reverb ?? 0), [zone.reverb]);
   useEffect(() => {
     // the page's own fullscreen fires fullscreenchange; the browser's (F11) only shows up as a resize
     const sync = () => setFullscreen(fullscreenMode());
@@ -190,7 +215,12 @@ export default function World() {
   const onPortal = useCallback(
     (p: Portal) => {
       if (p.opens) markUsed(p.opens);
-      travel(p.to, p.arrive ?? ZONES[p.to].spawn, p.veil);
+      if (p.link) {
+        // seamless: the place behind the doorway was already on screen; continue there, same step, same gaze
+        setArrival((a) => ({ zone: p.to, spawn: throughDoor(p.link!, pose.current), n: a.n + 1 }));
+        return;
+      }
+      travel(p.to, p.arrive ?? ZONES[p.to].spawn, p.veil ?? "#000000");
     },
     [travel, markUsed],
   );
@@ -280,7 +310,7 @@ export default function World() {
           filter: waking && !reducedMotion ? "blur(10px)" : "none",
           transition: reducedMotion ? undefined : "filter 2.6s ease-out",
         }}
-        camera={{ fov: 70, near: 0.05, far: 600 }}
+        camera={{ fov: 70, near: 0.03, far: 600 }}
         dpr={pixelRatio(weak && settings.quality === "auto" ? "low" : settings.quality, touch)}
         onCreated={({ gl }) => setWeak(isSoftwareRenderer(gl.getContext()))}
         onClick={() => {
@@ -299,9 +329,10 @@ export default function World() {
             <Ready onReady={onReady} />
           </Fragment>
         </Suspense>
+        <Doorways key={`d${arrival.n}`} zone={zone} used={used} pose={pose} />
         </WorldStateContext.Provider>
         </QualityContext.Provider>
-        {filterOn && <DreamFilter light={touch} />}
+        {filterOn && <DreamFilter light={touch || settings.quality === "low"} post={zone.post} />}
         <Player
           key={arrival.n}
           zone={zone}
@@ -313,6 +344,7 @@ export default function World() {
           invertY={settings.invertY}
           bob={headBob}
           used={used}
+          pose={pose}
           onStep={onStep}
           onFocus={setFocus}
           onMove={onMove}

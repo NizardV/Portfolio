@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { CanvasTexture, MathUtils, type Group, type MeshBasicMaterial, type PointLight } from "three";
+import { CanvasTexture, MathUtils, type Group, type PointLight } from "three";
 import { useWorldState } from "../../state";
 import { MEADOW_DOOR, meadowHeight } from "../../terrain";
 import { MEADOW_DOOR_ID } from "../../zones";
@@ -11,7 +11,7 @@ const H = 2.2;
 const POST = 0.14;
 const SINK = 0.4; // the frame goes into the ground: it never floats on the slope
 const PAINT = "#f7f6f0";
-const WARM = "#ffe6bd"; // light from the other side: the hotel hall
+const WARM = "#ffe7a8"; // light from the other side: the Lobby's tubes
 const OPEN_ANGLE = -1.45; // radians: swings towards the player, like pulling it open
 
 /** A soft dark blot under the door, so it sits on the grass instead of hovering. */
@@ -44,8 +44,6 @@ export default function WhiteDoor() {
   const open = used.has(MEADOW_DOOR_ID);
   const shadow = useShadowTexture();
   const leaf = useRef<Group>(null);
-  const glowFront = useRef<MeshBasicMaterial>(null);
-  const glowBack = useRef<MeshBasicMaterial>(null);
   const light = useRef<PointLight>(null);
   const progress = useRef(open ? 1 : 0); // already open when coming back through it
 
@@ -55,8 +53,6 @@ export default function WhiteDoor() {
     const p = progress.current;
     if (leaf.current) leaf.current.rotation.y = OPEN_ANGLE * p;
     const glow = Math.min(1, p * 2.5);
-    if (glowFront.current) glowFront.current.opacity = glow;
-    if (glowBack.current) glowBack.current.opacity = glow;
     if (light.current) light.current.intensity = 4 * glow; // kept at 0, never removed: no shader recompile
   });
 
@@ -76,15 +72,7 @@ export default function WhiteDoor() {
         <meshStandardMaterial color={PAINT} roughness={0.6} />
       </mesh>
 
-      {/* the other side: warm and bright, revealed as the door opens (seen from both sides: it's a dream) */}
-      <mesh position={[0, H / 2, -0.05]}>
-        <planeGeometry args={[W, H]} />
-        <meshBasicMaterial ref={glowFront} color={WARM} toneMapped={false} transparent opacity={0} depthWrite={false} />
-      </mesh>
-      <mesh position={[0, H / 2, 0.05]} rotation={[0, Math.PI, 0]}>
-        <planeGeometry args={[W, H]} />
-        <meshBasicMaterial ref={glowBack} color={WARM} toneMapped={false} transparent opacity={0} depthWrite={false} />
-      </mesh>
+      {/* the other side is seen live through the opening (PortalWindow); its yellow light spills out */}
       <pointLight ref={light} position={[0, 1.3, 0.7]} color={WARM} intensity={0} distance={6} decay={1.5} />
 
       {/* leaf, hinged on the left post */}

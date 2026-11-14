@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { Color, DoubleSide, InstancedMesh, Matrix4, PlaneGeometry, Quaternion, ShaderMaterial, UniformsLib, UniformsUtils, Vector3, Vector4 } from "three";
 import { byQuality, useQuality } from "../../settings";
 import { MEADOW_HEIGHT_GLSL } from "../../terrain";
+import { usePreview } from "../../PortalWindow";
 
 /**
  * Grass that follows the player. Each layer is a square patch of blades laid out once; the vertex shader wraps
@@ -56,6 +57,8 @@ void main() {
   #include <colorspace_fragment>
   #include <fog_fragment>
 }`;
+
+const LOCAL = new Vector3();
 
 function bladeGeometry() {
   const geo = new PlaneGeometry(0.09, 1, 1, 3);
@@ -113,16 +116,20 @@ function useGrassLayer({ count, patch, fade, width, height, wind }: Layer) {
   useFrame(({ clock, camera }) => {
     const u = (mesh.material as ShaderMaterial).uniforms;
     u.uTime.value = clock.elapsedTime;
-    u.uCenter.value = [camera.position.x, camera.position.z];
+    LOCAL.copy(camera.position);
+    mesh.worldToLocal(LOCAL);
+    u.uCenter.value = [LOCAL.x, LOCAL.z];
   });
 
   return mesh;
 }
 
 export default function Grass() {
+  const preview = usePreview();
   const quality = useQuality();
+  const scale = preview ? 0.35 : 1; // seen through a doorway: far fewer blades are enough
   const near = useGrassLayer({
-    count: byQuality(quality, { low: 16000, phone: 36000, desktop: 80000, high: 120000 }), // same density as before, over a wider patch
+    count: Math.round(byQuality(quality, { low: 16000, phone: 36000, desktop: 80000, high: 120000 }) * scale), // same density as before, over a wider patch
     patch: 64,
     fade: [-1, 0, 23, 31],
     width: 1,
@@ -130,7 +137,7 @@ export default function Grass() {
     wind: 1,
   });
   const mid = useGrassLayer({
-    count: byQuality(quality, { low: 8000, phone: 20000, desktop: 55000, high: 85000 }),
+    count: Math.round(byQuality(quality, { low: 8000, phone: 20000, desktop: 55000, high: 85000 }) * scale),
     patch: 150,
     fade: [21, 29, 58, 72],
     width: 1.9,
@@ -138,7 +145,7 @@ export default function Grass() {
     wind: 0.7,
   });
   const far = useGrassLayer({
-    count: byQuality(quality, { low: 6000, phone: 14000, desktop: 35000, high: 50000 }),
+    count: Math.round(byQuality(quality, { low: 6000, phone: 14000, desktop: 35000, high: 50000 }) * scale),
     patch: 290,
     fade: [56, 66, 112, 138],
     width: 3.4,

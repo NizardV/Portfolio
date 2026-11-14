@@ -6,6 +6,7 @@ import Flowers from "./Flowers";
 import Grass from "./Grass";
 import Sky, { HORIZON, SUN_DIR } from "./Sky";
 import WhiteDoor from "./WhiteDoor";
+import Atmosphere from "../../Atmosphere";
 
 const LIGHT_GRASS = new Color("#6fb83a");
 const DEEP_GRASS = new Color("#3f8a24");
@@ -65,8 +66,7 @@ export default function Meadow() {
   const sun = SUN_DIR.map((v) => v * 100) as [number, number, number];
   return (
     <>
-      <color attach="background" args={[HORIZON]} />
-      <fog attach="fog" args={[HORIZON, 90, 540]} />
+      <Atmosphere background={HORIZON} fog={HORIZON} near={90} far={540} />
       <hemisphereLight args={["#d6eaff", "#4f7f2a", 1.15]} />
       <directionalLight position={sun} intensity={2.3} color="#fff4dc" />
       <Sky />

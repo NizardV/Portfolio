@@ -3,7 +3,7 @@
  * of these later; the public API (play / step / sfx) stays.
  * Browsers only allow sound after a user gesture: call start() from a click / key / touch handler.
  */
-export type AmbienceId = "wind" | "hum" | "none";
+export type AmbienceId = "wind" | "hum" | "lobby" | "none";
 export type Surface = "grass" | "carpet" | "hard";
 export type Sfx = "door-open" | "door-locked";
 
@@ -76,6 +76,70 @@ function chirp(ctx: AudioContext, out: AudioNode) {
   }
 }
 
+/** A far-away event in a huge empty building: mostly reverb, barely any direct sound. */
+function distant(ctx: AudioContext, noise: AudioBuffer, out: AudioNode) {
+  const t = ctx.currentTime;
+  const pan = ctx.createStereoPanner();
+  pan.pan.value = rand(-0.9, 0.9);
+  pan.connect(out);
+  const kind = Math.random();
+  if (kind < 0.4) {
+    // a heavy door or a metal panel, somewhere
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = rand(180, 420);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(rand(0.25, 0.5), t + 0.01);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + rand(0.4, 0.9));
+    src.connect(lp).connect(env).connect(pan);
+    src.start(t, rand(0, NOISE_SECONDS - 1), 1.2);
+  } else if (kind < 0.75) {
+    // footsteps that are not yours
+    const n = 4 + Math.floor(Math.random() * 5);
+    const gap = rand(0.45, 0.62);
+    for (let k = 0; k < n; k++) {
+      const at = t + k * gap;
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 450;
+      const env = ctx.createGain();
+      env.gain.setValueAtTime(0.0001, at);
+      env.gain.exponentialRampToValueAtTime(0.09 * (1 - k / (n + 2)), at + 0.015);
+      env.gain.exponentialRampToValueAtTime(0.0001, at + 0.1);
+      src.connect(lp).connect(env).connect(pan);
+      src.start(at, rand(0, NOISE_SECONDS - 1), 0.15);
+    }
+  } else {
+    // the building groaning: a slow, very low tone
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(rand(38, 55), t);
+    osc.frequency.linearRampToValueAtTime(rand(30, 45), t + 3);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.18, t + 1.2);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+    osc.connect(env).connect(pan);
+    osc.start(t);
+    osc.stop(t + 3.6);
+  }
+}
+
+/** A synthetic room tail (decaying stereo noise): convincing for big, empty, hard spaces. */
+function impulse(ctx: AudioContext, seconds: number): AudioBuffer {
+  const len = Math.floor(ctx.sampleRate * seconds);
+  const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2);
+  }
+  return buf;
+}
+
 function build(ctx: AudioContext, id: AmbienceId, noise: { brown: AudioBuffer; white: AudioBuffer }, out: AudioNode): Layer | null {
   if (id === "none") return null;
   const gain = ctx.createGain();
@@ -105,6 +169,45 @@ function build(ctx: AudioContext, id: AmbienceId, noise: { brown: AudioBuffer; w
       );
     }
     timers.push(every(4, 13, () => chirp(ctx, gain)));
+  } else if (id === "lobby") {
+    // weight: a low drone that beats against itself, the buzz of a thousand tubes, stale air, distant events
+    for (const [freq, level] of [[47, 0.16], [48.6, 0.12], [96, 0.05]] as const) {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.value = level;
+      osc.connect(g).connect(gain);
+      osc.start();
+      sources.push(osc);
+    }
+    const buzz = ctx.createOscillator();
+    buzz.type = "sawtooth";
+    buzz.frequency.value = 120;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 2200;
+    bp.Q.value = 3;
+    const bg = ctx.createGain();
+    bg.gain.value = 0.016;
+    buzz.connect(bp).connect(bg).connect(gain);
+    buzz.start();
+    sources.push(buzz);
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.07;
+    const depth = ctx.createGain();
+    depth.gain.value = 0.008;
+    lfo.connect(depth).connect(bg.gain);
+    lfo.start();
+    sources.push(lfo);
+    const air = loop(ctx, noise.brown);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 260;
+    const ag = ctx.createGain();
+    ag.gain.value = 0.3;
+    air.connect(lp).connect(ag).connect(gain);
+    sources.push(air);
+    timers.push(every(10, 32, () => distant(ctx, noise.white, gain)));
   } else {
     // mains hum of fluorescent tubes + faint ventilation
     const src = loop(ctx, noise.brown);
@@ -141,6 +244,10 @@ export class Ambience {
   private layer: Layer | null = null;
   private current: AmbienceId = "none";
   private level = 0;
+  /** everything goes through the bus: dry to the master, and a share to the reverb */
+  private bus: GainNode | null = null;
+  private send: GainNode | null = null;
+  private space = 0;
 
   /** Must run inside a user gesture. Safe to call repeatedly. */
   start() {
@@ -154,6 +261,13 @@ export class Ambience {
     this.master = this.ctx.createGain();
     this.master.gain.value = this.level;
     this.master.connect(this.ctx.destination);
+    this.bus = this.ctx.createGain();
+    this.bus.connect(this.master);
+    this.send = this.ctx.createGain();
+    this.send.gain.value = this.space;
+    const verb = this.ctx.createConvolver();
+    verb.buffer = impulse(this.ctx, 3.4);
+    this.bus.connect(this.send).connect(verb).connect(this.master);
     this.noise = { brown: noiseBuffer(this.ctx, true), white: noiseBuffer(this.ctx, false) };
     const wanted = this.current;
     this.current = "none";
@@ -164,7 +278,8 @@ export class Ambience {
   play(id: AmbienceId) {
     if (id === this.current) return;
     this.current = id;
-    const { ctx, master, noise } = this;
+    const { ctx, noise } = this;
+    const master = this.bus;
     if (!ctx || !master || !noise) return;
     const now = ctx.currentTime;
     const old = this.layer;
@@ -178,7 +293,8 @@ export class Ambience {
 
   /** One footstep: a soft brush in grass, a short tap on hard floors. Running = louder, brighter. */
   step(surface: Surface, run: boolean) {
-    const { ctx, master, noise } = this;
+    const { ctx, noise } = this;
+    const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
     const src = ctx.createBufferSource();
@@ -200,7 +316,8 @@ export class Ambience {
 
   /** One-shot effects. */
   sfx(name: Sfx) {
-    const { ctx, master, noise } = this;
+    const { ctx, noise } = this;
+    const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
     if (name === "door-locked") {
@@ -259,6 +376,12 @@ export class Ambience {
     wobble.stop(t + 1.8);
   }
 
+  /** 0..1: how much the place echoes (open meadow: none; the Lobby: a lot) */
+  setSpace(amount: number) {
+    this.space = amount;
+    if (this.ctx && this.send) this.send.gain.setTargetAtTime(amount, this.ctx.currentTime, 0.4);
+  }
+
   /** volume 0..1 (from the menu); muted wins. */
   setLevel(volume: number, muted: boolean) {
     this.level = muted ? 0 : Math.max(0, Math.min(1, volume)) * MAX_VOLUME;
@@ -268,6 +391,6 @@ export class Ambience {
   dispose() {
     this.layer?.stop();
     void this.ctx?.close();
-    this.ctx = this.master = this.noise = this.layer = null;
+    this.ctx = this.master = this.noise = this.layer = this.bus = this.send = null;
   }
 }

@@ -1,29 +1,14 @@
-import { box, type Box } from "./collision";
+import { buildSpace, type Built } from "./archi/build";
+import { geomDist, Space, type Shape, type Solid } from "./archi/sdf";
 import type { Interactable } from "./zones";
 
 /**
- * The Lobby, as data: a 12 × 12 grid of 5 m cells carved into a maze, with special rooms that play with
- * height (a 10 m hall, a sunken pit, a raised platform, a floor full of holes) and the thresholds of the branches.
- * Everything is derived from one seeded generator: the scene draws it, the player walks it, collisions match.
- * Same seed = same Lobby for everyone.
+ * The Lobby: the hub of the dream, about 160 × 160 m. Hand-placed landmark rooms (a tilted hall 12 m high,
+ * an octagonal rotunda over a bottomless well, a triangular room, a sunken plaza, a raised stage, a forest of
+ * pillars, a shaft far too tall) linked by corridors that bend and meet at odd angles, plus seeded filler rooms.
+ * Same seed = same Lobby for everyone. Everything walkable and visible is derived from these shapes (archi/).
  */
-export const N = 12;
-export const C = 5; // cell size, metres
-export const HALF = (N * C) / 2; // the Lobby spans -30..30 on x and z
-export const WALL_T = 0.25;
-export const DOOR_W = 1.5;
-export const DOOR_H = 2.3;
 
-export type Mat = "carpet" | "stain" | "tile" | "concrete";
-export type Stair = { axis: "x" | "z"; atMin: number; atMax: number };
-export type Tag = "hall" | "pit" | "pitStairs" | "platform" | "platformStairs" | "holes" | "crawl" | "pool" | "arrival" | "elevator" | "mall";
-export type Cell = { i: number; j: number; floor: number; ceil: number; mat: Mat; lights: number; stair?: Stair; tag?: Tag };
-export type EdgeKind = "wall" | "door" | "open";
-/** a cell side shared by two cells: `vertical` = a line of constant x */
-export type Edge = { a: Cell; b: Cell; vertical: boolean; x: number; z: number; kind: EdgeKind; offset: number; blocked: boolean };
-export type Exit = { id: string; kind: "sealed" | "elevator" | "grate" | "glass" | "velvet"; x: number; z: number; y: number; angle: number; color: string; name: string; text: string };
-
-/* ---------- seeded randomness: the Lobby is the same for every visitor ---------- */
 function mulberry32(seed: number) {
   return () => {
     seed |= 0;
@@ -33,200 +18,210 @@ function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const rnd = mulberry32(1994);
+const rnd = mulberry32(2611);
+const range = (a: number, b: number) => a + rnd() * (b - a);
 
-export const cx = (i: number) => -HALF + C * (i + 0.5);
-export const cz = (j: number) => -HALF + C * (j + 0.5);
+export type Anchor = { x: number; z: number; y: number; yaw: number };
+export type Exit = { id: string; kind: "sealed" | "elevator" | "grate" | "glass" | "velvet"; anchor: Anchor; color: string; name: string; text: string };
 
-/* ---------- cells ---------- */
-export const CELLS: Cell[][] = Array.from({ length: N }, (_, i) =>
-  Array.from({ length: N }, (_, j) => ({ i, j, floor: 0, ceil: 3, mat: "carpet" as Mat, lights: 2 })),
-);
-function area(i0: number, i1: number, j0: number, j1: number, patch: Partial<Cell>) {
-  for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) Object.assign(CELLS[i][j], patch);
-}
-area(3, 6, 3, 6, { ceil: 10, tag: "hall", mat: "stain" });
-area(8, 9, 1, 2, { floor: -2.2, ceil: 3, tag: "pit", mat: "concrete", lights: 1 });
-area(8, 8, 3, 3, { ceil: 3, tag: "pitStairs", mat: "concrete", stair: { axis: "z", atMin: -2.2, atMax: 0 } });
-area(0, 1, 7, 9, { floor: 1.4, ceil: 4.4, tag: "platform" });
-area(2, 2, 8, 8, { ceil: 4.4, tag: "platformStairs", stair: { axis: "x", atMin: 1.4, atMax: 0 } });
-area(9, 10, 7, 8, { tag: "holes" });
-area(0, 0, 0, 4, { ceil: 2.2, tag: "crawl", mat: "stain", lights: 1 });
-area(6, 7, 0, 0, { tag: "pool", mat: "tile" });
-area(5, 6, 10, 11, { tag: "arrival" });
-area(11, 11, 4, 4, { tag: "elevator", mat: "stain" });
-area(11, 11, 9, 9, { tag: "mall" });
-// stains here and there, and some dead lights: the place is not maintained
-for (const col of CELLS) for (const c of col) {
-  if (!c.tag && rnd() < 0.18) c.mat = "stain";
-  if (!c.tag && rnd() < 0.14) c.lights = 0;
-  // ceilings that do not agree with each other: a low room, then one much too tall
-  const h = rnd();
-  if (!c.tag && h < 0.14) c.ceil = 2.45;
-  else if (!c.tag && h > 0.88) c.ceil = 5.5 + rnd() * 2;
-}
+/* ---------- landmarks ---------- */
+type Room = Shape & { cx: number; cz: number };
+const room = (s: Shape): Room => ({ ...s, cx: "x" in s ? s.x : (s.ax + s.bx) / 2, cz: "z" in s ? s.z : (s.az + s.bz) / 2 });
 
-export function cellAt(x: number, z: number): Cell | null {
-  const i = Math.floor((x + HALF) / C);
-  const j = Math.floor((z + HALF) / C);
-  return i >= 0 && i < N && j >= 0 && j < N ? CELLS[i][j] : null;
-}
-function cellGround(c: Cell, x: number, z: number) {
-  if (!c.stair) return c.floor;
-  const t = c.stair.axis === "x" ? (x - (-HALF + c.i * C)) / C : (z - (-HALF + c.j * C)) / C;
-  const k = Math.min(1, Math.max(0, t));
-  return c.stair.atMin + (c.stair.atMax - c.stair.atMin) * k;
-}
-/** Floor height under the player. */
-export function lobbyGround(x: number, z: number) {
-  const c = cellAt(x, z);
-  return c ? cellGround(c, x, z) : 0;
-}
+/** walking in from the meadow: the doorway plane is at z = 76, looking north (-z) */
+export const LOBBY_ARRIVAL: { x: number; z: number; y: number; yaw: number } = { x: 0, z: 76, y: 0, yaw: 0 };
 
-/* ---------- edges and the maze ---------- */
-export const EDGES: Edge[] = [];
-const edgeMap = new Map<string, Edge>();
-const key = (a: Cell, b: Cell) => (a.i * N + a.j < b.i * N + b.j ? `${a.i},${a.j}|${b.i},${b.j}` : `${b.i},${b.j}|${a.i},${a.j}`);
-for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
-  const a = CELLS[i][j];
-  if (i + 1 < N) {
-    const e: Edge = { a, b: CELLS[i + 1][j], vertical: true, x: -HALF + C * (i + 1), z: cz(j), kind: "wall", offset: 0, blocked: false };
-    EDGES.push(e);
-    edgeMap.set(key(a, e.b), e);
-  }
-  if (j + 1 < N) {
-    const e: Edge = { a, b: CELLS[i][j + 1], vertical: false, x: cx(i), z: -HALF + C * (j + 1), kind: "wall", offset: 0, blocked: false };
-    EDGES.push(e);
-    edgeMap.set(key(a, e.b), e);
+export const HALL = room({ kind: "box", x: -6, z: 16, w: 34, d: 26, a: 0.17, ceil: 12, mat: "stain", lights: 4.2, dead: 0.2, tag: "hall" });
+export const ROTUNDA = room({ kind: "ngon", x: 34, z: -20, r: 13, n: 8, a: Math.PI / 8, ceil: 10, lights: 3.4, tag: "rotunda" });
+const TRIANGLE = room({ kind: "ngon", x: -44, z: -6, r: 14, n: 3, a: 0.4, ceil: 4.4, lights: 3, mat: "stain" });
+export const PLAZA = room({ kind: "box", x: 42, z: 34, w: 22, d: 18, a: -0.32, floor: -2.4, ceil: 5.4, mat: "concrete", wall: "concrete", lights: 3.6, dead: 0.25 });
+export const STAGE = room({ kind: "box", x: -48, z: 38, w: 20, d: 14, a: 0.6, floor: 1.8, ceil: 5.6, lights: 3.2 });
+export const HOLES_ROOM = room({ kind: "box", x: 8, z: -38, w: 18, d: 18, a: 0.1, ceil: 3.3, lights: 3, tag: "holes" });
+const FOREST = room({ kind: "box", x: -28, z: -44, w: 26, d: 20, a: -0.08, ceil: 6.5, lights: 3.4, dead: 0.45, mat: "stain" });
+const SHAFT = room({ kind: "box", x: 60, z: 2, w: 6, d: 14, a: 0.9, ceil: 18, lights: 2.4 });
+const ARRIVAL_ROOM = room({ kind: "box", x: 0, z: 70, w: 8, d: 12, ceil: 2.8, lights: 2.6, tag: "arrival" });
+const LANDMARKS: Room[] = [HALL, ROTUNDA, TRIANGLE, PLAZA, STAGE, HOLES_ROOM, FOREST, SHAFT, ARRIVAL_ROOM];
+
+/* ---------- seeded filler rooms ---------- */
+const fillers: Room[] = [];
+for (let tries = 0; fillers.length < 34 && tries < 900; tries++) {
+  const x = range(-70, 70);
+  const z = range(-70, 66);
+  const size = range(7, 17);
+  const all = [...LANDMARKS, ...fillers];
+  if (all.some((r) => geomDist(r, x, z) < size * 0.35)) continue; // overlaps are fine, swallowing is not
+  const t = rnd();
+  const tall = rnd() < 0.14;
+  const ceil = tall ? range(5, 8) : range(2.55, 3.4);
+  const base = { ceil, lights: range(2.6, 3.4), dead: range(0.08, 0.3), mat: (rnd() < 0.3 ? "stain" : "carpet") as Shape["mat"] };
+  const skew = rnd() < 0.35 ? range(-Math.PI, Math.PI) : range(-0.06, 0.06); // most rooms almost straight, some badly askew
+  if (t < 0.55) fillers.push(room({ kind: "box", x, z, w: size, d: size * range(0.6, 1.4), a: skew, ...base }));
+  else if (t < 0.75) fillers.push(room({ kind: "ngon", x, z, r: size * 0.6, n: 5 + Math.floor(rnd() * 3), a: rnd() * 3, ...base }));
+  else if (t < 0.85) fillers.push(room({ kind: "circle", x, z, r: size * 0.5, ...base }));
+  else {
+    // an L: two boxes sharing a corner
+    fillers.push(room({ kind: "box", x, z, w: size, d: size * 0.45, a: skew, ...base }));
+    fillers.push(room({ kind: "box", x: x + Math.cos(skew) * size * 0.3, z: z - Math.sin(skew) * size * 0.3, w: size * 0.45, d: size, a: skew, ...base }));
   }
 }
-const edgeBetween = (a: Cell, b: Cell) => edgeMap.get(key(a, b));
-const neighbours = (c: Cell) =>
-  [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([di, dj]) => CELLS[c.i + di]?.[c.j + dj]).filter((n): n is Cell => !!n);
-const openKind = (): EdgeKind => (rnd() < 0.45 ? "open" : "door");
+const ROOMS = [...LANDMARKS, ...fillers];
 
-// 1. a spanning maze from the arrival room (randomised depth-first)
+/* ---------- corridors: a spanning tree plus loops, some of them bent ---------- */
+const corridors: Shape[] = [];
+const ramps: Shape[] = [];
+function corridor(ax: number, az: number, bx: number, bz: number, opts: { w?: number; ceil?: number; bend?: boolean } = {}) {
+  const w = opts.w ?? range(2.3, 3.6);
+  const ceil = opts.ceil ?? range(2.55, 3.1);
+  const pts: [number, number][] = [[ax, az]];
+  if (opts.bend ?? rnd() < 0.45) {
+    const mx = (ax + bx) / 2;
+    const mz = (az + bz) / 2;
+    const len = Math.hypot(bx - ax, bz - az) || 1;
+    const off = range(-0.35, 0.35) * len;
+    pts.push([mx + (-(bz - az) / len) * off, mz + ((bx - ax) / len) * off]);
+  }
+  pts.push([bx, bz]);
+  for (let k = 0; k < pts.length - 1; k++) {
+    const [x0, z0] = pts[k];
+    const [x1, z1] = pts[k + 1];
+    const len = Math.hypot(x1 - x0, z1 - z0);
+    corridors.push({ kind: "box", x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: len + w, d: w, a: Math.atan2(-(z1 - z0), x1 - x0), ceil, lights: 3.2, dead: 0.18, mat: rnd() < 0.25 ? "stain" : "carpet" });
+  }
+  return pts;
+}
+/** where a corridor enters a raised or sunken room: a ramp, so it can be walked */
+function rampInto(r: Room, pts: [number, number][]) {
+  const [fx, fz] = pts[pts.length - 2];
+  let bx = r.cx;
+  let bz = r.cz;
+  for (let t = 0; t <= 1; t += 0.01) {
+    const x = fx + (r.cx - fx) * t;
+    const z = fz + (r.cz - fz) * t;
+    if (geomDist(r, x, z) < 0) { bx = x; bz = z; break; }
+  }
+  const len = Math.hypot(r.cx - fx, r.cz - fz) || 1;
+  const dx = (r.cx - fx) / len;
+  const dz = (r.cz - fz) / len;
+  const h = typeof r.floor === "number" ? r.floor : 0;
+  ramps.push({ kind: "box", x: bx, z: bz, w: 8, d: 3.6, a: Math.atan2(-dz, dx), ceil: Math.max(3, r.ceil), lights: 0, mat: r.mat, wall: r.wall,
+    floor: { ax: bx - dx * 4, az: bz - dz * 4, bx: bx + dx * 4, bz: bz + dz * 4, ha: 0, hb: h } });
+}
+const raised = (r: Room) => typeof r.floor === "number" && r.floor !== 0;
+const connect = (a: Room, b: Room) => {
+  const pts = corridor(a.cx, a.cz, b.cx, b.cz);
+  if (raised(b)) rampInto(b, pts);
+  if (raised(a)) rampInto(a, [...pts].reverse());
+};
 {
-  const start = CELLS[5][11];
-  const seen = new Set([start]);
-  const stack = [start];
-  while (stack.length) {
-    const c = stack[stack.length - 1];
-    const next = neighbours(c).filter((n) => !seen.has(n));
-    if (!next.length) {
-      stack.pop();
-      continue;
+  const inTree = new Set<Room>([ARRIVAL_ROOM]);
+  while (inTree.size < ROOMS.length) {
+    let best: [Room, Room, number] | null = null;
+    for (const a of inTree) for (const b of ROOMS) if (!inTree.has(b)) {
+      const d = Math.hypot(a.cx - b.cx, a.cz - b.cz);
+      if (!best || d < best[2]) best = [a, b, d];
     }
-    const n = next[Math.floor(rnd() * next.length)];
-    edgeBetween(c, n)!.kind = openKind();
-    seen.add(n);
-    stack.push(n);
+    connect(best![0], best![1]);
+    inTree.add(best![1]);
+  }
+  for (let i = 0; i < ROOMS.length; i++) for (let j = i + 1; j < ROOMS.length; j++) {
+    const d = Math.hypot(ROOMS[i].cx - ROOMS[j].cx, ROOMS[i].cz - ROOMS[j].cz);
+    if (d < 34 && rnd() < 0.18) connect(ROOMS[i], ROOMS[j]);
   }
 }
-// 2. loops, so it feels like rooms rather than a corridor maze
-for (const e of EDGES) if (e.kind === "wall" && rnd() < 0.32) e.kind = openKind();
-// 3. special rooms are fully open inside; stairs open at both ends and closed on their sides
-const ROOMS: Tag[] = ["hall", "pit", "platform", "holes", "arrival", "pool"];
-for (const e of EDGES) if (e.a.tag && e.a.tag === e.b.tag && ROOMS.includes(e.a.tag)) e.kind = "open";
-for (const [a, b] of [[CELLS[8][3], CELLS[8][2]], [CELLS[8][3], CELLS[8][4]], [CELLS[2][8], CELLS[1][8]], [CELLS[2][8], CELLS[3][8]]]) edgeBetween(a, b)!.kind = "open";
-for (const [a, b] of [[CELLS[8][3], CELLS[7][3]], [CELLS[8][3], CELLS[9][3]], [CELLS[2][8], CELLS[2][7]], [CELLS[2][8], CELLS[2][9]]]) edgeBetween(a, b)!.kind = "wall";
 
-// 4. a height step across an open side is a ledge, not a passage
-function edgeHeights(e: Edge): [number, number] {
-  const n = 0.05;
-  if (e.vertical) return [cellGround(e.a, e.x - n, e.z), cellGround(e.b, e.x + n, e.z)];
-  return [cellGround(e.a, e.x, e.z - n), cellGround(e.b, e.x, e.z + n)];
-}
-const passable = (e: Edge) => e.kind !== "wall" && Math.abs(edgeHeights(e)[0] - edgeHeights(e)[1]) < 0.3;
-
-// 5. every cell reachable on foot from the arrival: knock doors through where the maze left islands
-for (let guard = 0; guard < N * N; guard++) {
-  const reach = new Set<Cell>([CELLS[5][11]]);
-  const queue = [CELLS[5][11]];
-  while (queue.length) {
-    const c = queue.shift()!;
-    for (const n of neighbours(c)) if (!reach.has(n) && passable(edgeBetween(c, n)!)) {
-      reach.add(n);
-      queue.push(n);
-    }
+/* ---------- special features: pits, the well, the hole field, pillars ---------- */
+const features: Shape[] = [];
+const solids: Solid[] = [];
+// the rotunda's sunken ring and its bottomless well of shelves
+export const ROTUNDA_PIT = { x: ROTUNDA.cx, z: ROTUNDA.cz, r: 6, floor: -3.2 };
+export const WELL = { x: ROTUNDA.cx, z: ROTUNDA.cz, r: 2.2, floor: -42 };
+features.push({ kind: "circle", x: ROTUNDA_PIT.x, z: ROTUNDA_PIT.z, r: ROTUNDA_PIT.r, floor: ROTUNDA_PIT.floor, ceil: ROTUNDA.ceil, mat: "concrete", wall: "concrete" });
+features.push({ kind: "circle", x: WELL.x, z: WELL.z, r: WELL.r, floor: WELL.floor, ceil: ROTUNDA.ceil, mat: "void", wall: "wallpaper", tag: "well" });
+// holes in the floor, over another lobby 6 m below
+export const HOLE_DEPTH = -6;
+{
+  const a = HOLES_ROOM.kind === "box" ? HOLES_ROOM.a ?? 0 : 0;
+  for (let u = -1; u <= 1; u++) for (let v = -1; v <= 1; v++) {
+    const lx = u * 4.6;
+    const lz = v * 4.6;
+    features.push({ kind: "box", x: HOLES_ROOM.cx + lx * Math.cos(a) + lz * Math.sin(a), z: HOLES_ROOM.cz - lx * Math.sin(a) + lz * Math.cos(a), w: 2.2, d: 2.2, a, floor: HOLE_DEPTH, ceil: HOLES_ROOM.ceil, mat: "carpet" });
   }
-  if (reach.size === N * N) break;
-  let fixed = false;
-  for (const c of reach) for (const n of neighbours(c)) {
-    const e = edgeBetween(c, n)!;
-    if (!fixed && !reach.has(n) && e.kind === "wall" && !n.stair && !c.stair && Math.abs(edgeHeights(e)[0] - edgeHeights(e)[1]) < 0.3) {
-      e.kind = "door";
-      fixed = true;
-    }
+}
+// partitions: half-height and full walls standing inside the bigger rooms, never quite parallel to anything
+for (const r of fillers) {
+  if (r.kind !== "box" || Math.min(r.w, r.d) < 9) continue;
+  const n = 1 + Math.floor(rnd() * 3);
+  for (let k = 0; k < n; k++) {
+    const a = (r.a ?? 0) + (rnd() < 0.7 ? 0 : range(-0.5, 0.5)) + (rnd() < 0.5 ? Math.PI / 2 : 0);
+    solids.push({ kind: "box", x: r.cx + range(-r.w / 4, r.w / 4), z: r.cz + range(-r.d / 4, r.d / 4), w: range(3, Math.min(r.w, r.d) * 0.55), d: 0.25, a });
   }
-  if (!fixed) break;
 }
-for (const e of EDGES) {
-  const [ha, hb] = edgeHeights(e);
-  e.blocked = e.kind !== "wall" && Math.abs(ha - hb) >= 0.3;
-  e.offset = e.kind === "door" ? (rnd() - 0.5) * (C - DOOR_W - 1) : 0;
+// pillars: the hall's six, and a forest
+export const HALL_PILLARS: [number, number][] = [];
+{
+  const a = HALL.kind === "box" ? HALL.a ?? 0 : 0;
+  for (const lx of [-9, 0, 9]) for (const lz of [-6, 6]) {
+    const x = HALL.cx + lx * Math.cos(a) + lz * Math.sin(a);
+    const z = HALL.cz - lx * Math.sin(a) + lz * Math.cos(a);
+    HALL_PILLARS.push([x, z]);
+    solids.push({ kind: "circle", x, z, r: 0.75 });
+  }
+  const fa = FOREST.kind === "box" ? FOREST.a ?? 0 : 0;
+  for (let lx = -10.5; lx <= 10.5; lx += 3) for (let lz = -7.5; lz <= 7.5; lz += 3) {
+    if (rnd() < 0.2) continue;
+    const x = FOREST.cx + lx * Math.cos(fa) + lz * Math.sin(fa) + range(-0.4, 0.4);
+    const z = FOREST.cz - lx * Math.sin(fa) + lz * Math.cos(fa) + range(-0.4, 0.4);
+    solids.push({ kind: "box", x, z, w: 0.7, d: 0.7, a: fa + range(-0.3, 0.3), mat: "wallpaper" });
+  }
 }
-export const edgeFloor = (e: Edge) => Math.min(...edgeHeights(e));
-export const edgeTop = (e: Edge) => Math.max(e.a.ceil, e.b.ceil);
-export const edgeHeightsOf = edgeHeights;
 
-/* ---------- special features ---------- */
-export const HALL = { x0: cx(3) - C / 2, x1: cx(6) + C / 2, z0: cz(3) - C / 2, z1: cz(6) + C / 2, ledgeY: 5.2, ledgeD: 1.6 };
-export const HALL_PILLARS: [number, number][] = [[-10, -10], [0, -10], [-10, 0], [0, 0]];
-export const WELL = { x: cx(8) + C / 2, z: cz(1) + C / 2, size: 3, depth: 16 };
-export const HOLES = { x0: cx(9) - C / 2, z0: cz(7) - C / 2, size: 2 * C, step: 1.25, depth: 4.5 };
-/** squares of the hole field (odd-odd positions on a 1.25 m grid): you see a second Lobby down there */
-export const HOLE_SQUARES: [number, number][] = [];
-for (let a = 1; a < 8; a += 2) for (let b = 1; b < 8; b += 2) HOLE_SQUARES.push([HOLES.x0 + (a + 0.5) * HOLES.step, HOLES.z0 + (b + 0.5) * HOLES.step]);
-export const ARRIVAL_DOOR = { x: cx(5), z: HALF, width: 1.2, height: 2.2 };
+/* ---------- the way in and the thresholds of the branches ---------- */
+const vestibules: Shape[] = [];
+// the doorway from the meadow: a narrow throat that continues a little past the doorway plane
+vestibules.push({ kind: "box", x: 0, z: 76.4, w: 1.3, d: 2.4, ceil: 2.25, lights: 0 });
 
 export const EXITS: Exit[] = [
-  { id: "exit-backrooms", kind: "sealed", x: cx(0), z: -HALF, y: 0, angle: 0, color: "#e8c547", name: "Backrooms", text: "La porte est scellée. Derrière, ça bourdonne : le jeu arrive un jour." },
-  { id: "exit-bassins", kind: "grate", x: cx(6) + C / 2, z: -HALF, y: 0, angle: 0, color: "#7fd6e0", name: "Les bassins", text: "On entend l'eau derrière la grille. Elle ne s'ouvre pas, pas encore." },
-  { id: "exit-bureaux", kind: "elevator", x: HALF, z: cz(4), y: 0, angle: -Math.PI / 2, color: "#4fd1c5", name: "Les bureaux", text: "L'ascenseur ne vient pas. Les bureaux isolés sont encore en travaux." },
-  { id: "exit-commerce", kind: "glass", x: HALF, z: cz(9), y: 0, angle: -Math.PI / 2, color: "#e597a6", name: "Le centre commercial", text: "Les portes vitrées sont fermées à clé. Une musique très lointaine filtre." },
-  { id: "exit-hotel", kind: "velvet", x: -HALF, z: cz(8), y: 1.4, angle: Math.PI / 2, color: "#d0745f", name: "L'hôtel", text: "Le grand escalier est barré d'un cordon de velours." },
+  { id: "exit-backrooms", kind: "sealed", anchor: { x: -66, z: -77, y: 0, yaw: 0 }, color: "#e8c547", name: "Backrooms", text: "La porte est scellée. Derrière, ça bourdonne : le jeu arrive un jour." },
+  { id: "exit-bassins", kind: "grate", anchor: { x: 22, z: -77, y: 0, yaw: 0 }, color: "#7fd6e0", name: "Les bassins", text: "On entend l'eau derrière la grille. Elle ne s'ouvre pas, pas encore." },
+  { id: "exit-bureaux", kind: "elevator", anchor: { x: 77, z: -10, y: 0, yaw: -Math.PI / 2 }, color: "#4fd1c5", name: "Les bureaux", text: "L'ascenseur ne vient pas. Les bureaux isolés sont encore en travaux." },
+  { id: "exit-commerce", kind: "glass", anchor: { x: 77, z: 50, y: 0, yaw: -Math.PI / 2 }, color: "#e597a6", name: "Le centre commercial", text: "Les portes vitrées sont fermées à clé. Une musique très lointaine filtre." },
+  { id: "exit-hotel", kind: "velvet", anchor: { x: -77, z: 46, y: 1.8, yaw: Math.PI / 2 }, color: "#d0745f", name: "L'hôtel", text: "Le grand escalier est barré d'un cordon de velours." },
 ];
-
-/* ---------- collisions ---------- */
-function edgeColliders(e: Edge): Box[] {
-  if (e.kind === "open" && !e.blocked) return [];
-  const along = (center: number, len: number) => (e.vertical ? box(e.x, center, WALL_T, len) : box(center, e.z, len, WALL_T));
-  const mid = e.vertical ? e.z : e.x;
-  if (e.kind === "door" && !e.blocked) {
-    const g0 = mid + e.offset - DOOR_W / 2;
-    const g1 = mid + e.offset + DOOR_W / 2;
-    const s0 = mid - C / 2;
-    const s1 = mid + C / 2;
-    return [along((s0 + g0) / 2, g0 - s0), along((g1 + s1) / 2, s1 - g1)];
-  }
-  return [along(mid, C)];
+for (const e of EXITS) {
+  const { x, z, yaw } = e.anchor;
+  const fx = -Math.sin(yaw);
+  const fz = -Math.cos(yaw);
+  // a vestibule in front of the door, then a corridor to the nearest room
+  const vx = x - fx * 3;
+  const vz = z - fz * 3;
+  const special = e.kind === "grate" ? { mat: "tile" as const, wall: "tile" as const } : e.kind === "sealed" ? { mat: "stain" as const } : {};
+  const isStage = e.kind === "velvet";
+  vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: e.kind === "sealed" ? 2.2 : 3, lights: 2.4, dead: 0.2, floor: isStage ? 1.8 : 0, ...special });
+  const target = isStage
+    ? STAGE
+    : ROOMS.filter((r) => !raised(r)).reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b));
+  if (isStage) vestibules.push({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, d: 3.2, a: Math.atan2(-(target.cz - vz), target.cx - vx), floor: 1.8, ceil: 4, lights: 3 });
+  else if (e.kind === "sealed") corridor(vx, vz, target.cx, target.cz, { w: 2.1, ceil: 2.15, bend: true }); // the crawl
+  else corridor(vx, vz, target.cx, target.cz, { bend: false });
 }
-const outer: Box[] = [
-  box(0, -HALF - WALL_T / 2, C * N + 1, WALL_T),
-  box(-HALF - WALL_T / 2, 0, WALL_T, C * N + 1),
-  box(HALF + WALL_T / 2, 0, WALL_T, C * N + 1),
-  // south wall, with the bright doorway back to the meadow
-  box((-HALF + ARRIVAL_DOOR.x - ARRIVAL_DOOR.width / 2) / 2, HALF + WALL_T / 2, ARRIVAL_DOOR.x - ARRIVAL_DOOR.width / 2 + HALF, WALL_T),
-  box((HALF + ARRIVAL_DOOR.x + ARRIVAL_DOOR.width / 2) / 2, HALF + WALL_T / 2, HALF - ARRIVAL_DOOR.x - ARRIVAL_DOOR.width / 2, WALL_T),
-  box(ARRIVAL_DOOR.x, HALF + 0.9, ARRIVAL_DOOR.width + 0.6, 0.2),
-];
-export const LOBBY_COLLIDERS: Box[] = [
-  ...EDGES.flatMap(edgeColliders),
-  ...outer,
-  ...HALL_PILLARS.map(([x, z]) => box(x, z, 1, 1)),
-  box(WELL.x, WELL.z, WELL.size, WELL.size),
-  ...HOLE_SQUARES.map(([x, z]) => box(x, z, HOLES.step, HOLES.step)),
-];
+
+/* ---------- the place ---------- */
+// order matters: later shapes win where they overlap (corridors < rooms < ramps and pits < vestibules)
+export const LOBBY_SPACE = new Space([...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules], solids);
+
+let built: Built | null = null;
+/** Geometry is derived once per visit, then shared by the scene and the doorway previews. */
+export function lobbyBuilt(): Built {
+  return (built ??= buildSpace(LOBBY_SPACE));
+}
+
+export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 
 export const LOBBY_INTERACTABLES: Interactable[] = EXITS.map((e) => ({
   id: e.id,
-  x: e.x + Math.sin(e.angle) * 0.6,
-  z: e.z + Math.cos(e.angle) * 0.6,
+  x: e.anchor.x + Math.sin(e.anchor.yaw) * 0.6,
+  z: e.anchor.z + Math.cos(e.anchor.yaw) * 0.6,
   radius: 2.4,
   verb: e.kind === "elevator" ? "Appeler l'ascenseur" : "Ouvrir",
   locked: { name: e.name, text: e.text, color: e.color },
 }));
-
-export const LOBBY_SPAWN = { x: ARRIVAL_DOOR.x, z: HALF - 2.5, yaw: 0 };
-export const LOBBY_PORTAL_BOX = { minX: ARRIVAL_DOOR.x - ARRIVAL_DOOR.width / 2, maxX: ARRIVAL_DOOR.x + ARRIVAL_DOOR.width / 2, minZ: HALF + 0.05, maxZ: HALF + 0.75 };
