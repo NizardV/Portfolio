@@ -13,7 +13,7 @@ export const CHANNEL = { x: 1.5, z: -40, w: 2.4, d: 78, floor: -1.3, water: -0.7
 const concrete = { mat: "concrete", wall: "concrete" } as const;
 const shapes: Shape[] = [
   throat(CANALS_ENTRY, 2.2, 2.4),
-  room(0, -41, 6.4, 84, { ceil: 3.4, ...concrete, lights: 6, dead: 0.3 }),
+  room(0, -41, 6.4, 84, { ceil: 3.4, ...concrete, lights: 4.2, dead: 0.2 }),
   room(CHANNEL.x, CHANNEL.z, CHANNEL.w, CHANNEL.d, { floor: CHANNEL.floor, ceil: 3.4, ...concrete, lights: 0 }),
   // a side chamber with pumps, and the crack beyond it
   room(-9, -58, 12, 8, { ceil: 3, ...concrete, lights: 3.4, dead: 0.5 }),

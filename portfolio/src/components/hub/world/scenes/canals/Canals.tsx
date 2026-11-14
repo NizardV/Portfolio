@@ -4,6 +4,7 @@ import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place, Water } from "../../archi/Place";
 import { canalsBuilt, CHANNEL } from "../../places/canals";
+import { usePreview } from "../../PortalWindow";
 import { Pieces } from "../props";
 
 const PALETTE: Palette = {
@@ -12,10 +13,10 @@ const PALETTE: Palette = {
   rail: "#5a5d55",
   panel: "#ffe6a8",
   light: "#f2d38a",
-  intensity: 8,
-  range: 12,
+  intensity: 15,
+  range: 15,
 };
-const AIR = "#0a0c0a";
+const AIR = "#141812";
 
 /** Pipes along both walls of the main tunnel. */
 function Pipes() {
@@ -29,9 +30,9 @@ function Pipes() {
 }
 
 function Canals() {
-  const built = use(canalsBuilt());
+  const built = use(canalsBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
-    <Place built={built} palette={PALETTE} air={AIR} density={0.05} hemi={0.25} flicker={0.06}>
+    <Place built={built} palette={PALETTE} air={AIR} density={0.034} hemi={0.55} flicker={0.06}>
       <Water y={CHANNEL.water} x={CHANNEL.x} z={CHANNEL.z} w={CHANNEL.w + 0.4} d={CHANNEL.d} color="#2e5b45" glint="#c9f2b0" opacity={0.85} />
       <Pipes />
       {/* the crack: a sliver of red light where there should be wall */}

@@ -4,6 +4,7 @@ import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
 import { officesBuilt, SERVERS, SURVEILLANCE } from "../../places/offices";
+import { usePreview } from "../../PortalWindow";
 import { Pieces, seeded, useCanvas } from "../props";
 
 const PALETTE: Palette = {
@@ -93,7 +94,7 @@ function ServerRoom() {
 }
 
 function Offices() {
-  const built = use(officesBuilt());
+  const built = use(officesBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.034} hemi={0.32} flicker={0.04}>
       <Surveillance />

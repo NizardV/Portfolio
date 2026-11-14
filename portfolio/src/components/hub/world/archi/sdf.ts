@@ -37,7 +37,7 @@ export type Shape = Geom & {
 };
 
 /** something standing in the space: a pillar, a partition, a house in a hangar. h = its height (default: up to the ceiling) */
-export type Solid = Geom & { mat?: WallSurface; tag?: string; h?: number };
+export type Solid = Geom & { mat?: WallSurface; tag?: string; h?: number; /** collision only: drawn by the scene (a fence…) */ ghost?: boolean };
 
 /* ---------- primitive distance functions (2D, x/z) ---------- */
 
@@ -108,6 +108,7 @@ export function floorAt(f: Floor | undefined, x: number, z: number): number {
 const CELL = 8;
 const RING: [number, number][] = Array.from({ length: 16 }, (_, k) => [Math.cos((k * Math.PI) / 8), Math.sin((k * Math.PI) / 8)]);
 const MARGIN = 3;
+const NONE: readonly number[] = [];
 
 export class Space {
   readonly shapes: Shape[];
@@ -144,6 +145,11 @@ export class Space {
     return this.index.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`);
   }
 
+  /** indices of the shapes that may matter at this point (the spatial index cell) */
+  nearShapes(x: number, z: number): readonly number[] {
+    return this.near(x, z)?.shapes ?? NONE;
+  }
+
   /** signed distance to the walls: negative inside the walkable space */
   dist(x: number, z: number): number {
     const n = this.near(x, z);
@@ -151,6 +157,15 @@ export class Space {
     let d = 10;
     for (const i of n.shapes) d = Math.min(d, geomDist(this.shapes[i], x, z));
     for (const i of n.solids) d = Math.max(d, -geomDist(this.solids[i], x, z));
+    return d;
+  }
+
+  /** signed distance to the rooms alone, ignoring the solids standing in them */
+  roomDist(x: number, z: number): number {
+    const n = this.near(x, z);
+    if (!n) return 10;
+    let d = 10;
+    for (const i of n.shapes) d = Math.min(d, geomDist(this.shapes[i], x, z));
     return d;
   }
 
@@ -163,12 +178,12 @@ export class Space {
     return best;
   }
 
-  /** distance to every shape placed after `i` (min), used to cut a shape's own floor/ceiling */
-  laterDist(i: number, x: number, z: number): number {
+  /** distance to every shape placed after `i` (min; optionally only some of them), used to cut a shape's floor/ceiling */
+  laterDist(i: number, x: number, z: number, only?: (j: number) => boolean): number {
     const n = this.near(x, z);
     if (!n) return 10;
     let d = 10;
-    for (const j of n.shapes) if (j > i) d = Math.min(d, geomDist(this.shapes[j], x, z));
+    for (const j of n.shapes) if (j > i && (!only || only(j))) d = Math.min(d, geomDist(this.shapes[j], x, z));
     return d;
   }
 

@@ -79,6 +79,18 @@ function useDiscovered(zone: ZoneId) {
   return places;
 }
 
+/**
+ * Where the dream starts: the meadow, or (for building the world) a spot set by hand in the browser:
+ * localStorage["hub-debug-spawn"] = JSON.stringify({ zone: "bassins", x: -40, z: -71, yaw: 1.6, pitch: 0 })
+ */
+function firstArrival(): Arrival {
+  const at = loadJSON<{ zone?: string; x?: number; z?: number; yaw?: number; pitch?: number } | null>("hub-debug-spawn", null);
+  if (at?.zone && at.zone in ZONES && typeof at.x === "number" && typeof at.z === "number") {
+    return { zone: at.zone as ZoneId, spawn: { x: at.x, z: at.z, yaw: at.yaw ?? 0, pitch: at.pitch ?? 0 }, n: 0 };
+  }
+  return { zone: START_ZONE, spawn: ZONES[START_ZONE].spawn, n: 0 };
+}
+
 export default function World() {
   const [webgl] = useState(hasWebGL);
   const controls = useRef(createControls()).current;
@@ -87,7 +99,7 @@ export default function World() {
   const travelling = useRef(true); // the wake-up counts as a transition
   const lastUnlock = useRef(0);
 
-  const [arrival, setArrival] = useState<Arrival>({ zone: START_ZONE, spawn: ZONES[START_ZONE].spawn, n: 0 });
+  const [arrival, setArrival] = useState<Arrival>(firstArrival);
   const pose = useRef<Pose>({ x: ZONES[START_ZONE].spawn.x, z: ZONES[START_ZONE].spawn.z, yaw: ZONES[START_ZONE].spawn.yaw, pitch: 0 });
   const [veil, setVeil] = useState<Veil>({ color: "#ffffff", opaque: true, ms: WAKE_MS });
   const [menu, setMenu] = useState(false);

@@ -1,10 +1,13 @@
 "use client";
-import { memo, use, useMemo } from "react";
+import { memo, use, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import type { Group, Mesh, PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { EXITS, HALL, lobbyBuilt, WELL, type Exit } from "../../lobby";
+import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, lobbyBuilt, WELL, type Exit } from "../../lobby";
+import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
 
 /** Dirty mono-yellow, dim, heavy: pools of tube light in a sea of brownish dark. */
@@ -129,6 +132,61 @@ function Frame({ w, h, color }: { w: number; h: number; color: string }) {
     </>
   );
 }
+/**
+ * Something is wrong over there: shards of colour flash around the far door, its double slips sideways for a few
+ * frames, its light stutters. Random, in bursts, never for long.
+ */
+function Glitch({ w, h, color }: { w: number; h: number; color: string }) {
+  const shards = useRef<(Mesh | null)[]>([]);
+  const ghost = useRef<Group>(null);
+  const light = useRef<PointLight>(null);
+  const next = useRef(0);
+  const burst = useRef(0);
+  const COLORS = [color, "#4fd1c5", "#e0453a", "#f4f1e8", "#7a5cff"];
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (t > next.current) {
+      // between bursts: quiet for a while; during one: new shards every few frames
+      if (burst.current <= 0) {
+        burst.current = Math.random() < 0.5 ? 2 + Math.floor(Math.random() * 10) : 0;
+        next.current = t + (burst.current ? 0.05 : 0.6 + Math.random() * 2.4);
+      } else {
+        burst.current--;
+        next.current = t + 0.04 + Math.random() * 0.09;
+      }
+      const on = burst.current > 0;
+      shards.current.forEach((m, k) => {
+        if (!m) return;
+        m.visible = on && Math.random() < 0.7;
+        m.position.set((Math.random() - 0.5) * (w + 1.6), Math.random() * (h + 0.8), 0.12 + Math.random() * 0.3);
+        m.scale.set(0.1 + Math.random() * (k % 3 === 0 ? 1.4 : 0.5), 0.02 + Math.random() * 0.12, 1);
+      });
+      if (ghost.current) {
+        ghost.current.visible = on && Math.random() < 0.6;
+        ghost.current.position.x = (Math.random() - 0.5) * 0.5;
+      }
+      if (light.current) light.current.intensity = on ? 1 + Math.random() * 5 : 2.2;
+    }
+  });
+  return (
+    <>
+      {COLORS.flatMap((c) => [0, 1, 2].map((k) => (
+        <mesh key={c + k} ref={(m) => { shards.current[COLORS.indexOf(c) * 3 + k] = m; }} visible={false}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial color={c} toneMapped={false} transparent opacity={0.85} />
+        </mesh>
+      )))}
+      <group ref={ghost} visible={false}>
+        <mesh position={[0, h / 2, 0.14]}>
+          <planeGeometry args={[w, h]} />
+          <meshBasicMaterial color={color} transparent opacity={0.25} toneMapped={false} />
+        </mesh>
+      </group>
+      <pointLight ref={light} position={[0, 2, 0.8]} intensity={2.2} distance={8} decay={1.6} color={color} />
+    </>
+  );
+}
+
 function Plate({ text, color, y }: { text: string; color: string; y: number }) {
   const map = usePlateTexture(text, color);
   return (
@@ -161,7 +219,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
               <meshStandardMaterial color="#3a3320" metalness={0.5} roughness={0.5} />
             </mesh>
           ))}
-          <pointLight position={[0, 2, 0.8]} intensity={2.5} distance={6} decay={1.6} color={color} />
+          <Glitch w={w} h={h} color={color} />
         </>
       )}
       {kind === "grate" && <Frame w={w} h={h} color="#d9ecea" />}
@@ -215,7 +273,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
 /* ---------- scene ---------- */
 
 function Lobby() {
-  const built = use(lobbyBuilt());
+  const built = use(lobbyBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <>
       <Atmosphere background={FOG} fog={FOG} density={0.042} />
@@ -223,6 +281,10 @@ function Lobby() {
       <Architecture built={built} palette={LOBBY_PALETTE} flicker={0.06} />
       <Gallery />
       <Well />
+      {/* the way back to the meadow: the same white door frame as out there */}
+      <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_MOUTH]} rotation={[0, Math.PI, 0]}>
+        <Frame w={1.2} h={2.2} color="#efe9da" />
+      </group>
       {EXITS.map((e) => (
         <ExitThreshold key={e.id} exit={e} />
       ))}

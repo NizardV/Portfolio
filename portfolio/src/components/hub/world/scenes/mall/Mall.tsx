@@ -5,6 +5,7 @@ import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
 import { ARMS, ATRIUM, HOUSE, mallBuilt, RECORDS } from "../../places/mall";
 import { usePlateTexture } from "../lobby/textures";
+import { usePreview } from "../../PortalWindow";
 import { at, Pieces, seeded } from "../props";
 
 const PALETTE: Palette = {
@@ -124,7 +125,7 @@ function RecordsAndHouse() {
 }
 
 function Mall() {
-  const built = use(mallBuilt());
+  const built = use(mallBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.026} hemi={0.35} flicker={0.04}>
       <Shopfronts />

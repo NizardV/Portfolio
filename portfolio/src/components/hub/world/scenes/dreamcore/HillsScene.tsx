@@ -5,6 +5,7 @@ import { Place } from "../../archi/Place";
 import { HILLS, hillsBuilt } from "../../places/dreamcore";
 import Sky from "../meadow/Sky";
 import { Pieces, seeded } from "../props";
+import { usePreview } from "../../PortalWindow";
 import { Hills, House, Turbine } from "./Outdoors";
 
 const PALETTE: Palette = {
@@ -20,7 +21,7 @@ const AIR = "#bcd8f2";
 
 /** Les collines: bright, too green, small yellow houses alone on the slopes, white fences, turbines. */
 function HillsScene() {
-  const built = use(hillsBuilt());
+  const built = use(hillsBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   const h = HILLS.house;
   const fences = useMemo(() => {
     const r = seeded(5);

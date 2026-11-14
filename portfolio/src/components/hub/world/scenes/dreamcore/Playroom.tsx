@@ -1,10 +1,11 @@
 "use client";
 import { memo, use, useMemo } from "react";
-import { Color, InstancedMesh, MeshStandardMaterial, Object3D, SphereGeometry } from "three";
+import { BackSide, Color, InstancedMesh, MeshStandardMaterial, Object3D, Path, Shape, ShapeGeometry, SphereGeometry, Vector2 } from "three";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
-import { PLAY, playBuilt } from "../../places/dreamcore";
+import { BACKDROP, PLAY, playBuilt } from "../../places/dreamcore";
+import { usePreview } from "../../PortalWindow";
 import { Pieces, seeded, useCanvas } from "../props";
 
 const PALETTE: Palette = {
@@ -59,12 +60,27 @@ function Backdrop() {
     ctx.strokeStyle = "#2a1a0c";
     ctx.stroke();
   });
-  const z = stage.z - stage.d / 2 + 0.05;
+  const z = BACKDROP.z;
+  // the painted wall, with a doorway cut out of it (UVs stretched over the whole wall, so the painting is not cut)
+  const wall = useMemo(() => {
+    const W = stage.w - 0.4;
+    const H = 7.8;
+    const { w, h } = BACKDROP.gate;
+    const outline = new Shape([new Vector2(-W / 2, 0), new Vector2(W / 2, 0), new Vector2(W / 2, H), new Vector2(-W / 2, H)]);
+    outline.holes.push(new Path([new Vector2(-w / 2, 0.001), new Vector2(-w / 2, h), new Vector2(w / 2, h), new Vector2(w / 2, 0.001)]));
+    const g = new ShapeGeometry(outline);
+    const pos = g.attributes.position;
+    const uv = g.attributes.uv;
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, (pos.getX(k) + W / 2) / W, pos.getY(k) / H);
+    return g;
+  }, []);
   return (
     <>
-      <mesh position={[0, 4, z]}>
-        <planeGeometry args={[stage.w - 0.4, 7.8]} />
+      <mesh geometry={wall} position={[0, 0.1, z]}>
         <meshStandardMaterial map={sky} roughness={1} />
+      </mesh>
+      <mesh geometry={wall} position={[0, 0.1, z - 0.02]}>
+        <meshStandardMaterial color="#8fa3b8" roughness={1} side={BackSide} />
       </mesh>
       <mesh position={[0, 5.6, z + 0.15]}>
         <planeGeometry args={[3, 3]} />
@@ -82,8 +98,10 @@ function SetPieces() {
   ]), []);
   const fence = useMemo(() => {
     const p: Piece[] = [];
-    for (let x = -stage.w / 2 + 0.6; x < stage.w / 2 - 0.4; x += 0.38) p.push({ x, y: 0, z: stage.z - stage.d / 2 + 0.9, w: 0.08, h: 0.95, d: 0.05 });
-    p.push({ x: 0, y: 0.6, z: stage.z - stage.d / 2 + 0.88, w: stage.w - 1, h: 0.08, d: 0.04 });
+    const gap = BACKDROP.gate.w / 2;
+    for (let x = -stage.w / 2 + 0.6; x < stage.w / 2 - 0.4; x += 0.38) if (Math.abs(x) > gap) p.push({ x, y: 0, z: BACKDROP.fence, w: 0.08, h: 0.95, d: 0.05 });
+    const rail = (stage.w - 1) / 2 - gap;
+    for (const s of [-1, 1]) p.push({ x: s * (gap + rail / 2), y: 0.6, z: BACKDROP.fence - 0.02, w: rail, h: 0.08, d: 0.04 });
     return p;
   }, []);
   const toys = useMemo<Piece[]>(() => [
@@ -137,7 +155,7 @@ function BallPit() {
 }
 
 function Playroom() {
-  const built = use(playBuilt());
+  const built = use(playBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.03} hemi={0.65}>
       <Backdrop />

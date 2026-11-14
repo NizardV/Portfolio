@@ -20,10 +20,17 @@ export function throat(a: Anchor, w: number, h: number, len = 1.6): Shape {
 /** The same anchor, facing the other way (the way back out). */
 export const back = (a: Anchor): Anchor => ({ ...a, yaw: a.yaw + Math.PI });
 
-/** Geometry is derived once per visit, on first need (scene or doorway preview), then shared. */
-export function lazyBuilt(space: Space): () => Promise<Built> {
+/**
+ * Geometry is derived once per visit, on first need (scene, doorway preview, or getting ready behind a door), then
+ * shared. In small slices while nobody waits for it; in big ones as soon as someone stands in the place (urgent).
+ */
+export function lazyBuilt(space: Space): (urgent?: boolean) => Promise<Built> {
   let built: Promise<Built> | null = null;
-  return () => (built ??= buildSpaceAsync(space));
+  const budget = { ms: 6 };
+  return (urgent = false) => {
+    if (urgent) budget.ms = 40;
+    return (built ??= buildSpaceAsync(space, budget));
+  };
 }
 
 /** box helper for rotated rooms: centre, size, angle */

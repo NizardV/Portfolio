@@ -20,16 +20,34 @@ export function contours(f: Field, x0: number, z0: number, x1: number, z1: numbe
 
 /** the same, yielding every few rows (see slice.ts) */
 export function* contourSteps(f: Field, x0: number, z0: number, x1: number, z1: number, step: number): Steps<Pt[][]> {
+  const [loops] = yield* contourSetSteps((x, z, out) => { out[0] = f(x, z); }, 1, x0, z0, x1, z1, step);
+  return loops;
+}
+
+/**
+ * Several fields over the same grid, sampled together (one pass: a sample may share its work between the fields),
+ * then outlined one by one.
+ */
+export function* contourSetSteps(fields: (x: number, z: number, out: number[]) => void, count: number, x0: number, z0: number, x1: number, z1: number, step: number): Steps<Pt[][][]> {
   const nx = Math.ceil((x1 - x0) / step) + 1;
   const nz = Math.ceil((z1 - z0) / step) + 1;
-  const v = new Float32Array(nx * nz);
+  const grids = Array.from({ length: count }, () => new Float32Array(nx * nz));
+  const out = new Array<number>(count).fill(1);
   for (let j = 0; j < nz; j++) {
     for (let i = 0; i < nx; i++) {
       // the border is always outside, so every outline closes
-      v[j * nx + i] = i === 0 || j === 0 || i === nx - 1 || j === nz - 1 ? 1 : f(x0 + i * step, z0 + j * step);
+      if (i === 0 || j === 0 || i === nx - 1 || j === nz - 1) out.fill(1);
+      else fields(x0 + i * step, z0 + j * step, out);
+      for (let k = 0; k < count; k++) grids[k][j * nx + i] = out[k];
     }
     if (j % 16 === 15) yield;
   }
+  const result: Pt[][][] = [];
+  for (const v of grids) result.push(yield* march(v, nx, nz, x0, z0, step));
+  return result;
+}
+
+function* march(v: Float32Array, nx: number, nz: number, x0: number, z0: number, step: number): Steps<Pt[][]> {
   const val = (i: number, j: number) => v[j * nx + i];
   const pts = new Map<string, Pt>();
   const edgePoint = (i: number, j: number, e: number): [string, Pt] => {

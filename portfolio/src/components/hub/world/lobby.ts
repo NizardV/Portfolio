@@ -39,6 +39,8 @@ const room = (s: Shape): Room => ({ ...s, cx: "x" in s ? s.x : (s.ax + s.bx) / 2
 
 /** walking in from the meadow: the doorway plane is at z = 76, looking north (-z) */
 export const LOBBY_ARRIVAL: { x: number; z: number; y: number; yaw: number } = { x: 0, z: 76, y: 0, yaw: 0 };
+/** where the meadow's doorway opens into the Lobby (the mouth of its little vestibule): a white frame stands there */
+export const ARRIVAL_MOUTH = 75.2;
 
 export const HALL = room({ kind: "box", x: -6, z: 16, w: 34, d: 26, a: 0.17, ceil: 12, mat: "stain", lights: 4.2, dead: 0.2, tag: "hall" });
 export const ROTUNDA = room({ kind: "ngon", x: 34, z: -20, r: 13, n: 8, a: Math.PI / 8, ceil: 10, lights: 3.4, tag: "rotunda" });
@@ -180,17 +182,18 @@ export const HALL_PILLARS: [number, number][] = [];
     if (rnd() < 0.2) continue;
     const x = FOREST.cx + lx * Math.cos(fa) + lz * Math.sin(fa) + range(-0.4, 0.4);
     const z = FOREST.cz - lx * Math.sin(fa) + lz * Math.cos(fa) + range(-0.4, 0.4);
-    solids.push({ kind: "box", x, z, w: 0.7, d: 0.7, a: fa + range(-0.3, 0.3), mat: "wallpaper" });
+    range(-0.3, 0.3); // (was a random tilt: drawn, kept so the rest of the layout stays the same)
+    solids.push({ kind: "box", x, z, w: 0.7, d: 0.7, a: fa, mat: "wallpaper" });
   }
 }
 
 /* ---------- the way in and the thresholds of the branches ---------- */
 const vestibules: Shape[] = [];
 // the doorway from the meadow: a narrow throat that continues a little past the doorway plane
-vestibules.push({ kind: "box", x: 0, z: 76.4, w: 1.3, d: 2.4, ceil: 2.25, lights: 0 });
+vestibules.push({ kind: "box", x: LOBBY_ARRIVAL.x, z: ARRIVAL_MOUTH + 1.2, w: 1.3, d: 2.4, ceil: 2.25, lights: 0 });
 
 export const EXITS: Exit[] = [
-  { id: "exit-backrooms", kind: "sealed", anchor: { x: -66, z: -77, y: 0, yaw: 0 }, color: "#e8c547", name: "Backrooms", size: [1.2, 2.1], text: "La porte est scellée. Derrière, ça bourdonne : le jeu arrive un jour." },
+  { id: "exit-backrooms", kind: "sealed", anchor: { x: -66, z: -77, y: 0, yaw: 0 }, color: "#e8c547", name: "La porte, là-bas", size: [1.2, 2.1], text: "Trop loin, de l'autre côté du vide. Elle grésille, comme si elle n'était pas tout à fait là." },
   { id: "exit-bassins", kind: "grate", anchor: { x: 22, z: -77, y: 0, yaw: 0 }, color: "#7fd6e0", name: "Les bassins", size: [2.2, 2.4] },
   { id: "exit-bureaux", kind: "elevator", anchor: { x: 77, z: -10, y: 0, yaw: -Math.PI / 2 }, color: "#4fd1c5", name: "Les bureaux", size: [1.7, 2.3] },
   { id: "exit-commerce", kind: "glass", anchor: { x: 77, z: 50, y: 0, yaw: -Math.PI / 2 }, color: "#e597a6", name: "Le centre commercial", size: [2, 2.3] },
@@ -199,21 +202,36 @@ export const EXITS: Exit[] = [
   { id: "exit-canaux", kind: "service", anchor: { x: -77, z: -24, y: 0, yaw: Math.PI / 2 }, color: "#8c8f86", name: "Service", size: [1.1, 2.1] },
   { id: "exit-rouge", kind: "secret", anchor: { x: 50, z: 77, y: 0, yaw: Math.PI }, color: "#e0453a", name: "?", size: [1, 2] },
 ];
+/** The sealed door stands out of reach: a hall split by a void, a ledge on our side, the door on a landing beyond. */
+export const CHASM = { landing: 2.6, gap: 7, ledge: 4, width: 5, ceil: 6, floor: -40 };
+
 for (const e of EXITS) {
   const { x, z, yaw } = e.anchor;
   const fx = -Math.sin(yaw);
   const fz = -Math.cos(yaw);
+  const across = (along: number, w: number) => (Math.abs(fx) > 0.5 ? { w: along, d: w } : { w, d: along });
+  if (e.kind === "sealed") {
+    const { landing, gap, ledge, width, ceil, floor } = CHASM;
+    const hall = landing + gap + ledge;
+    vestibules.push({ kind: "box", x: x - (fx * hall) / 2, z: z - (fz * hall) / 2, ...across(hall, width), ceil, lights: 0, mat: "stain" });
+    vestibules.push({ kind: "box", x: x - fx * (landing + gap / 2), z: z - fz * (landing + gap / 2), ...across(gap, width), ceil, floor, lights: 0, mat: "void" });
+    const lx = x - fx * (landing + gap + ledge / 2);
+    const lz = z - fz * (landing + gap + ledge / 2);
+    vestibules.push({ kind: "box", x: lx, z: lz, ...across(ledge, width), ceil, lights: 2.2, dead: 0.5, mat: "stain" });
+    const target = ROOMS.filter((r) => !raised(r)).reduce((a, b) => (Math.hypot(a.cx - lx, a.cz - lz) < Math.hypot(b.cx - lx, b.cz - lz) ? a : b), ROOMS[0]);
+    corridor(lx, lz, target.cx, target.cz, { w: 2.1, ceil: 2.15, bend: true }); // the crawl
+    continue;
+  }
   // a vestibule in front of the door, then a corridor to the nearest room
   const vx = x - fx * 3;
   const vz = z - fz * 3;
-  const special = e.kind === "grate" ? { mat: "tile" as const, wall: "tile" as const } : e.kind === "sealed" ? { mat: "stain" as const } : {};
+  const special = e.kind === "grate" ? { mat: "tile" as const, wall: "tile" as const } : {};
   const isStage = e.kind === "velvet";
-  vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: e.kind === "sealed" ? 2.2 : 3, lights: 2.4, dead: 0.2, floor: isStage ? 1.8 : 0, ...special });
+  vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: (isStage ? 1.8 : 0) + 3, lights: 2.4, dead: 0.2, floor: isStage ? 1.8 : 0, ...special });
   const level = ROOMS.filter((r) => !raised(r));
   const nearest = level.reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b), level[0]);
   const target = isStage ? STAGE : nearest;
   if (isStage) vestibules.push({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, d: 3.2, a: Math.atan2(-(target.cz - vz), target.cx - vx), floor: 1.8, ceil: 4, lights: 3 });
-  else if (e.kind === "sealed") corridor(vx, vz, target.cx, target.cz, { w: 2.1, ceil: 2.15, bend: true }); // the crawl
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
   if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05));
@@ -228,11 +246,15 @@ export const lobbyBuilt = lazyBuilt(LOBBY_SPACE);
 
 export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 
-export const LOBBY_INTERACTABLES: Interactable[] = EXITS.filter((e) => e.text).map((e) => ({
+export const LOBBY_INTERACTABLES: Interactable[] = EXITS.filter((e) => e.text).map((e) => {
+  // the sealed door is looked at from the edge of the void, across it
+  const back = e.kind === "sealed" ? CHASM.landing + CHASM.gap + 0.8 : 0.6;
+  return {
   id: e.id,
-  x: e.anchor.x + Math.sin(e.anchor.yaw) * 0.6,
-  z: e.anchor.z + Math.cos(e.anchor.yaw) * 0.6,
+  x: e.anchor.x + Math.sin(e.anchor.yaw) * back,
+  z: e.anchor.z + Math.cos(e.anchor.yaw) * back,
   radius: 2.4,
-  verb: e.kind === "elevator" ? "Appeler l'ascenseur" : "Ouvrir",
+  verb: e.kind === "elevator" ? "Appeler l'ascenseur" : e.kind === "sealed" ? "Regarder" : "Ouvrir",
   locked: { name: e.name, text: e.text!, color: e.color },
-}));
+  };
+});

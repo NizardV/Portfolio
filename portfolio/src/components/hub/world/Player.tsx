@@ -74,7 +74,11 @@ export default function Player(props: Props) {
       camera.updateProjectionMatrix();
     }
     // a doorway arms only once you have stepped away from it (you may arrive standing in one)
-    for (const p of zone.portals) if (p.link) armed.current.set(p, doorwaySide(p.link.from, spawn.x, spawn.z).s < ARM);
+    for (const p of zone.portals) {
+      if (!p.link) continue;
+      const { s: side, lateral } = doorwaySide(p.link.from, spawn.x, spawn.z);
+      armed.current.set(p, side < ARM && Math.abs(lateral) < p.link.w / 2 + 0.2);
+    }
   }, [camera, zone, spawn]);
 
   useFrame((_, rawDt) => {
@@ -121,8 +125,12 @@ export default function Player(props: Props) {
         if (p.requires && !used.has(p.requires)) continue;
         if (p.link) {
           const { s: side, lateral } = doorwaySide(p.link.from, s.x, s.z);
-          if (side < ARM) armed.current.set(p, true);
-          if (armed.current.get(p) && side >= 0 && Math.abs(lateral) < p.link.w / 2 + 0.2) {
+          const facing = Math.abs(lateral) < p.link.w / 2 + 0.2;
+          // armed only when standing in front of the opening; stepping aside (or walking round behind) disarms it,
+          // so only a real walk through the doorway crosses, never a sidestep into it from behind
+          if (side < ARM && facing) armed.current.set(p, true);
+          else if (!facing || side > 0.3) armed.current.set(p, false);
+          if (armed.current.get(p) && side >= 0 && facing) {
             const fx = -Math.sin(p.link.from.yaw);
             const fz = -Math.cos(p.link.from.yaw);
             const back = Math.max(0, side - 0.04);

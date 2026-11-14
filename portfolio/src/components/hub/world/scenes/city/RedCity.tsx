@@ -4,6 +4,7 @@ import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
 import { AVENUE, CITY_BACK, cityBuilt, CROSS_STREETS } from "../../places/redcity";
+import { usePreview } from "../../PortalWindow";
 import { Pieces, seeded } from "../props";
 
 const PALETTE: Palette = {
@@ -82,7 +83,7 @@ function Viaduct() {
 }
 
 function RedCity() {
-  const built = use(cityBuilt());
+  const built = use(cityBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.028} hemi={0.7}>
       <Towers />

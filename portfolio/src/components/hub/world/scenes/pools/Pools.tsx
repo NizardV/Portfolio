@@ -4,6 +4,7 @@ import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place, Water } from "../../archi/Place";
 import { COURTYARD, HALL_A, poolsBuilt, WATER } from "../../places/pools";
+import { usePreview } from "../../PortalWindow";
 import { Pieces } from "../props";
 
 const PALETTE: Palette = {
@@ -66,7 +67,7 @@ function Courtyard() {
 }
 
 function Pools() {
-  const built = use(poolsBuilt());
+  const built = use(poolsBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.03} hemi={0.4} flicker={0.03}>
       <Water y={WATER} color="#2fb3b0" />

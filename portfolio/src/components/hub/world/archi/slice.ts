@@ -11,10 +11,13 @@ export function drain<T>(steps: Steps<T>): T {
   }
 }
 
-export function sliced<T>(steps: Steps<T>, budgetMs = 6): Promise<T> {
+/** milliseconds of work per slice; may be raised while it runs (someone is now waiting for the result) */
+export type Budget = { ms: number };
+
+export function sliced<T>(steps: Steps<T>, budget: Budget = { ms: 6 }): Promise<T> {
   return new Promise((resolve, reject) => {
     const tick = () => {
-      const end = performance.now() + budgetMs;
+      const end = performance.now() + budget.ms;
       try {
         for (;;) {
           const r = steps.next();

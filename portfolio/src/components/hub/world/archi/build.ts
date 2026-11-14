@@ -1,8 +1,8 @@
 import { BoxGeometry, BufferAttribute, BufferGeometry, ShapeUtils, Vector2 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { contourSteps, loopArea, pointInLoop, type Pt } from "./contour";
-import { drain, sliced, type Steps } from "./slice";
-import { floorAt, geomBounds, geomDist, type Space, type Surface, type WallSurface } from "./sdf";
+import { contourSetSteps, contourSteps, loopArea, pointInLoop, type Pt } from "./contour";
+import { drain, sliced, type Budget, type Steps } from "./slice";
+import { floorAt, geomBounds, geomDist, type Geom, type Space, type Surface, type WallSurface } from "./sdf";
 
 /** world-metre size of one texture repeat, per material */
 export const TILE: Record<string, number> = {
@@ -118,14 +118,50 @@ export type Built = {
 
 const ceilingSurface = (s: Surface | undefined) => (s === "tile" ? "tile" : s === "concrete" ? "concrete" : s === "marble" ? "plaster" : "ceiling");
 
+/** a wall face with its baseboard, a hair in front of it */
+function wallFace(b: Builder, trim: Builder, ax: number, az: number, bx: number, bz: number, ya: [number, number], yb: [number, number], nx: number, nz: number, u: number, tile: number) {
+  const len = Math.hypot(bx - ax, bz - az);
+  strip(b, ax, az, bx, bz, ya, yb, nx, nz, u / tile, (u + len) / tile, tile);
+  strip(trim, ax + nx * 0.015, az + nz * 0.015, bx + nx * 0.015, bz + nz * 0.015, [ya[0], ya[0] + 0.12], [yb[0], yb[0] + 0.12], nx, nz, u, u + len, 1, false);
+}
+
+/** the exact outline of a solid, as a convex polygon (circles and capsule ends with enough sides to look round) */
+export function solidOutline(g: Geom): Pt[] {
+  const turn = (lx: number, lz: number, a: number, x: number, z: number): Pt => {
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    return [x + lx * c + lz * s, z - lx * s + lz * c];
+  };
+  switch (g.kind) {
+    case "box":
+      return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) => turn((sx * g.w) / 2, (sz * g.d) / 2, g.a ?? 0, g.x, g.z));
+    case "circle": {
+      const n = Math.max(12, Math.min(40, Math.round(g.r * 24)));
+      return Array.from({ length: n }, (_, k) => [g.x + g.r * Math.cos((k * 2 * Math.PI) / n), g.z + g.r * Math.sin((k * 2 * Math.PI) / n)] as Pt);
+    }
+    case "ngon":
+      return Array.from({ length: g.n }, (_, k) => {
+        const t = (2 * k * Math.PI) / g.n; // the corners of the distance function above
+        return turn(g.r * Math.sin(t), g.r * Math.cos(t), g.a ?? 0, g.x, g.z);
+      });
+    case "capsule": {
+      const a = Math.atan2(g.bz - g.az, g.bx - g.ax);
+      const pts: Pt[] = [];
+      for (let k = 0; k <= 8; k++) pts.push([g.bx + g.r * Math.cos(a - Math.PI / 2 + (k * Math.PI) / 8), g.bz + g.r * Math.sin(a - Math.PI / 2 + (k * Math.PI) / 8)]);
+      for (let k = 0; k <= 8; k++) pts.push([g.ax + g.r * Math.cos(a + Math.PI / 2 + (k * Math.PI) / 8), g.az + g.r * Math.sin(a + Math.PI / 2 + (k * Math.PI) / 8)]);
+      return pts;
+    }
+  }
+}
+
 /** Everything visible of a place, derived from its distance field. Pure: run once, cache the result. */
 export function buildSpace(space: Space): Built {
   return drain(buildSteps(space));
 }
 
 /** the same, a few milliseconds per frame: the dream keeps running while a place is being built */
-export function buildSpaceAsync(space: Space): Promise<Built> {
-  return sliced(buildSteps(space));
+export function buildSpaceAsync(space: Space, budget?: Budget): Promise<Built> {
+  return sliced(buildSteps(space), budget);
 }
 
 function* buildSteps(space: Space): Steps<Built> {
@@ -137,8 +173,74 @@ function* buildSteps(space: Space): Steps<Built> {
   const [bx0, bz0, bx1, bz1] = space.bounds;
   const inward = (x: number, z: number, nx: number, nz: number) => [x + nx * 0.15, z + nz * 0.15] as const;
 
-  /* ---- outer walls: the outline of the whole space ---- */
-  const outline = space.walls ? yield* contourSteps((x, z) => space.dist(x, z), bx0, bz0, bx1, bz1, STEP) : [];
+  /**
+   * One wall face from a to b, facing (nx, nz), following the floor and ceiling of the rooms it faces. Where it runs
+   * along two rooms of different heights, it goes in short pieces, each from the lower floor up to the higher
+   * ceiling: a top interpolated from one height to the other would leave a triangle open onto the void.
+   */
+  const side = (ax: number, az: number, bx: number, bz: number, nx: number, nz: number, u: number, look: (owner: number) => WallSurface, cap?: number) => {
+    const len = Math.hypot(bx - ax, bz - az);
+    const ends = (x: number, z: number) => {
+      // the room this end faces; at a bevelled corner the first sample may still fall outside, so look further in
+      let px = x;
+      let pz = z;
+      let o = -1;
+      for (const d of [0.15, 0.35, 0.6]) {
+        px = x + nx * d;
+        pz = z + nz * d;
+        o = space.ownerIndex(px, pz);
+        if (o >= 0) break;
+      }
+      if (o < 0) return null;
+      const lo = space.ground(px, pz);
+      let hi = space.ceiling(px, pz);
+      if (space.shapes[o].open) hi = Math.max(hi, lo + 8);
+      if (cap !== undefined) hi = Math.min(hi, lo + cap);
+      return { o, lo, hi };
+    };
+    // a metre at a time (a long straight wall may run along several rooms), a quarter where the room changes
+    const cuts: number[] = [];
+    const coarse = Math.max(1, Math.ceil(len));
+    for (let c = 0; c < coarse; c++) {
+      const t0 = c / coarse;
+      const t1 = (c + 1) / coarse;
+      const e0 = ends(ax + (bx - ax) * t0, az + (bz - az) * t0);
+      const e1 = ends(ax + (bx - ax) * t1, az + (bz - az) * t1);
+      const mid = ends(ax + (bx - ax) * ((t0 + t1) / 2), az + (bz - az) * ((t0 + t1) / 2));
+      const same = e0 && e1 && mid && e0.o === e1.o && mid.o === e0.o;
+      const fine = same ? 1 : Math.max(1, Math.ceil((len / coarse) / 0.25));
+      for (let f = 0; f < fine; f++) cuts.push(t0 + ((t1 - t0) * f) / fine);
+    }
+    cuts.push(1);
+    for (let p = 0; p < cuts.length - 1; p++) {
+      const x0 = ax + (bx - ax) * cuts[p];
+      const z0 = az + (bz - az) * cuts[p];
+      const x1 = ax + (bx - ax) * cuts[p + 1];
+      const z1 = az + (bz - az) * cuts[p + 1];
+      const a = ends(x0, z0);
+      const b = ends(x1, z1);
+      const u0 = u + len * cuts[p];
+      if (!a && !b) continue;
+      let ya: [number, number];
+      let yb: [number, number];
+      if (a && b && a.o === b.o) {
+        ya = [a.lo, a.hi];
+        yb = [b.lo, b.hi];
+      } else {
+        const ends2 = [a, b].filter((e) => e !== null);
+        const lo = Math.min(...ends2.map((e) => e.lo));
+        const hi = Math.max(...ends2.map((e) => e.hi));
+        ya = [lo, hi];
+        yb = [lo, hi];
+      }
+      const wall = look((a ?? b)!.o);
+      wallFace(walls.get(wall), trim, x0, z0, x1, z1, ya, yb, nx, nz, u0, TILE[wall]);
+    }
+  };
+  const roomWall = (o: number): WallSurface => space.shapes[o].wall ?? "wallpaper";
+
+  /* ---- outer walls: the outline of the rooms (solids are drawn from their exact shape below) ---- */
+  const outline = space.walls ? yield* contourSteps((x, z) => space.roomDist(x, z), bx0, bz0, bx1, bz1, STEP) : [];
   yield;
   for (const loop of outline) {
     let u = 0;
@@ -147,45 +249,54 @@ function* buildSteps(space: Space): Steps<Built> {
       const [bx, bz] = loop[(k + 1) % loop.length];
       const len = Math.hypot(bx - ax, bz - az);
       if (len < 1e-4) continue;
-      const nx = (bz - az) / len; // inside is on (dz, -dx)
-      const nz = -(bx - ax) / len;
-      const [pxa, pza] = inward(ax, az, nx, nz);
-      const [pxb, pzb] = inward(bx, bz, nx, nz);
-      const mi = space.ownerIndex((pxa + pxb) / 2, (pza + pzb) / 2);
-      const wall: WallSurface = (mi >= 0 && space.shapes[mi].wall) || "wallpaper";
-      const tile = TILE[wall];
-      const ya: [number, number] = [space.ground(pxa, pza), space.ceiling(pxa, pza)];
-      const yb: [number, number] = [space.ground(pxb, pzb), space.ceiling(pxb, pzb)];
-      // a solid of limited height (partition, house…) on the other side: its wall stops at its top
-      const solid = space.solidAt((ax + bx) / 2 - nx * 0.15, (az + bz) / 2 - nz * 0.15);
-      if (solid?.h !== undefined) { ya[1] = Math.min(ya[1], ya[0] + solid.h); yb[1] = Math.min(yb[1], yb[0] + solid.h); }
-      if (mi >= 0 && space.shapes[mi].open) { ya[1] = Math.max(ya[1], ya[0] + 8); yb[1] = Math.max(yb[1], yb[0] + 8); }
-      strip(walls.get(wall), ax, az, bx, bz, ya, yb, nx, nz, u / tile, (u + len) / tile, tile);
-      // baseboard, a hair in front of the wall
-      strip(trim, ax + nx * 0.015, az + nz * 0.015, bx + nx * 0.015, bz + nz * 0.015, [ya[0], ya[0] + 0.12], [yb[0], yb[0] + 0.12], nx, nz, u, u + len, 1, false);
+      side(ax, az, bx, bz, (bz - az) / len, -(bx - ax) / len, u, roomWall); // inside is on (dz, -dx)
       u += len;
     }
   }
 
-  /* ---- tops of solids that stop below the ceiling ---- */
+  /* ---- solids (pillars, partitions, houses): their exact outline, so what you see is what stops you ---- */
   for (const so of space.solids) {
+    yield;
+    if (so.ghost) continue;
+    const poly = solidOutline(so);
+    const others = space.solids.filter((o) => o !== so);
+    let u = 0;
+    for (let k = 0; k < poly.length; k++) {
+      const [x0, z0] = poly[k];
+      const [x1, z1] = poly[(k + 1) % poly.length];
+      const len = Math.hypot(x1 - x0, z1 - z0);
+      if (len < 1e-4) continue;
+      let nx = (z1 - z0) / len;
+      let nz = -(x1 - x0) / len;
+      if (geomDist(so, (x0 + x1) / 2 + nx * 0.05, (z0 + z1) / 2 + nz * 0.05) < 0) { nx = -nx; nz = -nz; } // face outwards
+      // in pieces of a metre at most: each follows the floor and ceiling of the room it faces, and hidden ones go
+      const pieces = Math.max(1, Math.ceil(len / 1));
+      for (let p = 0; p < pieces; p++) {
+        const ax = x0 + ((x1 - x0) * p) / pieces;
+        const az = z0 + ((z1 - z0) * p) / pieces;
+        const bx = x0 + ((x1 - x0) * (p + 1)) / pieces;
+        const bz = z0 + ((z1 - z0) * (p + 1)) / pieces;
+        const [mx, mz] = inward((ax + bx) / 2, (az + bz) / 2, nx, nz);
+        // hidden: outside the rooms, or inside another solid that goes all the way up (a low partition hides nothing above it)
+        if (space.roomDist(mx, mz) >= 0 || others.some((o) => o.h === undefined && !o.ghost && geomDist(o, mx, mz) < 0)) { u += len / pieces; continue; }
+        side(ax, az, bx, bz, nx, nz, u, (o) => so.mat ?? roomWall(o), so.h);
+        u += len / pieces;
+      }
+    }
     if (so.h === undefined) continue;
-    const [x0, z0, x1, z1] = geomBounds(so);
+    // a solid that stops below the ceiling gets a top
     const wall = so.mat ?? "wallpaper";
     const tile = TILE[wall];
-    const outlines = yield* contourSteps((x, z) => geomDist(so, x, z), x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
-    for (const loop of outlines) {
-      if (loopArea(loop) >= 0) continue;
-      const tris = ShapeUtils.triangulateShape(loop.map(([x, z]) => new Vector2(x, z)), []);
-      const b = walls.get(wall);
-      const idx = loop.map(([x, z]) => b.vert(x, space.ground(x, z) + so.h!, z, 0, 1, 0, x / tile, z / tile, 0.9));
-      for (const [a, c, d] of tris) {
-        const [ax, az] = loop[a];
-        const [cx, cz] = loop[c];
-        const [dx, dz] = loop[d];
-        const up = (cx - ax) * (dz - az) - (cz - az) * (dx - ax) < 0;
-        b.idx.push(idx[a], up ? idx[c] : idx[d], up ? idx[d] : idx[c]);
-      }
+    const [cx, cz] = poly.reduce(([x, z], [px, pz]) => [x + px / poly.length, z + pz / poly.length], [0, 0]);
+    const y = space.ground(cx, cz) + so.h;
+    const b = walls.get(wall);
+    const idx = poly.map(([x, z]) => b.vert(x, y, z, 0, 1, 0, x / tile, z / tile, 0.9));
+    for (let k = 1; k < poly.length - 1; k++) {
+      const [ax, az] = poly[0];
+      const [px, pz] = poly[k];
+      const [qx, qz] = poly[k + 1];
+      const up = (px - ax) * (qz - az) - (pz - az) * (qx - ax) < 0;
+      b.idx.push(idx[0], up ? idx[k] : idx[k + 1], up ? idx[k + 1] : idx[k]);
     }
   }
 
@@ -194,57 +305,90 @@ function* buildSteps(space: Space): Steps<Built> {
     const s = space.shapes[i];
     yield;
     const [x0, z0, x1, z1] = geomBounds(s);
-    const g = (x: number, z: number) => Math.max(geomDist(s, x, z), -space.laterDist(i, x, z));
-    const loops = yield* contourSteps(g, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
-    if (!loops.length) continue;
-    const outers = loops.filter((l) => loopArea(l) < 0);
-    const holes = loops.filter((l) => loopArea(l) >= 0);
-    const floorKey = `f:${s.mat ?? "carpet"}`;
-    const ceilKey = `c:${ceilingSurface(s.mat)}`;
-    for (const outer of outers) {
-      const mine = holes.filter((h) => pointInLoop(h[0], outer));
-      const tris = ShapeUtils.triangulateShape(outer.map(([x, z]) => new Vector2(x, z)), mine.map((h) => h.map(([x, z]) => new Vector2(x, z))));
-      const all = [...outer, ...mine.flat()];
-      const fb = flats.get(floorKey);
-      const ftile = TILE[s.mat ?? "carpet"];
-      const fIdx = all.map(([x, z]) => fb.vert(x, floorAt(s.floor, x, z), z, 0, 1, 0, x / ftile, z / ftile));
-      for (const [a, b, c] of tris) {
-        // keep triangles facing up
-        const [ax, az] = all[a];
-        const [bx, bz] = all[b];
-        const [cx, cz] = all[c];
-        const up = (bx - ax) * (cz - az) - (bz - az) * (cx - ax) < 0;
-        fb.idx.push(fIdx[a], up ? fIdx[b] : fIdx[c], up ? fIdx[c] : fIdx[b]);
+    // the shape, plus a 12 cm band beyond the outer walls (hidden behind them: no crack of void at the foot of a wall,
+    // where the outline of the rooms and this shape's own outline are traced a little apart), minus later shapes
+    // Three fields over the same grid, sampled in one pass (each neighbouring room measured once):
+    // [0] the shape's own region (for its boundary faces);
+    // [1] its floor, [2] its ceiling: the same, but running 10 cm on under a higher floor (above a lower ceiling) of
+    //     the next room, hidden there, so no hairline crack of void is left where two rooms of different heights
+    //     meet. That band sits 4 mm back, so where both are at the same height the later room stays on top.
+    const BAND = 0.1;
+    const fl = (x: number, z: number) => floorAt(s.floor, x, z);
+    const fields = (x: number, z: number, out: number[]) => {
+      const d = geomDist(s, x, z);
+      const f = fl(x, z);
+      let room = 10;
+      let later = 10;
+      let under = 10;
+      let notUnder = 10;
+      let above = 10;
+      let notAbove = 10;
+      for (const j of space.nearShapes(x, z)) {
+        const o = space.shapes[j];
+        const dj = j === i ? d : geomDist(o, x, z);
+        if (dj < room) room = dj;
+        if (j <= i) continue;
+        if (dj < later) later = dj;
+        if (floorAt(o.floor, x, z) >= f - 0.01) under = Math.min(under, dj);
+        else notUnder = Math.min(notUnder, dj);
+        if (o.open || o.ceil <= s.ceil + 0.01) above = Math.min(above, dj);
+        else notAbove = Math.min(notAbove, dj);
       }
-      if (!s.open) {
-        const cb = flats.get(ceilKey);
-        const ctile = TILE[ceilingSurface(s.mat)];
-        const cIdx = all.map(([x, z]) => cb.vert(x, s.ceil, z, 0, -1, 0, x / ctile, z / ctile));
-        for (const [a, b, c] of tris) {
+      // the shape, plus a 12 cm band beyond the outer walls (hidden behind them: no crack at the foot of a wall)
+      const base = Math.min(d, Math.max(d - 0.12, -room));
+      out[0] = Math.max(base, -later);
+      out[1] = Math.max(base, -notUnder, -under - BAND);
+      out[2] = Math.max(base, -notAbove, -above - BAND);
+    };
+    const [loops, floorLoops, ceilLoops] = yield* contourSetSteps(fields, 3, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
+    if (!loops.length) continue;
+    const surface = (outline: Pt[][], b: Builder, y: (x: number, z: number) => number, ny: number, tile: number) => {
+      const outers = outline.filter((l) => loopArea(l) < 0);
+      const holes = outline.filter((l) => loopArea(l) >= 0);
+      for (const outer of outers) {
+        const mine = holes.filter((h) => pointInLoop(h[0], outer));
+        const tris = ShapeUtils.triangulateShape(outer.map(([x, z]) => new Vector2(x, z)), mine.map((h) => h.map(([x, z]) => new Vector2(x, z))));
+        const all = [...outer, ...mine.flat()];
+        const idx = all.map(([x, z]) => b.vert(x, y(x, z) - (space.laterDist(i, x, z) < -0.005 ? ny * 0.004 : 0), z, 0, ny, 0, x / tile, z / tile));
+        for (const [a, c, d] of tris) {
+          // facing up (floors) or down (ceilings)
           const [ax, az] = all[a];
-          const [bx, bz] = all[b];
           const [cx, cz] = all[c];
-          const up = (bx - ax) * (cz - az) - (bz - az) * (cx - ax) < 0;
-          cb.idx.push(cIdx[a], up ? cIdx[c] : cIdx[b], up ? cIdx[b] : cIdx[c]);
+          const [dx, dz] = all[d];
+          const up = (cx - ax) * (dz - az) - (cz - az) * (dx - ax) < 0;
+          b.idx.push(idx[a], up === ny > 0 ? idx[c] : idx[d], up === ny > 0 ? idx[d] : idx[c]);
         }
       }
-    }
+    };
+    surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"]);
+    if (!s.open) surface(ceilLoops, flats.get(`c:${ceilingSurface(s.mat)}`), () => s.ceil, -1, TILE[ceilingSurface(s.mat)]);
 
     /* ---- where a later shape takes over: soffits, risers, railings ---- */
     for (const loop of loops) {
+      // in pieces of a metre at most: a long straight side may border several rooms, each with its own heights
+      const pieces: [number, number, number, number][] = [];
       for (let k = 0; k < loop.length; k++) {
         const [ax, az] = loop[k];
         const [bx, bz] = loop[(k + 1) % loop.length];
-        const len = Math.hypot(bx - ax, bz - az);
+        const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az)));
+        for (let p = 0; p < n; p++) pieces.push([ax + ((bx - ax) * p) / n, az + ((bz - az) * p) / n, ax + ((bx - ax) * (p + 1)) / n, az + ((bz - az) * (p + 1)) / n]);
+      }
+      for (const [x0, z0, x1, z1] of pieces) {
+        const len = Math.hypot(x1 - x0, z1 - z0);
         if (len < 1e-4) continue;
-        const mx = (ax + bx) / 2;
-        const mz = (az + bz) / 2;
-        if (geomDist(s, mx, mz) > -EPS) continue; // on the shape's own outline: an outer wall, done above
-        if (space.dist(mx, mz) > -EPS) continue; // against a pillar or outside
-        const nx = (bz - az) / len; // pointing into this shape's region
-        const nz = -(bx - ax) / len;
+        const mx = (x0 + x1) / 2;
+        const mz = (z0 + z1) / 2;
+        const nx = (z1 - z0) / len; // pointing into this shape's region
+        const nz = -(x1 - x0) / len;
+        // another room on the other side? (also along the shape's own outline: the outlines of neighbouring rooms are
+        // traced separately and may lie a little apart, so both sides draw their faces, a centimetre into their own room)
         const j = space.ownerIndex(mx - nx * 0.15, mz - nz * 0.15);
-        if (j < 0) continue;
+        if (j < 0 || j === i || space.dist(mx - nx * 0.15, mz - nz * 0.15) > -0.02) continue;
+        const own = geomDist(s, mx, mz) > -EPS;
+        const ax = x0 + nx * 0.01;
+        const az = z0 + nz * 0.01;
+        const bx = x1 + nx * 0.01;
+        const bz = z1 + nz * 0.01;
         const o = space.shapes[j];
         const fi = (x: number, z: number) => floorAt(s.floor, x, z);
         const fj = (x: number, z: number) => floorAt(o.floor, x, z);
@@ -256,6 +400,14 @@ function* buildSteps(space: Space): Steps<Built> {
           const hi = Math.max(s.ceil, o.ceil);
           const sign = s.ceil > o.ceil ? 1 : -1;
           strip(walls.get(wall), ax, az, bx, bz, [lo, hi], [lo, hi], nx * sign, nz * sign, 0, len / tile, tile, false);
+        } else if (s.open !== o.open) {
+          // open sky next to a ceiling: the wall goes on above the roofed side, like the outer walls of an open room
+          const roofed = s.open ? o : s;
+          const sky = s.open ? s : o;
+          const lo = roofed.ceil;
+          const hi = Math.max(lo, floorAt(sky.floor, mx, mz) + 8);
+          const sign = s.open ? 1 : -1;
+          strip(walls.get(wall), ax, az, bx, bz, [lo, hi], [lo, hi], nx * sign, nz * sign, 0, len / tile, tile, false);
         }
         // floors: a riser facing the lower side, and a railing on the higher side for real drops
         const ha = [fi(ax, az), fj(ax, az)];
@@ -264,7 +416,7 @@ function* buildSteps(space: Space): Steps<Built> {
           const sign = ha[0] < ha[1] ? 1 : -1;
           strip(walls.get(o.wall ?? wall), ax, az, bx, bz, [Math.min(...ha), Math.max(...ha)], [Math.min(...hb), Math.max(...hb)], nx * sign, nz * sign, 0, len / tile, tile, false);
           const drop = Math.max(Math.abs(ha[0] - ha[1]), Math.abs(hb[0] - hb[1]));
-          if (drop > 0.6) {
+          if (drop > 0.6 && !own) {
             const top = Math.max(...ha, ...hb);
             const a = Math.atan2(-(bz - az), bx - ax);
             rails.push({ x: mx, y: top + 0.92, z: mz, w: len, h: 0.06, d: 0.06, a });

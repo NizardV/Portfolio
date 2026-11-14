@@ -6,6 +6,7 @@ import { Place } from "../../archi/Place";
 import { HOUSES, SUBURB, suburbBuilt } from "../../places/dreamcore";
 import Sky from "../meadow/Sky";
 import { Pieces } from "../props";
+import { usePreview } from "../../PortalWindow";
 import { Hills, House, Turbine } from "./Outdoors";
 
 const PALETTE: Palette = {
@@ -22,7 +23,7 @@ const COLORS = ["#f2d06b", "#e9e1cf", "#d7a6a0", "#c9d6e0"];
 
 /** Le lotissement: dusk, pink and peach, an empty street, every window lit. A crater at the end. */
 function SuburbScene() {
-  const built = use(suburbBuilt());
+  const built = use(suburbBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   const street = useMemo<Piece[]>(() => [
     { x: 0, y: -0.01, z: -SUBURB.street.len / 2 + 4, w: SUBURB.street.w, h: 0.02, d: SUBURB.street.len },
     ...[-1, 1].map((s) => ({ x: s * (SUBURB.street.w / 2 + 0.9), y: 0, z: -SUBURB.street.len / 2 + 4, w: 1.8, h: 0.12, d: SUBURB.street.len })),

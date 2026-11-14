@@ -4,6 +4,7 @@ import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
 import { hotelBuilt, WELL } from "../../places/hotel";
+import { usePreview } from "../../PortalWindow";
 import { Pieces } from "../props";
 
 const PALETTE: Palette = {
@@ -60,7 +61,7 @@ function FloorsBelow() {
 }
 
 function Hotel() {
-  const built = use(hotelBuilt());
+  const built = use(hotelBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
     <Place built={built} palette={PALETTE} air={AIR} density={0.022} hemi={0.32} flicker={0.03}>
       <FloorsBelow />

@@ -56,9 +56,19 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
 - **Contours** (`contour.ts`) : le sens de chaque segment se décide sur la **topologie de la grille** (milieux d'arêtes
   + coin intérieur), jamais en ré-échantillonnant le champ, et seules les boucles réellement fermées sont gardées.
   Sinon (bug du 2026-11-14) : boucles ouvertes refermées de force → murs en travers des salles, sols/plafonds manquants.
-  Diagnostic : compter les fermetures de boucle hors mur et échantillonner la couverture des triangles de sol.
-- **Construction découpée** (`slice.ts`) : `buildSpace` est un générateur ; `lazyBuilt` le joue ~6 ms par tranche et
-  renvoie une promesse lue par `use()` dans la scène. `PREPARE` (`scenes/index.ts`) prépare code + géométrie des lieux
+- **Raccords** (`build.ts`) : les solides (piliers, cloisons) sont dessinés depuis leur **forme exacte** (`solidOutline`,
+  = la collision), pas tracés ; les murs suivent les pièces par morceaux de 1 m (25 cm aux changements de pièce), du sol le
+  plus bas au plafond le plus haut ; les faces entre deux pièces sont dessinées des deux côtés (à 1 cm) et par morceaux ;
+  sols/plafonds débordent de 12 cm derrière les murs et de 10 cm sous la pièce suivante (4 mm en retrait). Sinon : fentes
+  de vide aux raccords. `Solid.ghost` = collision seule (la clôture de la salle de jeux, dessinée par la scène).
+- **Audit à la 1re personne** : `pnpm hub:audit [LIEU]` (`scripts/hub-audit.mjs`, sans navigateur) lance 144 rayons depuis
+  l'œil, tous les 2 m de chaque lieu atteignable, et compte : **vide** (rayon qui s'échappe), **fantôme** (mur traversable),
+  **invisible** (blocage sans mur). À relancer après chaque modif de plan. Reste connu (2026-11-14) : ~0,05 % de rayons
+  dans le Lobby, des pièces générées qui se frôlent (0-40 cm) → à corriger dans le générateur.
+- **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` fait
+  démarrer le rêve à cet endroit (captures Playwright d'un lieu précis).
+- **Construction découpée** (`slice.ts`) : `buildSpace` est un générateur ; `lazyBuilt` le joue par tranches (6 ms en
+  préparation, 40 ms dès qu'on est dans le lieu) et renvoie une promesse lue par `use()` dans la scène. `PREPARE` (`scenes/index.ts`) prépare code + géométrie des lieux
   derrière les portes du lieu courant : la porte montre son lieu sans saccade.
 - **Piège** : deux formes qui se touchent **sans se chevaucher** créent un mur invisible d'épaisseur nulle. Toujours
   ≥ 0,3 m de recouvrement (`throat()` de `places/common.ts` le fait). Vérifier un plan : transpiler `places/*.ts` en
@@ -81,6 +91,6 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
 | Projet | Lieu prévu | État |
 | --- | --- | --- |
 | 🟩 Vigil (+ Infra) | bureaux isolés : salle de surveillance + salle serveurs, pilotées par Vigil | bureaux en place, écrans factices (données publiques agrégées à brancher) |
-| 🟨 Backrooms | porte scellée au fond du Lobby, teaser jouable + « Jouer sur Roblox » | porte scellée dans le Lobby |
+| 🟨 Backrooms | porte au fond du Lobby, de l'autre côté d'un vide (inatteignable, glitchs) ; plus tard teaser + « Jouer sur Roblox » | en place (prompt sans mention du jeu) |
 
 Blindtest abandonné (2026-11-08). Backlog détaillé : fiche Notion « Hub nizard.dev ».
