@@ -104,7 +104,7 @@ test.describe("page (all devices)", () => {
     const menu = page.getByRole("dialog", { name: "Menu" });
     await expect(menu).toBeVisible();
     await expect(menu.getByRole("button", { name: /La prairie/ })).toBeVisible();
-    await expect(menu.getByText("???")).toBeVisible(); // the room is not found yet
+    await expect(menu.getByText("???")).toHaveCount(10); // every other place is still to be found
     await expect(menu.getByRole("link", { name: /SE RÉVEILLER/ })).toHaveAttribute("href", "/");
     for (const [tab, setting] of [["Graphismes", "Balancement de la marche"], ["Audio", "Volume"], ["Contrôles", "Sensibilité"]]) {
       await menu.getByRole("tab", { name: tab }).click();

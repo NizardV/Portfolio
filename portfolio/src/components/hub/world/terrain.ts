@@ -4,6 +4,8 @@
  */
 
 export const MEADOW_DOOR = { x: 0, z: -12 };
+/** a hole hidden in the grass, off the path: the way down into Dreamcore */
+export const MEADOW_HOLE = { x: -32, z: 16, r: 1.5 };
 /** the big « Bliss » hill the door stands in front of */
 const HILL = { x: 18, z: -105, radius: 75, height: 26 };
 /** the small white house, far away on a ridge (scenery only) */

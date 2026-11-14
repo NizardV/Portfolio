@@ -36,7 +36,8 @@ export type Shape = Geom & {
   open?: boolean;
 };
 
-export type Solid = Geom & { mat?: WallSurface; tag?: string };
+/** something standing in the space: a pillar, a partition, a house in a hangar. h = its height (default: up to the ceiling) */
+export type Solid = Geom & { mat?: WallSurface; tag?: string; h?: number };
 
 /* ---------- primitive distance functions (2D, x/z) ---------- */
 
@@ -105,17 +106,21 @@ export function floorAt(f: Floor | undefined, x: number, z: number): number {
 /* ---------- a place: shapes + solids, with a spatial index ---------- */
 
 const CELL = 8;
+const RING: [number, number][] = Array.from({ length: 16 }, (_, k) => [Math.cos((k * Math.PI) / 8), Math.sin((k * Math.PI) / 8)]);
 const MARGIN = 3;
 
 export class Space {
   readonly shapes: Shape[];
   readonly solids: Solid[];
   readonly bounds: [number, number, number, number];
+  /** false: open-air places, the edge of the space is invisible (no wall drawn) */
+  readonly walls: boolean;
   private index = new Map<string, { shapes: number[]; solids: number[] }>();
 
-  constructor(shapes: Shape[], solids: Solid[] = []) {
+  constructor(shapes: Shape[], solids: Solid[] = [], opts: { walls?: boolean } = {}) {
     this.shapes = shapes;
     this.solids = solids;
+    this.walls = opts.walls ?? true;
     const b: [number, number, number, number] = [Infinity, Infinity, -Infinity, -Infinity];
     const add = (bb: [number, number, number, number], list: "shapes" | "solids", i: number) => {
       b[0] = Math.min(b[0], bb[0]);
@@ -167,6 +172,14 @@ export class Space {
     return d;
   }
 
+  /** the solid standing at this point, if any */
+  solidAt(x: number, z: number): Solid | null {
+    const n = this.near(x, z);
+    if (!n) return null;
+    for (const i of n.solids) if (geomDist(this.solids[i], x, z) < 0) return this.solids[i];
+    return null;
+  }
+
   ground(x: number, z: number): number {
     const i = this.ownerIndex(x, z);
     return i < 0 ? 0 : floorAt(this.shapes[i].floor, x, z);
@@ -177,19 +190,36 @@ export class Space {
     return i < 0 ? 3 : this.shapes[i].ceil;
   }
 
-  /** push a circle of radius r back inside the space (two passes settle corners) */
+  /**
+   * Push a circle of radius r back inside the space. Inside a union of overlapping shapes, the distance field
+   * underestimates (a seam between two rooms looks like a wall to it), so the test uses points around the
+   * circle: only points truly outside the space count as a wall, and the circle is pushed away from them.
+   */
   collide(x: number, z: number, r: number): [number, number] {
-    for (let pass = 0; pass < 3; pass++) {
-      const d = this.dist(x, z);
-      if (d <= -r) break;
-      const e = 0.02;
-      const gx = this.dist(x + e, z) - this.dist(x - e, z);
-      const gz = this.dist(x, z + e) - this.dist(x, z - e);
-      const len = Math.hypot(gx, gz) || 1;
-      const push = d + r + 0.001;
-      x -= (gx / len) * push;
-      z -= (gz / len) * push;
+    for (let pass = 0; pass < 4; pass++) {
+      let px = 0;
+      let pz = 0;
+      let worst = 0;
+      for (let k = 0; k < RING.length; k++) {
+        const [c, s] = RING[k];
+        const d = this.dist(x + c * r, z + s * r);
+        if (d > 0) {
+          px -= c * d;
+          pz -= s * d;
+          worst = Math.max(worst, d);
+        }
+      }
+      if (worst === 0) break;
+      const len = Math.hypot(px, pz) || 1;
+      x += (px / len) * (worst + 0.002);
+      z += (pz / len) * (worst + 0.002);
     }
     return [x, z];
+  }
+
+  /** a circle of radius r fits here without touching any wall */
+  fits(x: number, z: number, r: number): boolean {
+    if (this.dist(x, z) >= 0) return false;
+    return RING.every(([c, s]) => this.dist(x + c * r, z + s * r) < 0);
   }
 }

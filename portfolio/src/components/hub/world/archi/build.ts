@@ -128,7 +128,7 @@ export function buildSpace(space: Space): Built {
   const inward = (x: number, z: number, nx: number, nz: number) => [x + nx * 0.15, z + nz * 0.15] as const;
 
   /* ---- outer walls: the outline of the whole space ---- */
-  for (const loop of contours((x, z) => space.dist(x, z), bx0, bz0, bx1, bz1, STEP)) {
+  for (const loop of space.walls ? contours((x, z) => space.dist(x, z), bx0, bz0, bx1, bz1, STEP) : []) {
     let u = 0;
     for (let k = 0; k < loop.length; k++) {
       const [ax, az] = loop[k];
@@ -144,11 +144,35 @@ export function buildSpace(space: Space): Built {
       const tile = TILE[wall];
       const ya: [number, number] = [space.ground(pxa, pza), space.ceiling(pxa, pza)];
       const yb: [number, number] = [space.ground(pxb, pzb), space.ceiling(pxb, pzb)];
+      // a solid of limited height (partition, house…) on the other side: its wall stops at its top
+      const solid = space.solidAt((ax + bx) / 2 - nx * 0.15, (az + bz) / 2 - nz * 0.15);
+      if (solid?.h !== undefined) { ya[1] = Math.min(ya[1], ya[0] + solid.h); yb[1] = Math.min(yb[1], yb[0] + solid.h); }
       if (mi >= 0 && space.shapes[mi].open) { ya[1] = Math.max(ya[1], ya[0] + 8); yb[1] = Math.max(yb[1], yb[0] + 8); }
       strip(walls.get(wall), ax, az, bx, bz, ya, yb, nx, nz, u / tile, (u + len) / tile, tile);
       // baseboard, a hair in front of the wall
       strip(trim, ax + nx * 0.015, az + nz * 0.015, bx + nx * 0.015, bz + nz * 0.015, [ya[0], ya[0] + 0.12], [yb[0], yb[0] + 0.12], nx, nz, u, u + len, 1, false);
       u += len;
+    }
+  }
+
+  /* ---- tops of solids that stop below the ceiling ---- */
+  for (const so of space.solids) {
+    if (so.h === undefined) continue;
+    const [x0, z0, x1, z1] = geomBounds(so);
+    const wall = so.mat ?? "wallpaper";
+    const tile = TILE[wall];
+    for (const loop of contours((x, z) => geomDist(so, x, z), x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP)) {
+      if (loopArea(loop) >= 0) continue;
+      const tris = ShapeUtils.triangulateShape(loop.map(([x, z]) => new Vector2(x, z)), []);
+      const b = walls.get(wall);
+      const idx = loop.map(([x, z]) => b.vert(x, space.ground(x, z) + so.h!, z, 0, 1, 0, x / tile, z / tile, 0.9));
+      for (const [a, c, d] of tris) {
+        const [ax, az] = loop[a];
+        const [cx, cz] = loop[c];
+        const [dx, dz] = loop[d];
+        const up = (cx - ax) * (dz - az) - (cz - az) * (dx - ax) < 0;
+        b.idx.push(idx[a], up ? idx[c] : idx[d], up ? idx[d] : idx[c]);
+      }
     }
   }
 
@@ -250,7 +274,7 @@ export function buildSpace(space: Space): Built {
       for (let u = -reach; u <= reach; u += spacing) for (let v = -reach; v <= reach; v += spacing) {
         const x = cx + u * c + v * sn;
         const z = cz - u * sn + v * c;
-        if (space.ownerIndex(x, z) !== i || space.dist(x, z) > -0.7) continue;
+        if (space.ownerIndex(x, z) !== i || !space.fits(x, z, 0.7)) continue;
         const big = s.ceil > 6;
         panels.push({ x, y: s.ceil - 0.02, z, a, size: big ? [1.6, 1.6] : [1.2, 0.6], dead: rnd() < (s.dead ?? 0.12) });
       }

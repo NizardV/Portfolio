@@ -1,5 +1,6 @@
 import { buildSpace, type Built } from "./archi/build";
 import { geomDist, Space, type Shape, type Solid } from "./archi/sdf";
+import { back, throat } from "./places/common";
 import type { Interactable } from "./zones";
 
 /**
@@ -22,7 +23,16 @@ const rnd = mulberry32(2611);
 const range = (a: number, b: number) => a + rnd() * (b - a);
 
 export type Anchor = { x: number; z: number; y: number; yaw: number };
-export type Exit = { id: string; kind: "sealed" | "elevator" | "grate" | "glass" | "velvet"; anchor: Anchor; color: string; name: string; text: string };
+export type Exit = {
+  id: string;
+  kind: "sealed" | "elevator" | "grate" | "glass" | "velvet" | "service" | "secret";
+  anchor: Anchor;
+  color: string;
+  name: string;
+  /** open doorway size (w × h); a locked one has a text instead */
+  size: [number, number];
+  text?: string;
+};
 
 /* ---------- landmarks ---------- */
 type Room = Shape & { cx: number; cz: number };
@@ -181,11 +191,14 @@ const vestibules: Shape[] = [];
 vestibules.push({ kind: "box", x: 0, z: 76.4, w: 1.3, d: 2.4, ceil: 2.25, lights: 0 });
 
 export const EXITS: Exit[] = [
-  { id: "exit-backrooms", kind: "sealed", anchor: { x: -66, z: -77, y: 0, yaw: 0 }, color: "#e8c547", name: "Backrooms", text: "La porte est scellée. Derrière, ça bourdonne : le jeu arrive un jour." },
-  { id: "exit-bassins", kind: "grate", anchor: { x: 22, z: -77, y: 0, yaw: 0 }, color: "#7fd6e0", name: "Les bassins", text: "On entend l'eau derrière la grille. Elle ne s'ouvre pas, pas encore." },
-  { id: "exit-bureaux", kind: "elevator", anchor: { x: 77, z: -10, y: 0, yaw: -Math.PI / 2 }, color: "#4fd1c5", name: "Les bureaux", text: "L'ascenseur ne vient pas. Les bureaux isolés sont encore en travaux." },
-  { id: "exit-commerce", kind: "glass", anchor: { x: 77, z: 50, y: 0, yaw: -Math.PI / 2 }, color: "#e597a6", name: "Le centre commercial", text: "Les portes vitrées sont fermées à clé. Une musique très lointaine filtre." },
-  { id: "exit-hotel", kind: "velvet", anchor: { x: -77, z: 46, y: 1.8, yaw: Math.PI / 2 }, color: "#d0745f", name: "L'hôtel", text: "Le grand escalier est barré d'un cordon de velours." },
+  { id: "exit-backrooms", kind: "sealed", anchor: { x: -66, z: -77, y: 0, yaw: 0 }, color: "#e8c547", name: "Backrooms", size: [1.2, 2.1], text: "La porte est scellée. Derrière, ça bourdonne : le jeu arrive un jour." },
+  { id: "exit-bassins", kind: "grate", anchor: { x: 22, z: -77, y: 0, yaw: 0 }, color: "#7fd6e0", name: "Les bassins", size: [2.2, 2.4] },
+  { id: "exit-bureaux", kind: "elevator", anchor: { x: 77, z: -10, y: 0, yaw: -Math.PI / 2 }, color: "#4fd1c5", name: "Les bureaux", size: [1.7, 2.3] },
+  { id: "exit-commerce", kind: "glass", anchor: { x: 77, z: 50, y: 0, yaw: -Math.PI / 2 }, color: "#e597a6", name: "Le centre commercial", size: [2, 2.3] },
+  { id: "exit-hotel", kind: "velvet", anchor: { x: -77, z: 46, y: 1.8, yaw: Math.PI / 2 }, color: "#d0745f", name: "L'hôtel", size: [2.6, 2.8] },
+  // ways back that nobody shows you: a service door (from the canals) and a door that should not be there (the red city)
+  { id: "exit-canaux", kind: "service", anchor: { x: -77, z: -24, y: 0, yaw: Math.PI / 2 }, color: "#8c8f86", name: "Service", size: [1.1, 2.1] },
+  { id: "exit-rouge", kind: "secret", anchor: { x: 50, z: 77, y: 0, yaw: Math.PI }, color: "#e0453a", name: "?", size: [1, 2] },
 ];
 for (const e of EXITS) {
   const { x, z, yaw } = e.anchor;
@@ -203,6 +216,8 @@ for (const e of EXITS) {
   if (isStage) vestibules.push({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, d: 3.2, a: Math.atan2(-(target.cz - vz), target.cx - vx), floor: 1.8, ceil: 4, lights: 3 });
   else if (e.kind === "sealed") corridor(vx, vz, target.cx, target.cz, { w: 2.1, ceil: 2.15, bend: true }); // the crawl
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
+  // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
+  if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05));
 }
 
 /* ---------- the place ---------- */
@@ -217,11 +232,11 @@ export function lobbyBuilt(): Built {
 
 export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 
-export const LOBBY_INTERACTABLES: Interactable[] = EXITS.map((e) => ({
+export const LOBBY_INTERACTABLES: Interactable[] = EXITS.filter((e) => e.text).map((e) => ({
   id: e.id,
   x: e.anchor.x + Math.sin(e.anchor.yaw) * 0.6,
   z: e.anchor.z + Math.cos(e.anchor.yaw) * 0.6,
   radius: 2.4,
   verb: e.kind === "elevator" ? "Appeler l'ascenseur" : "Ouvrir",
-  locked: { name: e.name, text: e.text, color: e.color },
+  locked: { name: e.name, text: e.text!, color: e.color },
 }));

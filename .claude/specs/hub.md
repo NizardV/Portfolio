@@ -11,7 +11,9 @@ Vigil : salle de surveillance, salle serveurs), bassins → canaux → ville rou
 studio, hôtel-atrium, Dreamcore (trou dans la prairie → salle de jeux → chutes en plein air), porte scellée du jeu
 Backrooms. Principe : « cohérent, et en même temps pas » ; pas d'architecture trop proche du réel.
 
-**En prod** : la prairie → porte blanche → **le Lobby** ; ses seuils vers les branches sont fermés (bandeau au clic).
+**État (PR #65, 2026-11-14)** : les 11 lieux existent en version « telle quelle » (pour se projeter, détails à venir) :
+prairie, Lobby, bureaux, bassins, canaux, ville rouge, commerce, hôtel, salle de jeux, collines, lotissement. Le menu
+Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (porte scellée) et Vigil (écrans factices).
 `/hub/v2` (adresse de construction) redirige vers `/hub`.
 
 ## Accès
@@ -43,21 +45,35 @@ Backrooms. Principe : « cohérent, et en même temps pas » ; pas d'architectur
   le joueur et l'herbe) ; herbe instanciée qui suit le joueur, 3 couches en fondu (proche animée ~30 m, moyenne la plus
   dense ~70 m, lointaine peu animée ~135 m) ; ciel en dégradé (direction normalisée PAR PIXEL) + cumulus en sprites ;
   porte blanche fermée à ouvrir (s'ouvre vers le joueur).
-- **Lobby** : données dans `world/lobby.ts` (grille 12 × 12 de cases de 5 m, labyrinthe généré avec une graine fixe
-  = identique pour tous ; pièces spéciales : grande salle de 10 m et sa galerie inaccessible, fosse + escalier + puits
-  d'étagères, estrade + escalier, champ de trous sur un « second lobby » en dessous, couloir écrasant ; plafonds de
-  hauteurs variées ; seuils des branches `EXITS`). Le sol (`lobbyGround`) suit escaliers et fosses ; un dénivelé
-  sur un côté ouvert devient une rambarde (collision). Rendu `scenes/lobby/` : `geometry.ts` fusionne murs, sols,
-  plafonds en quelques maillages (UV en mètres monde), `textures.ts` (papier peint, moquette, taches, faïence, béton).
-  Pour vérifier un changement de plan : générer une vue de dessus (transpiler `lobby.ts`) plutôt que marcher.
-- Pièges : dans une scène, `<color attach="background">` / `<fog>` doivent être enfants directs de la scène (pas d'un
-  `<group>`), sinon le ciel reste noir. Ne jamais retirer une lumière (recompilation des shaders) : intensité 0.
+- **Kit d'architecture** (`archi/`) : un lieu = union de formes 2D (boîte inclinée/arrondie, cercle, polygone, capsule)
+  moins des solides (piliers, cloisons, maisons de hauteur `h`), en champ de distance signé (`sdf.ts`). La forme placée
+  **après** gagne (son sol plat ou en rampe, son plafond). `build.ts` extrait murs (marching squares + RDP), sols,
+  plafonds, retombées, contremarches, rambardes (chute > 0,6 m) et plafonniers ; AO en couleurs de sommet.
+  `materials.ts` : textures procédurales neutres, teintées par lieu (`Palette` dans `Architecture.tsx`, `Place.tsx`).
+  Lumière : plafonniers émissifs (bloom) + 3 à 10 point lights qui suivent le joueur sur les plafonniers proches.
+- **Collision** = le même champ : `Space.collide` teste 16 points autour du joueur (le min de l'union sous-estime la
+  distance aux raccords : un gradient y bloquait). Marche : 0,45 m max sans rampe.
+- **Piège** : deux formes qui se touchent **sans se chevaucher** créent un mur invisible d'épaisseur nulle. Toujours
+  ≥ 0,3 m de recouvrement (`throat()` de `places/common.ts` le fait). Vérifier un plan : transpiler `places/*.ts` en
+  .mjs et faire un parcours en largeur avec `fits` + règle de marche, plutôt que marcher.
+- **Lieux** : données dans `places/*.ts` et `lobby.ts` (généré, graine fixe, ~160 m : salles repères, remplissage
+  déformé, couloirs MST + boucles), rendu dans `scenes/<lieu>/`. Ville rouge, collines, lotissement : `walls: false`
+  (plein air, bord invisible).
+- **Portes sans fondu** : `Portal.link` → `PortalWindow` (drei `MeshPortalMaterial`, `worldUnits`) montre le lieu
+  d'arrivée en direct ; franchir le plan remonte le joueur de l'autre côté (`throughDoor`, pose conservée). Chaque côté
+  a besoin d'une « gorge » au-delà de l'ancre. Near caméra 0,03. Seules les chutes (trous Dreamcore) gardent un fondu.
+  Retour de la ville rouge : escalier éclairé au bout de l'avenue → porte secrète du Lobby.
+- `Atmosphere.tsx` pose fond + brouillard via `useThree` (marche aussi dans les scènes de portail ; un `<color attach>`
+  dans un `<group>` laisse le ciel noir). Post-traitement par lieu (`Zone.post`) : bloom, teinte, contraste, grain,
+  vignettage. **Pas d'AO** : N8AO plante avec three r172+, SSAO trop bruité. Réverbération par lieu (`Zone.reverb`).
+- Pièges : ne jamais retirer une lumière (recompilation des shaders) : intensité 0. Pas de « faisceau » en boîte
+  translucide : vu de près, il recouvre l'écran d'un triangle net, même très transparent.
 - Tests locaux : tuer tout `next start` resté sur le port 3100 avant de relancer (sinon chunks périmés, page blanche).
 
 ## Projets (`components/hub/universes.ts`)
 | Projet | Lieu prévu | État |
 | --- | --- | --- |
-| 🟩 Vigil (+ Infra) | bureaux isolés : salle de surveillance + salle serveurs, pilotées par Vigil | ascenseur fermé dans le Lobby |
+| 🟩 Vigil (+ Infra) | bureaux isolés : salle de surveillance + salle serveurs, pilotées par Vigil | bureaux en place, écrans factices (données publiques agrégées à brancher) |
 | 🟨 Backrooms | porte scellée au fond du Lobby, teaser jouable + « Jouer sur Roblox » | porte scellée dans le Lobby |
 
 Blindtest abandonné (2026-11-08). Backlog détaillé : fiche Notion « Hub nizard.dev ».

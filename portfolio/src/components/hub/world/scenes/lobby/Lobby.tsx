@@ -129,12 +129,6 @@ function Frame({ w, h, color }: { w: number; h: number; color: string }) {
     </>
   );
 }
-const Glow = ({ w, h, color, z = 0.02, opacity = 1 }: { w: number; h: number; color: string; z?: number; opacity?: number }) => (
-  <mesh position={[0, h / 2, z]}>
-    <planeGeometry args={[w, h]} />
-    <meshBasicMaterial color={color} toneMapped={false} transparent={opacity < 1} opacity={opacity} />
-  </mesh>
-);
 function Plate({ text, color, y }: { text: string; color: string; y: number }) {
   const map = usePlateTexture(text, color);
   return (
@@ -145,84 +139,75 @@ function Plate({ text, color, y }: { text: string; color: string; y: number }) {
   );
 }
 
+/** The thresholds of the branches. Open ones are only a frame: the place behind is seen through them, live. */
 function ExitThreshold({ exit }: { exit: Exit }) {
-  const { kind, color, anchor } = exit;
-  const a = anchor.yaw;
+  const { kind, color, anchor, size } = exit;
+  const [w, h] = size;
+  const a = anchor.yaw + Math.PI; // the frame faces into the Lobby
+  const fx = -Math.sin(anchor.yaw);
+  const fz = -Math.cos(anchor.yaw);
   return (
-    <group position={[anchor.x + Math.sin(a) * 0.14, anchor.y, anchor.z + Math.cos(a) * 0.14]} rotation={[0, a, 0]}>
+    <group position={[anchor.x - fx * 0.06, anchor.y, anchor.z - fz * 0.06]} rotation={[0, a, 0]}>
       {kind === "sealed" && (
         <>
-          <Frame w={1.2} h={2.1} color="#4a4126" />
-          <mesh position={[0, 1.05, 0.04]}>
-            <boxGeometry args={[1.2, 2.1, 0.08]} />
+          <Frame w={w} h={h} color="#4a4126" />
+          <mesh position={[0, h / 2, 0.04]}>
+            <boxGeometry args={[w, h, 0.08]} />
             <meshStandardMaterial color="#6b5d2a" metalness={0.4} roughness={0.6} />
           </mesh>
           {[0.5, 1.05, 1.6].map((y) => (
             <mesh key={y} position={[0, y, 0.1]}>
-              <boxGeometry args={[1.3, 0.08, 0.06]} />
+              <boxGeometry args={[w + 0.1, 0.08, 0.06]} />
               <meshStandardMaterial color="#3a3320" metalness={0.5} roughness={0.5} />
             </mesh>
           ))}
           <pointLight position={[0, 2, 0.8]} intensity={2.5} distance={6} decay={1.6} color={color} />
         </>
       )}
-      {kind === "grate" && (
-        <>
-          <Glow w={2.2} h={2.4} color="#bff6f2" z={-0.05} />
-          <Frame w={2.2} h={2.4} color="#d9ecea" />
-          {Array.from({ length: 12 }, (_, k) => (
-            <mesh key={k} position={[-1.05 + k * 0.19, 1.2, 0.08]}>
-              <boxGeometry args={[0.04, 2.4, 0.04]} />
-              <meshStandardMaterial color="#56606a" metalness={0.6} roughness={0.4} />
-            </mesh>
-          ))}
-          <pointLight position={[0, 1.6, 1.4]} intensity={5} distance={10} decay={1.5} color={color} />
-        </>
-      )}
+      {kind === "grate" && <Frame w={w} h={h} color="#d9ecea" />}
       {kind === "elevator" && (
         <>
-          <Frame w={1.7} h={2.3} color="#6e757b" />
-          {[-0.425, 0.425].map((x) => (
-            <mesh key={x} position={[x, 1.15, 0.05]}>
-              <boxGeometry args={[0.84, 2.3, 0.05]} />
+          <Frame w={w} h={h} color="#6e757b" />
+          <Plate text="▲  BUREAUX" color={color} y={h + 0.3} />
+          {[-1, 1].map((sd) => (
+            <mesh key={sd} position={[sd * (w / 2 + 0.55), h / 2, 0.02]}>
+              <boxGeometry args={[0.84, h, 0.05]} />
               <meshStandardMaterial color="#9aa1a7" metalness={0.75} roughness={0.35} />
             </mesh>
           ))}
-          <Plate text="▲  BUREAUX" color={color} y={2.6} />
-          <pointLight position={[0, 2.2, 1.2]} intensity={4} distance={9} decay={1.6} color={color} />
         </>
       )}
       {kind === "glass" && (
         <>
-          <Glow w={2} h={2.3} color="#ffd1dc" z={-0.06} opacity={0.9} />
-          <Frame w={2} h={2.3} color="#2c2c30" />
-          {[-0.5, 0.5].map((x) => (
-            <mesh key={x} position={[x, 1.15, 0.05]}>
-              <boxGeometry args={[0.98, 2.3, 0.03]} />
+          <Frame w={w} h={h} color="#2c2c30" />
+          {[-1, 1].map((sd) => (
+            <mesh key={sd} position={[sd * (w / 2 + 0.5), h / 2, 0.05]}>
+              <boxGeometry args={[0.98, h, 0.03]} />
               <meshStandardMaterial color="#d8e4ec" transparent opacity={0.25} roughness={0.1} />
             </mesh>
           ))}
-          <pointLight position={[0, 1.6, 1.2]} intensity={4} distance={9} decay={1.6} color={color} />
         </>
       )}
       {kind === "velvet" && (
         <>
-          <Glow w={2.6} h={2.8} color="#ff9a7a" z={-0.05} />
-          <Frame w={2.6} h={2.8} color="#5a3220" />
-          <Plate text="HÔTEL  ↑" color="#f2c9a0" y={3.15} />
-          {[-0.9, 0.9].map((x) => (
-            <mesh key={x} position={[x, 0.5, 0.7]}>
+          <Frame w={w} h={h} color="#5a3220" />
+          <Plate text="HÔTEL  ↑" color="#f2c9a0" y={h + 0.35} />
+          {[-1, 1].map((sd) => (
+            <mesh key={sd} position={[sd * (w / 2 + 0.4), 0.5, 0.5]}>
               <cylinderGeometry args={[0.05, 0.08, 1, 12]} />
               <meshStandardMaterial color="#c9a24a" metalness={0.8} roughness={0.3} />
             </mesh>
           ))}
-          <mesh position={[0, 0.88, 0.7]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.035, 0.035, 1.8, 10]} />
-            <meshStandardMaterial color="#8a1f24" roughness={0.8} />
-          </mesh>
-          <pointLight position={[0, 1.8, 1.4]} intensity={5} distance={10} decay={1.5} color={color} />
         </>
       )}
+      {kind === "service" && (
+        <>
+          <Frame w={w} h={h} color="#55585a" />
+          <Plate text="SERVICE" color="#c9ccc4" y={h + 0.25} />
+        </>
+      )}
+      {kind === "secret" && <Frame w={w} h={h} color="#3a3320" />}
+      {kind !== "sealed" && kind !== "secret" && <pointLight position={[0, h * 0.8, 1]} intensity={3} distance={8} decay={1.6} color={color} />}
     </group>
   );
 }

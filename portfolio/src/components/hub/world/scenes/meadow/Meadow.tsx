@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import { BufferAttribute, Color, PlaneGeometry } from "three";
-import { MEADOW_HOUSE, meadowHeight } from "../../terrain";
+import { MEADOW_HOLE, MEADOW_HOUSE, meadowHeight } from "../../terrain";
 import Flowers from "./Flowers";
 import Grass from "./Grass";
 import Sky, { HORIZON, SUN_DIR } from "./Sky";
@@ -77,6 +77,11 @@ export default function Meadow() {
       <Flowers />
       <House />
       <WhiteDoor />
+      {/* the rabbit hole: black, perfectly round, half hidden by the grass */}
+      <mesh position={[MEADOW_HOLE.x, meadowHeight(MEADOW_HOLE.x, MEADOW_HOLE.z) + 0.04, MEADOW_HOLE.z]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[MEADOW_HOLE.r, 40]} />
+        <meshBasicMaterial color="#000000" />
+      </mesh>
     </>
   );
 }

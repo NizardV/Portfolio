@@ -1,14 +1,22 @@
 import { box, type Box } from "./collision";
 import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
-import { MEADOW_DOOR, meadowHeight } from "./terrain";
-import { LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
+import { MEADOW_DOOR, MEADOW_HOLE, meadowHeight } from "./terrain";
+import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
+import { back } from "./places/common";
+import { OFFICES_ENTRY, OFFICES_SPACE, OFFICES_SPAWN } from "./places/offices";
+import { POOLS_DRAIN, POOLS_ENTRY, POOLS_SPACE, POOLS_SPAWN } from "./places/pools";
+import { CANALS_CRACK, CANALS_ENTRY, CANALS_SPACE, CANALS_SPAWN, CANALS_UP } from "./places/canals";
+import { CITY_BACK, CITY_ENTRY, CITY_SPACE, CITY_SPAWN } from "./places/redcity";
+import { MALL_ENTRY, MALL_SPACE, MALL_SPAWN } from "./places/mall";
+import { HOTEL_ENTRY, HOTEL_SPACE, HOTEL_SPAWN } from "./places/hotel";
+import { HILLS_FALL, HILLS_SPACE, HILLS_SPAWN, PLAY_FALL, PLAY_SPACE, PLAY_SPAWN, SUBURB_FALL, SUBURB_SPACE, SUBURB_SPAWN } from "./places/dreamcore";
 
 /**
  * The world's map: each zone is a separate scene loaded on demand (see scenes/index.ts).
  * Collisions, floors and doorways live here, as data, so movement never depends on a scene's meshes.
  */
-export type ZoneId = "meadow" | "lobby";
+export type ZoneId = "meadow" | "lobby" | "bureaux" | "bassins" | "canaux" | "rouge" | "commerce" | "hotel" | "jeux" | "collines" | "lotissement";
 
 /** Where the player stands and looks (yaw 0 = looking towards -Z, π = towards +Z). */
 export type Spawn = { x: number; z: number; yaw: number; pitch?: number };
@@ -91,6 +99,30 @@ export const MEADOW_DOOR_IN: Anchor = { x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, y: D
 const MEADOW_DOOR_OUT: Anchor = { ...MEADOW_DOOR_IN, yaw: Math.PI };
 const LOBBY_OUT: Anchor = { ...LOBBY_ARRIVAL, yaw: Math.PI };
 
+/** A doorway both ways: `out` is the plane walked through when leaving `a`, `into` the same plane seen from `b`. */
+function pair(a: ZoneId, out: Anchor, b: ZoneId, into: Anchor, w: number, h: number, extra: Partial<Portal> = {}): [Portal, Portal] {
+  return [
+    { to: b, link: { from: out, to: into, w, h }, ...extra },
+    { to: a, link: { from: back(into), to: back(out), w, h } },
+  ];
+}
+const exit = (id: string) => EXITS.find((e) => e.id === id)!;
+const lobbyTo = (id: string, b: ZoneId, into: Anchor) => pair("lobby", exit(id).anchor, b, into, exit(id).size[0], exit(id).size[1]);
+const [lobbyMeadow, meadowLobby] = [
+  { to: "meadow" as const, link: { from: LOBBY_OUT, to: MEADOW_DOOR_OUT, w: 1.3, h: 2.25 }, opens: [MEADOW_DOOR_ID] },
+  { to: "lobby" as const, link: { from: MEADOW_DOOR_IN, to: LOBBY_ARRIVAL, w: 1.2, h: 2.2 }, requires: MEADOW_DOOR_ID },
+];
+const [lobbyOffices, officesLobby] = lobbyTo("exit-bureaux", "bureaux", OFFICES_ENTRY);
+const [lobbyPools, poolsLobby] = lobbyTo("exit-bassins", "bassins", POOLS_ENTRY);
+const [lobbyMall, mallLobby] = lobbyTo("exit-commerce", "commerce", MALL_ENTRY);
+const [lobbyHotel, hotelLobby] = lobbyTo("exit-hotel", "hotel", HOTEL_ENTRY);
+const [canalsLobby, lobbyCanals] = pair("canaux", CANALS_UP, "lobby", back(exit("exit-canaux").anchor), 1.1, 2.1);
+const [cityLobby, lobbyCity] = pair("rouge", CITY_BACK, "lobby", back(exit("exit-rouge").anchor), 1, 2);
+const [poolsCanals, canalsPools] = pair("bassins", POOLS_DRAIN, "canaux", CANALS_ENTRY, 1.8, 2);
+const [canalsCity, cityCanals] = pair("canaux", CANALS_CRACK, "rouge", CITY_ENTRY, 0.9, 2.1);
+const fall = (to: ZoneId, box: Box, arrive: Spawn): Portal => ({ to, box, arrive, veil: "#000000" });
+const indoor = { ao: true, bloom: 0.8, vignette: 0.6, grain: 0.3, saturation: -0.2, contrast: 0.04 };
+
 export const ZONES: Record<ZoneId, Zone> = {
   meadow: {
     id: "meadow",
@@ -104,7 +136,7 @@ export const ZONES: Record<ZoneId, Zone> = {
     interactables: [
       { id: MEADOW_DOOR_ID, x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, radius: 2.6, verb: "Ouvrir la porte", blocker: box(0, MEADOW_DOOR_Z, 1.2, 0.12) },
     ],
-    portals: [{ to: "lobby", link: { from: MEADOW_DOOR_IN, to: LOBBY_ARRIVAL, w: 1.2, h: 2.2 }, requires: MEADOW_DOOR_ID }],
+    portals: [meadowLobby, fall("jeux", box(MEADOW_HOLE.x, MEADOW_HOLE.z, 1.6, 1.6), PLAY_SPAWN)],
     ambience: "wind",
     post: { vignette: 0.42, grain: 0.18, saturation: -0.14, contrast: -0.06 },
   },
@@ -115,16 +147,122 @@ export const ZONES: Record<ZoneId, Zone> = {
     spawn: LOBBY_SPAWN,
     space: LOBBY_SPACE,
     interactables: LOBBY_INTERACTABLES,
-    portals: [{ to: "meadow", link: { from: LOBBY_OUT, to: MEADOW_DOOR_OUT, w: 1.3, h: 2.25 }, opens: [MEADOW_DOOR_ID] }],
+    portals: [lobbyMeadow, lobbyOffices, lobbyPools, lobbyMall, lobbyHotel, lobbyCanals, lobbyCity],
     ambience: "lobby",
     floor: "carpet",
     reverb: 0.55,
     post: { ao: true, bloom: 0.9, vignette: 0.62, grain: 0.32, saturation: -0.22, contrast: 0.04 },
   },
+  bureaux: {
+    id: "bureaux",
+    name: "Les bureaux isolés",
+    description: "Un plateau de bureaux plus large que son immeuble. Au fond, la salle de surveillance ; sous les pieds, la salle serveurs : les deux pièces de Vigil.",
+    spawn: OFFICES_SPAWN,
+    space: OFFICES_SPACE,
+    portals: [officesLobby],
+    ambience: "hum",
+    floor: "carpet",
+    reverb: 0.4,
+    post: { ...indoor, saturation: -0.35 },
+  },
+  bassins: {
+    id: "bassins",
+    name: "Les bassins",
+    description: "Des piscines qu'on traverse en marchant dans l'eau : faïence éblouissante, voûte sombre, nuit bleue, et une cour à ciel ouvert au milieu du bâtiment.",
+    spawn: POOLS_SPAWN,
+    space: POOLS_SPACE,
+    portals: [poolsLobby, poolsCanals],
+    ambience: "water",
+    floor: "hard",
+    reverb: 0.85,
+    post: { ...indoor, bloom: 1.1, saturation: -0.1 },
+  },
+  canaux: {
+    id: "canaux",
+    name: "Les canaux",
+    description: "Des tunnels bas sous les bassins, un canal d'eau verte. Un escalier remonte quelque part ; une fissure, au milieu, n'a rien à faire là.",
+    spawn: CANALS_SPAWN,
+    space: CANALS_SPACE,
+    portals: [canalsPools, canalsLobby, canalsCity],
+    ambience: "water",
+    floor: "hard",
+    reverb: 0.9,
+    post: { ...indoor, saturation: -0.3 },
+  },
+  rouge: {
+    id: "rouge",
+    name: "La ville rouge",
+    description: "La nuit, sous une ligne aérienne, entre des tours dont toutes les fenêtres sont allumées. Personne.",
+    spawn: CITY_SPAWN,
+    space: CITY_SPACE,
+    portals: [cityCanals, cityLobby],
+    ambience: "city",
+    floor: "hard",
+    reverb: 0.3,
+    post: { bloom: 1.2, vignette: 0.75, grain: 0.55, saturation: -0.05, contrast: 0.1 },
+  },
+  commerce: {
+    id: "commerce",
+    name: "Le centre commercial",
+    description: "Un centre commercial mort en étoile, des galeries de boutiques fermées. Un disquaire au bout de l'une ; derrière une autre, une maison construite dans un hangar.",
+    spawn: MALL_SPAWN,
+    space: MALL_SPACE,
+    portals: [mallLobby],
+    ambience: "mall",
+    floor: "hard",
+    reverb: 0.75,
+    post: { ...indoor, saturation: -0.25 },
+  },
+  hotel: {
+    id: "hotel",
+    name: "L'hôtel",
+    description: "Le dernier étage d'un hôtel bâti autour d'un puits. En dessous, le même étage se répète, plus loin que la lumière ne va.",
+    spawn: HOTEL_SPAWN,
+    space: HOTEL_SPACE,
+    portals: [hotelLobby],
+    ambience: "hum",
+    floor: "carpet",
+    reverb: 0.6,
+    post: { ...indoor, saturation: -0.1 },
+  },
+  jeux: {
+    id: "jeux",
+    name: "La salle de jeux",
+    description: "Un décor d'enfant sous un plafond noir : un ciel peint, un soleil qui sourit, un vrai rayon de soleil. Une piscine à balles, puis une salle verte… et un trou.",
+    spawn: PLAY_SPAWN,
+    space: PLAY_SPACE,
+    portals: [fall("collines", PLAY_FALL, HILLS_SPAWN)],
+    ambience: "hum",
+    floor: "carpet",
+    reverb: 0.5,
+    post: { ...indoor, saturation: 0.05, bloom: 1 },
+  },
+  collines: {
+    id: "collines",
+    name: "Les collines",
+    description: "Des collines d'herbe, de petites maisons jaunes et des éoliennes. L'une des maisons n'a pas de plancher.",
+    spawn: HILLS_SPAWN,
+    space: HILLS_SPACE,
+    portals: [fall("lotissement", HILLS_FALL, SUBURB_SPAWN)],
+    ambience: "wind",
+    floor: "grass",
+    post: { vignette: 0.45, grain: 0.2, saturation: -0.05 },
+  },
+  lotissement: {
+    id: "lotissement",
+    name: "Le lotissement",
+    description: "Un lotissement vide au crépuscule rose, toutes les fenêtres allumées. Un cratère au bout de la rue.",
+    spawn: SUBURB_SPAWN,
+    space: SUBURB_SPACE,
+    portals: [fall("lobby", SUBURB_FALL, LOBBY_SPAWN)],
+    ambience: "wind",
+    floor: "hard",
+    post: { vignette: 0.55, grain: 0.28, saturation: -0.1, bloom: 0.6 },
+  },
 };
 
 /** Menu order, and where the dream starts. */
-export const ZONE_ORDER: readonly ZoneId[] = ["meadow", "lobby"];
+export const ZONE_ORDER: readonly ZoneId[] = ["meadow", "lobby", "bureaux", "bassins", "canaux", "rouge", "commerce", "hotel", "jeux", "collines", "lotissement"];
 export const START_ZONE: ZoneId = "meadow";
 
 /* ---------- doorway maths ---------- */
