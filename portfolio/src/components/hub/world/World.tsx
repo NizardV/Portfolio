@@ -119,6 +119,9 @@ export default function World() {
   const headBob = settings.headBob ?? !reducedMotion; // an explicit choice wins over the system setting
   const zone = ZONES[arrival.zone];
   const [used, setUsed] = useState<ReadonlySet<string>>(() => new Set());
+  const usedRef = useRef(used);
+  usedRef.current = used;
+  const [crouched, setCrouched] = useState(false);
   const [rattle, setRattle] = useState<{ id: string; n: number }>();
   const worldState = useMemo(() => ({ used, rattle }), [used, rattle]);
   const [toast, setToast] = useState<{ title: string; text: string; color: string }>();
@@ -152,9 +155,18 @@ export default function World() {
       audio.current?.sfx("door-locked");
       return;
     }
+    if (target.toggle) {
+      setUsed((prev) => {
+        const next = new Set(prev);
+        if (!next.delete(target.id)) next.add(target.id);
+        return next;
+      });
+      audio.current?.sfx(target.sfx ?? "switch");
+      return;
+    }
     markUsed([target.id]);
     setFocus(null);
-    audio.current?.sfx("door-open");
+    audio.current?.sfx(target.sfx ?? "door-open");
   }, [markUsed]);
   const interactRef = useRef(interact);
   interactRef.current = interact;
@@ -201,6 +213,16 @@ export default function World() {
     };
   }, []);
   useEffect(() => audio.current?.play(zone.ambience), [zone.ambience]);
+  // placed sounds and the ambience of the part of the zone we stand in, a few times a second
+  useEffect(() => {
+    audio.current?.setEmitters(zone.emitters ?? []);
+    const id = setInterval(() => {
+      const { x, z } = pose.current;
+      audio.current?.listen(x, z, usedRef.current);
+      if (zone.ambienceAt) audio.current?.play(zone.ambienceAt(x, z) ?? zone.ambience);
+    }, 300);
+    return () => clearInterval(id);
+  }, [zone]);
   useEffect(() => audio.current?.setLevel(settings.volume, settings.muted), [settings.volume, settings.muted]);
   useEffect(() => audio.current?.setSpace(zone.reverb ?? 0), [zone.reverb]);
   useEffect(() => {
@@ -388,6 +410,20 @@ export default function World() {
             <div className="mt-1 text-xs text-white/70">{toast.text}</div>
           </div>
         </div>
+      )}
+
+      {touch && !menu && (
+        <button
+          type="button"
+          aria-pressed={crouched}
+          onClick={() => {
+            controls.crouch = !controls.crouch;
+            setCrouched(controls.crouch);
+          }}
+          className={`absolute bottom-24 right-4 z-10 rounded-full border px-4 py-3 text-[10px] tracking-widest text-white ${crouched ? "border-white/70 bg-white/20" : "border-white/30 bg-black/30"}`}
+        >
+          ACCROUPI
+        </button>
       )}
 
       {focus && !menu && (

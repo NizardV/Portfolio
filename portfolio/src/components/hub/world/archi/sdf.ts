@@ -16,8 +16,8 @@ export type Geom =
   | { kind: "ngon"; x: number; z: number; r: number; n: number; a?: number }
   | { kind: "capsule"; ax: number; az: number; bx: number; bz: number; r: number };
 
-export type Surface = "carpet" | "stain" | "tile" | "concrete" | "wood" | "marble" | "void";
-export type WallSurface = "wallpaper" | "tile" | "concrete" | "plaster" | "panel";
+export type Surface = "carpet" | "stain" | "tile" | "concrete" | "wood" | "marble" | "void" | "lawn";
+export type WallSurface = "wallpaper" | "tile" | "concrete" | "plaster" | "panel" | "sky";
 
 export type Shape = Geom & {
   floor?: Floor;
@@ -26,6 +26,8 @@ export type Shape = Geom & {
   mat?: Surface;
   /** wall look for the boundary owned by this shape */
   wall?: WallSurface;
+  /** ceiling look, when it is not the one that goes with the floor (a painted sky…) */
+  ceilMat?: "ceiling" | "plaster" | "tile" | "concrete" | "sky";
   /** ceiling lights: metres between panels (0 = none) */
   lights?: number;
   /** share of dead panels */
@@ -34,6 +36,12 @@ export type Shape = Geom & {
   tag?: string;
   /** no ceiling at all (open sky or a void above) */
   open?: boolean;
+  /** walking speed here, as a share of normal (a ball pit: 0.45) */
+  slow?: number;
+  /** no railing on its edges, even above a drop (a bed, a giant toy block: furniture, not a balcony) */
+  rails?: false;
+  /** you may step down into it from any height (the end of a slide): the way back up stays closed */
+  drop?: true;
 };
 
 /** something standing in the space: a pillar, a partition, a house in a hangar. h = its height (default: up to the ceiling) */
@@ -198,6 +206,17 @@ export class Space {
   ground(x: number, z: number): number {
     const i = this.ownerIndex(x, z);
     return i < 0 ? 0 : floorAt(this.shapes[i].floor, x, z);
+  }
+
+  /** stepping down into here is allowed from any height */
+  dropAt(x: number, z: number): boolean {
+    const i = this.ownerIndex(x, z);
+    return i >= 0 && this.shapes[i].drop === true;
+  }
+
+  slowAt(x: number, z: number): number {
+    const i = this.ownerIndex(x, z);
+    return i < 0 ? 1 : (this.shapes[i].slow ?? 1);
   }
 
   ceiling(x: number, z: number): number {

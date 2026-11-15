@@ -1,7 +1,9 @@
 import { box, type Box } from "./collision";
 import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
-import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, meadowHeight } from "./terrain";
+import type { Sfx } from "./audio";
+import type { Emitter } from "./sounds";
+import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSE, MEADOW_HOUSES, MEADOW_LIMIT, MEADOW_POI, SKY_WALL, meadowHeight } from "./terrain";
 import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
 import { back } from "./places/common";
 import { OFFICES_ENTRY, OFFICES_SPACE, OFFICES_SPAWN } from "./places/offices";
@@ -10,7 +12,8 @@ import { CANALS_CRACK, CANALS_ENTRY, CANALS_SPACE, CANALS_SPAWN, CANALS_UP } fro
 import { CITY_BACK, CITY_ENTRY, CITY_SPACE, CITY_SPAWN } from "./places/redcity";
 import { MALL_ENTRY, MALL_SPACE, MALL_SPAWN } from "./places/mall";
 import { HOTEL_ENTRY, HOTEL_SPACE, HOTEL_SPAWN } from "./places/hotel";
-import { HILLS_FALL, HILLS_SPACE, HILLS_SPAWN, PLAY_FALL, PLAY_SPACE, PLAY_SPAWN, SUBURB_FALL, SUBURB_SPACE, SUBURB_SPAWN } from "./places/dreamcore";
+import { HILLS_FALL, HILLS_SPACE, HILLS_SPAWN, SUBURB_FALL, SUBURB_SPACE, SUBURB_SPAWN } from "./places/dreamcore";
+import { GARDENS, PLAY, PLAY_FALL, PLAY_IDS, PLAY_SPACE, PLAY_SPAWN, playAmbience } from "./places/playground";
 
 /**
  * The world's map: each zone is a separate scene loaded on demand (see scenes/index.ts).
@@ -54,6 +57,10 @@ export type Interactable = {
   blocker?: Box;
   /** a threshold that does not open yet: using it says what lies behind */
   locked?: { name: string; text: string; color: string };
+  /** can be used again and again: each use switches it (a lamp, a phone…); scenes read it from `used` */
+  toggle?: boolean;
+  /** the sound of using it (default: a door) */
+  sfx?: Sfx;
 };
 
 /** Post-processing mood of a place (see DreamFilter). */
@@ -71,6 +78,10 @@ export type Zone = {
   colliders?: readonly Box[];
   portals: readonly Portal[];
   ambience: AmbienceId;
+  /** a different ambience in some parts of the zone (crossfaded as you walk); falls back to `ambience` */
+  ambienceAt?: (x: number, z: number) => AmbienceId | undefined;
+  /** sounds placed in the zone, heard from nearby */
+  emitters?: Emitter[];
   /** ground height under the player (default: the space's floors, or 0) */
   ground?: (x: number, z: number) => number;
   /** footstep sound */
@@ -85,8 +96,9 @@ export type Zone = {
 
 const MEADOW_DOOR_Z = MEADOW_DOOR.z;
 export const MEADOW_DOOR_ID = "meadow-door";
-const MEADOW_LIMIT = 110; // invisible edge: the hills beyond it are scenery only
+export const MEADOW_RADIO = "meadow-radio";
 const MEADOW_EDGES = [
+  box(0, SKY_WALL.z + 0.6, MEADOW_LIMIT * 2, 1), // the sky wall
   box(0, -MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(0, MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(-MEADOW_LIMIT, 0, 1, MEADOW_LIMIT * 2),
@@ -150,11 +162,31 @@ export const ZONES: Record<ZoneId, Zone> = {
     description: "Des collines vertes à perte de vue, le vent dans l'herbe, quelques maisons. Dans l'une d'elles, une porte blanche.",
     // a little off-axis, facing the door 35 m away: it is the only landmark
     spawn: { x: 6, z: 22, yaw: -0.1 },
-    colliders: [...MEADOW_EDGES, ...MEADOW_DOOR_POSTS, ...MEADOW_WALLS],
+    colliders: [
+      ...MEADOW_EDGES,
+      ...MEADOW_DOOR_POSTS,
+      ...MEADOW_WALLS,
+      box(MEADOW_POI.swing.x, MEADOW_POI.swing.z, 1.1, 1.1),
+      box(MEADOW_POI.lamp.x, MEADOW_POI.lamp.z, 0.4, 0.4),
+      box(MEADOW_POI.bathtub.x, MEADOW_POI.bathtub.z, 2.4, 2.4),
+      box(MEADOW_HOUSE.x, MEADOW_HOUSE.z, 8.6, 8.6), // the house on the ridge (turned: a square that holds it)
+      ...Array.from({ length: Math.floor((MEADOW_POI.power.x1 - MEADOW_POI.power.x0) / MEADOW_POI.power.step) - 1 }, (_, k) => box(MEADOW_POI.power.x0 + k * MEADOW_POI.power.step, MEADOW_POI.power.z, 0.4, 0.4)),
+      box(MEADOW_POI.power.x1, MEADOW_POI.power.z, 0.4, 0.4),
+    ],
+    emitters: [
+      { kind: "radio", x: MEADOW_POI.picnic.x, z: MEADOW_POI.picnic.z, radius: 38, mute: MEADOW_RADIO },
+      { kind: "creak", x: MEADOW_POI.swing.x, z: MEADOW_POI.swing.z, radius: 30 },
+      { kind: "drip", x: MEADOW_POI.bathtub.x, z: MEADOW_POI.bathtub.z, radius: 14, level: 0.8 },
+      ...Array.from({ length: 6 }, (_, k) => ({ kind: "hum" as const, x: MEADOW_POI.power.x0 + 16 + k * MEADOW_POI.power.step, z: MEADOW_POI.power.z, radius: 14, level: 0.6 })),
+    ],
+    // near the sky wall, the wind stops
+    ambienceAt: (_x, z) => (z < SKY_WALL.z + 30 ? "quiet" : undefined),
     ground: meadowHeight,
     floor: "grass",
     interactables: [
       { id: MEADOW_DOOR_ID, x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, radius: 2.6, verb: "Ouvrir la porte", blocker: box(MEADOW_DOOR.x, MEADOW_DOOR_Z, 1.2, 0.12) },
+      { id: MEADOW_RADIO, x: MEADOW_POI.picnic.x - 0.3, z: MEADOW_POI.picnic.z - 0.5, radius: 1.8, verb: "Tourner le bouton", toggle: true, sfx: "switch" },
+      { id: "sky-wall-door", x: 12, z: SKY_WALL.z + 0.8, radius: 2, verb: "Ouvrir", locked: { name: "Porte de service", text: "Fermée de l'autre côté. Derrière, on entend du vent.", color: "#8d97a3" } },
     ],
     portals: [meadowLobby, fall("jeux", box(MEADOW_HOLE.x, MEADOW_HOLE.z, HOLE_REACH.inner * 2 + 0.6, HOLE_REACH.inner * 2 + 0.6), PLAY_SPAWN)],
     ambience: "wind",
@@ -247,13 +279,26 @@ export const ZONES: Record<ZoneId, Zone> = {
   },
   jeux: {
     id: "jeux",
-    name: "La salle de jeux",
-    description: "Un décor d'enfant sous un plafond noir : un ciel peint, un soleil qui sourit, un vrai rayon de soleil. Une piscine à balles, puis une salle verte… et un trou.",
+    name: "Dreamcore",
+    description: "Un décor d'enfant sous un ciel de nuit peint : un manège dans la piscine à balles, une rivière de balles, un lit, une boîte à musique. Plus loin, des salles blanches et paisibles… et un trou.",
     spawn: PLAY_SPAWN,
     space: PLAY_SPACE,
     portals: [fall("collines", PLAY_FALL, HILLS_SPAWN)],
-    ambience: "hum",
-    floor: "carpet",
+    ambience: "nursery",
+    ambienceAt: playAmbience,
+    interactables: [
+      { id: PLAY_IDS.nightlight, x: PLAY.nightlight.x, z: PLAY.nightlight.z, radius: 1.8, verb: "Allumer la veilleuse", toggle: true, sfx: "switch" },
+      { id: PLAY_IDS.phone, x: GARDENS.phone.x, z: GARDENS.phone.z, radius: 1.6, verb: "Décrocher", sfx: "pickup" },
+    ],
+    emitters: [
+      { kind: "musicbox", x: PLAY.carousel.x, z: PLAY.carousel.z, radius: 48 },
+      { kind: "clock", x: PLAY.table.x, z: PLAY.table.z, radius: 24, level: 0.7 },
+      { kind: "lullaby", x: PLAY.nightlight.x, z: PLAY.nightlight.z, radius: 20, needs: PLAY_IDS.nightlight },
+      { kind: "tv", x: -13.6, z: -28.4, radius: 9, level: 0.7 },
+      { kind: "lapping", x: GARDENS.basin.x, z: GARDENS.basin.z, radius: 22 },
+      { kind: "phone", x: GARDENS.phone.x, z: GARDENS.phone.z, radius: 34, mute: PLAY_IDS.phone },
+    ],
+    floor: "grass",
     reverb: 0.5,
     post: { ...indoor, saturation: 0.05, bloom: 1 },
   },

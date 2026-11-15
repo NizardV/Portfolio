@@ -10,28 +10,8 @@ import { lazyBuilt, room } from "./common";
  * - le lotissement: an empty suburb at dusk, every window lit; a crater at the end of the street.
  */
 
-/* ---------- la salle de jeux ---------- */
-export const PLAY = { stage: { x: 0, z: -10, w: 22, d: 16 }, pit: { x: 0, z: -21, w: 12, d: 7 }, green: { x: 0, z: -48, w: 16, d: 14 }, hole: { x: 0, z: -50, r: 1.6 } };
-/** the painted sky closes the stage: a doorway in it (and a gap in the fence before it) leads to the ball pit */
-export const BACKDROP = { z: PLAY.stage.z - PLAY.stage.d / 2 + 0.05, gate: { w: 2.6, h: 3 }, fence: PLAY.stage.z - PLAY.stage.d / 2 + 0.9 };
-const playShapes: Shape[] = [
-  room(PLAY.stage.x, PLAY.stage.z, PLAY.stage.w, PLAY.stage.d, { ceil: 8, mat: "carpet", wall: "plaster", lights: 0 }),
-  room(PLAY.pit.x, PLAY.pit.z, PLAY.pit.w, PLAY.pit.d, { floor: -0.4, ceil: 8, mat: "void", wall: "plaster", lights: 0 }),
-  room(0, -32.5, 3.2, 18, { ceil: 2.6, mat: "carpet", wall: "wallpaper", lights: 2.6 }),
-  room(PLAY.green.x, PLAY.green.z, PLAY.green.w, PLAY.green.d, { ceil: 3.2, mat: "carpet", wall: "plaster", lights: 3.2 }),
-  { kind: "circle", x: PLAY.hole.x, z: PLAY.hole.z, r: PLAY.hole.r, floor: -0.35, ceil: 3.2, mat: "void", wall: "plaster" },
-];
-const half = (PLAY.stage.w + 0.2) / 2;
-const side = (half - BACKDROP.gate.w / 2) / 2 + BACKDROP.gate.w / 2;
-const playSolids: Solid[] = [-1, 1].flatMap((s) => [
-  { kind: "box" as const, x: s * side, z: BACKDROP.z - 0.08, w: half - BACKDROP.gate.w / 2, d: 0.1, mat: "plaster" as const }, // the painted wall
-  { kind: "box" as const, x: s * side, z: BACKDROP.fence, w: half - BACKDROP.gate.w / 2, d: 0.1, h: 0.95, ghost: true }, // the fence (drawn by the scene)
-]);
-export const PLAY_SPACE = new Space(playShapes, playSolids);
-export const playBuilt = lazyBuilt(PLAY_SPACE);
-export const PLAY_SPAWN = { x: 0, z: -4, yaw: 0 };
-/** falling: stepping into the rabbit hole */
-export const PLAY_FALL = box(PLAY.hole.x, PLAY.hole.z, 1.4, 1.4);
+/* ---------- Dreamcore, inside: see places/playground.ts ---------- */
+export { BACKDROP, GARDENS, PLAY, PLAY_FALL, PLAY_SPACE, PLAY_SPAWN, playBuilt } from "./playground";
 
 /* ---------- les collines ---------- */
 export const HILLS = { r: 58, house: { x: 24, z: -30, w: 6, d: 6 } };

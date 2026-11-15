@@ -44,10 +44,10 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   // sensor static: fine, different every frame, stronger in the dark
   float n = lensHash(floor(uv * resolution) + fract(time * 61.0) * vec2(97.0, 131.0)) - 0.5;
   float l = luma(col);
-  col += n * (0.045 + 0.02 * (1.0 - l)) * (1.0 + uVhs * 0.5);
+  col += n * (0.022 + 0.012 * (1.0 - l)) * (1.0 + uVhs * 0.8);
   // and some colour in it, like a small sensor
   vec3 cn = vec3(lensHash(floor(uv * resolution * 0.5) + fract(time * 47.0) * 13.0), lensHash(floor(uv * resolution * 0.5) + fract(time * 53.0) * 17.0), lensHash(floor(uv * resolution * 0.5) + fract(time * 59.0) * 19.0)) - 0.5;
-  col += cn * 0.025;
+  col += cn * 0.012;
   // exposure hunts, slowly, like auto-exposure that never quite settles
   col *= 1.0 + 0.03 * sin(time * 0.9) * sin(time * 0.37) + 0.008 * sin(time * 7.1);
   // corners fall off (lens vignetting, on top of the grade)

@@ -11,13 +11,33 @@
  * The first one holds the white door: you go in through its front doorway, the door stands against its back wall.
  */
 export const MEADOW_HOUSES = [
-  { x: 28, z: -80, w: 7, d: 6, h: 3, lean: 0.015, color: "#f4f1e6", roof: "#7d8794", door: true },
-  { x: -74, z: -18, w: 8, d: 6.5, h: 3.4, lean: -0.05, color: "#efe2b4", roof: "#6d6170" },
-  { x: 86, z: 12, w: 6.5, d: 7.5, h: 3.2, lean: 0.06, color: "#e9e6f0", roof: "#5e6b78" },
-  // on the way to the hole, behind the hill
-  { x: -36, z: 92, w: 7, d: 6, h: 3.6, lean: -0.07, color: "#f1d98f", roof: "#6d6170" },
-  { x: -98, z: 58, w: 6, d: 7, h: 3.1, lean: 0.045, color: "#e7ddd0", roof: "#7d8794" },
+  // footprints match the Blender models (tools/blender/build.py): house_open 7 × 6, house_yellow 6 × 7 (2 floors),
+  // house_cottage 8 × 6.5; `model` picks one, `color` repaints its walls
+  { x: 28, z: -80, w: 7, d: 6, h: 3, lean: 0.015, model: "houseOpen", color: "#f4f1e6", door: true },
+  { x: -74, z: -18, w: 8, d: 6.5, h: 3.2, lean: -0.05, model: "houseCottage", color: "#efe2b4" },
+  { x: 86, z: 12, w: 6, d: 7, h: 5.8, lean: 0.06, model: "houseYellow", color: "#e9e6f0" },
+  { x: -36, z: 92, w: 6, d: 7, h: 5.8, lean: -0.07, model: "houseYellow", color: "#f1d98f" },
+  { x: -98, z: 58, w: 8, d: 6.5, h: 3.2, lean: 0.045, model: "houseCottage", color: "#e7ddd0" },
+  { x: 150, z: -130, w: 6, d: 7, h: 5.8, lean: -0.04, model: "houseYellow", color: "#f2c9b8" },
+  { x: -140, z: 120, w: 8, d: 6.5, h: 3.2, lean: 0.08, model: "houseCottage", color: "#d9e4ec" },
 ] as const;
+/**
+ * Points of interest of the meadow (see the plan: claude.ai/artifact/5fMWeqvH3Nt6mZrCgbwYsv). Evident: the door's
+ * house, the power line, the swing tree. To look for: the picnic, the lamp, the dead-end path. Hidden: the hole,
+ * the bathtub, the edge of the world.
+ */
+export const MEADOW_POI = {
+  swing: { x: 110, z: -60 },
+  picnic: { x: -110, z: 10 },
+  lamp: { x: -60, z: -120 },
+  path: { x: 45, z: 115, len: 60 },
+  bathtub: { x: 140, z: 90 },
+  power: { z: 5, x0: -170, x1: 60, step: 32 },
+};
+/** the meadow ends on a wall painted like the sky, far to the north, behind the big hill */
+export const SKY_WALL = { z: -178, w: 1400, h: 120 };
+/** where you can walk (beyond, the hills are scenery only); the sky wall stops you to the north */
+export const MEADOW_LIMIT = 175;
 const DOOR_HOUSE = MEADOW_HOUSES[0];
 /** wall thickness of the door's house (colliders in zones.ts, mesh in scenes/meadow/Houses.tsx) */
 export const HOUSE_WALL = 0.2;
@@ -34,6 +54,12 @@ const BUMPS = [
   { x: MEADOW_HOUSE.x, z: MEADOW_HOUSE.z, radius: 60, height: 20 },
   // the hill that hides the hole from the wake-up spot
   { x: -52, z: 62, radius: 21, height: 11 },
+  // the swing tree's hill, to the east
+  { x: 110, z: -60, radius: 26, height: 9 },
+  // hollows: the picnic, the lamp's little valley, the bathtub's flowers (negative bumps)
+  { x: -110, z: 10, radius: 18, height: -4 },
+  { x: -60, z: -120, radius: 16, height: -5 },
+  { x: 140, z: 90, radius: 14, height: -3 },
 ];
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -61,9 +87,21 @@ export function holeDrop(dx: number, dz: number): number {
 /** the widest the hole gets (for the fall trigger and what has to give way around it) */
 export const HOLE_REACH = { inner: MEADOW_HOLE.r * 1.24, rim: MEADOW_HOLE.rim * 1.04 };
 
+/** the dead-end path: its centre line, from where it starts to where it stops (bare earth, no grass) */
+export const PATH_LINE = { ax: MEADOW_POI.path.x + 10, az: MEADOW_POI.path.z + MEADOW_POI.path.len / 2, bx: MEADOW_POI.path.x, bz: MEADOW_POI.path.z - MEADOW_POI.path.len / 2 };
+function onPath(x: number, z: number): boolean {
+  const { ax, az, bx, bz } = PATH_LINE;
+  const dx = bx - ax;
+  const dz = bz - az;
+  const t = Math.min(1, Math.max(0, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+  return Math.hypot(x - ax - dx * t, z - az - dz * t) < 3;
+}
+
 /** 1 where the ground is bare (inside a house, down the hole): no grass, no flowers */
 export function meadowBare(x: number, z: number): number {
   for (const hs of MEADOW_HOUSES) if (Math.abs(x - hs.x) < hs.w / 2 + 0.2 && Math.abs(z - hs.z) < hs.d / 2 + 0.2) return 1;
+  if (onPath(x, z)) return 0.6;
+  if (Math.hypot(x - MEADOW_POI.picnic.x, z - MEADOW_POI.picnic.z) < 2.2) return 1;
   return holeDrop(x - MEADOW_HOLE.x, z - MEADOW_HOLE.z) > 0.18 ? 1 : 0;
 }
 
@@ -127,6 +165,10 @@ ${MEADOW_HOUSES.map((hs) => `  { vec2 q = max(abs(p - vec2(${f(hs.x)}, ${f(hs.z)
   return h - meadowHole(p - vec2(${f(MEADOW_HOLE.x)}, ${f(MEADOW_HOLE.z)}));
 }
 float meadowBare(vec2 p) {
+  { vec2 a = vec2(${f(PATH_LINE.ax)}, ${f(PATH_LINE.az)}), b = vec2(${f(PATH_LINE.bx)}, ${f(PATH_LINE.bz)});
+    vec2 ab = b - a; float t = clamp(dot(p - a, ab) / dot(ab, ab), 0.0, 1.0);
+    if (length(p - a - ab * t) < 3.0) return 0.6; }
+  if (length(p - vec2(${f(MEADOW_POI.picnic.x)}, ${f(MEADOW_POI.picnic.z)})) < 2.2) return 1.0;
 ${MEADOW_HOUSES.map((hs) => `  if (abs(p.x - ${f(hs.x)}) < ${f(hs.w / 2 + 0.2)} && abs(p.y - ${f(hs.z)}) < ${f(hs.d / 2 + 0.2)}) return 1.0;`).join("\n")}
   return meadowHole(p - vec2(${f(MEADOW_HOLE.x)}, ${f(MEADOW_HOLE.z)})) > 0.18 ? 1.0 : 0.0;
 }

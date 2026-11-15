@@ -3,9 +3,11 @@
  * of these later; the public API (play / step / sfx) stays.
  * Browsers only allow sound after a user gesture: call start() from a click / key / touch handler.
  */
-export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "none";
+import { voice, type Emitter, type Voice } from "./sounds";
+
+export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "nursery" | "garden" | "purple" | "quiet" | "none";
 export type Surface = "grass" | "carpet" | "hard";
-export type Sfx = "door-open" | "door-locked";
+export type Sfx = "door-open" | "door-locked" | "switch" | "pickup";
 
 const MAX_VOLUME = 0.35; // « 100 % » stays a background level
 const CROSSFADE = 1.5; // seconds
@@ -265,6 +267,72 @@ function build(ctx: AudioContext, id: AmbienceId, noise: { brown: AudioBuffer; w
     src.connect(lp).connect(g).connect(gain);
     sources.push(src);
     timers.push(every(14, 40, () => distant(ctx, noise.white, gain)));
+  } else if (id === "nursery") {
+    // a big quiet room: soft air (the music box is the carousel's, placed in the room)
+    const src = loop(ctx, noise.brown);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 500;
+    const air = ctx.createGain();
+    air.gain.value = 0.18;
+    src.connect(lp).connect(air).connect(gain);
+    sources.push(src);
+  } else if (id === "garden") {
+    // indoors that feel outdoors: a light breeze, leaves, birds a little too far away
+    const src = loop(ctx, noise.brown);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 320;
+    const g = ctx.createGain();
+    g.gain.value = 0.3;
+    src.connect(lp).connect(g).connect(gain);
+    sources.push(src);
+    const leaves = loop(ctx, noise.white);
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 3200;
+    bp.Q.value = 0.6;
+    const lg = ctx.createGain();
+    lg.gain.value = 0.015;
+    leaves.connect(bp).connect(lg).connect(gain);
+    sources.push(leaves);
+    timers.push(every(4, 9, () => lg.gain.setTargetAtTime(rand(0.005, 0.04), ctx.currentTime, 1.2)));
+    timers.push(every(3, 9, () => chirp(ctx, gain)));
+  } else if (id === "purple") {
+    // a low, soft pad that hardly moves
+    for (const [f, l] of [[55, 0.12], [82.4, 0.07], [110.3, 0.05], [164.8, 0.02]] as const) {
+      const o = ctx.createOscillator();
+      o.type = "triangle";
+      o.frequency.value = f;
+      const og = ctx.createGain();
+      og.gain.value = l;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = rand(0.03, 0.08);
+      const depth = ctx.createGain();
+      depth.gain.value = l * 0.6;
+      lfo.connect(depth).connect(og.gain);
+      o.connect(og).connect(gain);
+      o.start();
+      lfo.start();
+      sources.push(o, lfo);
+    }
+  } else if (id === "quiet") {
+    // almost nothing: still air, one tube buzzing somewhere
+    const src = loop(ctx, noise.brown);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 220;
+    const g = ctx.createGain();
+    g.gain.value = 0.09;
+    src.connect(lp).connect(g).connect(gain);
+    sources.push(src);
+    const buzz = ctx.createOscillator();
+    buzz.frequency.value = 100;
+    const bg = ctx.createGain();
+    bg.gain.value = 0.012;
+    buzz.connect(bg).connect(gain);
+    buzz.start();
+    sources.push(buzz);
   } else if (id === "mall") {
     // fluorescent hum, the far muzak, footsteps in another gallery
     const src = loop(ctx, noise.brown);
@@ -356,6 +424,8 @@ export class Ambience {
   private bus: GainNode | null = null;
   private send: GainNode | null = null;
   private space = 0;
+  /** sounds placed in the zone, each with its own voice, levelled by distance in listen() */
+  private emitters: { e: Emitter; v: Voice | null }[] = [];
 
   /** Must run inside a user gesture. Safe to call repeatedly. */
   start() {
@@ -399,6 +469,30 @@ export class Ambience {
     this.layer?.gain.gain.setTargetAtTime(1, now, CROSSFADE / 4);
   }
 
+  /** The placed sounds of the zone we are in (replaces the previous zone's). */
+  setEmitters(list: readonly Emitter[]) {
+    for (const { v } of this.emitters) {
+      if (!v || !this.ctx) continue;
+      v.gain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3);
+      setTimeout(v.stop, 1500);
+    }
+    this.emitters = list.map((e) => ({ e, v: null }));
+  }
+
+  /** Levels each placed sound from where the listener stands (and what is switched on): a few times a second. */
+  listen(x: number, z: number, used: ReadonlySet<string>) {
+    const { ctx, noise } = this;
+    if (!ctx || !noise || !this.bus) return;
+    for (const slot of this.emitters) {
+      const { e } = slot;
+      const on = (!e.needs || used.has(e.needs)) && (!e.mute || !used.has(e.mute));
+      const d = Math.hypot(x - e.x, z - e.z);
+      const level = on && d < e.radius ? (1 - d / e.radius) ** 2 * (e.level ?? 1) : 0;
+      if (level > 0 && !slot.v) slot.v = voice(ctx, e.kind, noise, this.bus);
+      slot.v?.gain.gain.setTargetAtTime(level, ctx.currentTime, 0.25);
+    }
+  }
+
   /** One footstep: a soft brush in grass, a short tap on hard floors. Running = louder, brighter. */
   step(surface: Surface, run: boolean) {
     const { ctx, noise } = this;
@@ -428,6 +522,31 @@ export class Ambience {
     const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
+    if (name === "switch" || name === "pickup") {
+      // a small switch: two clicks; a handset lifted: a clunk
+      const click = (at: number, f: number, level: number) => {
+        const src = ctx.createBufferSource();
+        src.buffer = noise.white;
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = f;
+        bp.Q.value = 3;
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(0.0001, at);
+        env.gain.exponentialRampToValueAtTime(level, at + 0.003);
+        env.gain.exponentialRampToValueAtTime(0.0001, at + 0.04);
+        src.connect(bp).connect(env).connect(master);
+        src.start(at, rand(0, NOISE_SECONDS - 1), 0.06);
+      };
+      if (name === "switch") {
+        click(t, 3200, 0.3);
+        click(t + 0.05, 2200, 0.18);
+      } else {
+        click(t, 600, 0.4);
+        click(t + 0.12, 900, 0.2);
+      }
+      return;
+    }
     if (name === "door-locked") {
       // the handle turns, the latch knocks against the strike plate a few times
       for (let i = 0; i < 3; i++) {
@@ -498,6 +617,8 @@ export class Ambience {
 
   dispose() {
     this.layer?.stop();
+    this.emitters.forEach(({ v }) => v?.stop());
+    this.emitters = [];
     void this.ctx?.close();
     this.ctx = this.master = this.noise = this.layer = this.bus = this.send = null;
   }

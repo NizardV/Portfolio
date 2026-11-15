@@ -6,7 +6,7 @@ import { floorAt, geomBounds, geomDist, type Geom, type Space, type Surface, typ
 
 /** world-metre size of one texture repeat, per material */
 export const TILE: Record<string, number> = {
-  wallpaper: 2, tile: 0.9, concrete: 3, plaster: 3, panel: 1.2,
+  wallpaper: 2, tile: 0.9, concrete: 3, plaster: 3, panel: 1.2, sky: 7, lawn: 5,
   carpet: 3, stain: 3, wood: 2.4, marble: 2.5, void: 3, ceiling: 1.2, trim: 1,
 };
 
@@ -87,15 +87,21 @@ function strip(b: Builder, ax: number, az: number, bx: number, bz: number, ya: [
 }
 
 /** Oriented thin boxes merged together (railings, posts, ledges). */
-export type Piece = { x: number; y: number; z: number; w: number; h: number; d: number; a?: number };
+export type Piece = { x: number; y: number; z: number; w: number; h: number; d: number; a?: number; tilt?: number };
 export function piecesGeometry(pieces: Piece[], tile = 1): BufferGeometry | null {
   if (!pieces.length) return null;
-  const parts = pieces.map(({ x, y, z, w, h, d, a }) => {
+  const parts = pieces.map(({ x, y, z, w, h, d, a, tilt }) => {
     const g = new BoxGeometry(w, h, d);
     const uv = g.attributes.uv;
     const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
     for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) uv.setXY(f * 4 + k, (uv.getX(f * 4 + k) * dims[f][0]) / tile, (uv.getY(f * 4 + k) * dims[f][1]) / tile);
     g.deleteAttribute("color");
+    if (tilt) {
+      // tilted about its middle (a sloping rail); y is then the height of its middle, not of its foot
+      g.translate(0, h / 2, 0);
+      g.rotateZ(tilt);
+      g.translate(0, -h / 2, 0);
+    }
     if (a) g.rotateY(a);
     g.translate(x, y + h / 2, z);
     return g;
@@ -361,7 +367,8 @@ function* buildSteps(space: Space): Steps<Built> {
       }
     };
     surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"]);
-    if (!s.open) surface(ceilLoops, flats.get(`c:${ceilingSurface(s.mat)}`), () => s.ceil, -1, TILE[ceilingSurface(s.mat)]);
+    const ck = s.ceilMat ?? ceilingSurface(s.mat);
+    if (!s.open) surface(ceilLoops, flats.get(`c:${ck}`), () => s.ceil, -1, TILE[ck]);
 
     /* ---- where a later shape takes over: soffits, risers, railings ---- */
     for (const loop of loops) {
@@ -416,12 +423,17 @@ function* buildSteps(space: Space): Steps<Built> {
           const sign = ha[0] < ha[1] ? 1 : -1;
           strip(walls.get(o.wall ?? wall), ax, az, bx, bz, [Math.min(...ha), Math.max(...ha)], [Math.min(...hb), Math.max(...hb)], nx * sign, nz * sign, 0, len / tile, tile, false);
           const drop = Math.max(Math.abs(ha[0] - ha[1]), Math.abs(hb[0] - hb[1]));
-          if (drop > 0.6 && !own) {
-            const top = Math.max(...ha, ...hb);
+          if (drop > 0.6 && !own && s.rails !== false && o.rails !== false && !s.drop && !o.drop) {
+            // the railing stands on the higher floor, all along (it may slope, on a ramp)
+            const topA = Math.max(...ha);
+            const topB = Math.max(...hb);
             const a = Math.atan2(-(bz - az), bx - ax);
-            rails.push({ x: mx, y: top + 0.92, z: mz, w: len, h: 0.06, d: 0.06, a });
-            rails.push({ x: mx, y: top, z: mz, w: len, h: 0.07, d: 0.05, a });
-            for (let t = 0.2; t < len; t += 1.2) rails.push({ x: ax + ((bx - ax) * t) / len, y: top, z: az + ((bz - az) * t) / len, w: 0.05, h: 0.95, d: 0.05 });
+            const tilt = Math.atan2(topB - topA, len);
+            const span = Math.hypot(len, topB - topA);
+            const mid = (topA + topB) / 2;
+            rails.push({ x: mx, y: mid + 0.92, z: mz, w: span, h: 0.06, d: 0.06, a, tilt });
+            rails.push({ x: mx, y: mid, z: mz, w: span, h: 0.07, d: 0.05, a, tilt });
+            for (let t = 0.2; t < len; t += 1.2) rails.push({ x: ax + ((bx - ax) * t) / len, y: topA + ((topB - topA) * t) / len, z: az + ((bz - az) * t) / len, w: 0.05, h: 0.95, d: 0.05 });
           }
         }
       }
