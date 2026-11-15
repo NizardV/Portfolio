@@ -25,10 +25,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float roll = 1.0 - fract(time * 0.06);
   float band = smoothstep(0.05, 0.0, abs(uv.y - roll)) * uVhs;
   p.x += band * 0.008 * sin(uv.y * 300.0 + time * 30.0);
-  // colour fringing towards the edges
+  // a cheap wide lens: the picture bulges a little, fringes in colour and goes soft towards the corners
   vec2 c = p - 0.5;
-  vec2 off = c * dot(c, c) * (0.01 + 0.012 * uVhs);
+  float r2 = dot(c, c);
+  p = 0.5 + c * (1.0 - 0.06 * r2);
+  vec2 off = c * r2 * (0.035 + 0.02 * uVhs);
+  vec2 blur = c * r2 * 0.02;
   vec3 col = vec3(texture2D(inputBuffer, p + off).r, texture2D(inputBuffer, p).g, texture2D(inputBuffer, p - off).b);
+  col = mix(col, (texture2D(inputBuffer, p + blur).rgb + texture2D(inputBuffer, p - blur).rgb + texture2D(inputBuffer, p + blur.yx).rgb + texture2D(inputBuffer, p - blur.yx).rgb) * 0.25, smoothstep(0.08, 0.35, r2));
   if (uVhs > 0.0) {
     // chroma bleeds to the right, the picture softens, lines show
     vec3 smear = (texture2D(inputBuffer, p + vec2(0.004, 0.0)).rgb + texture2D(inputBuffer, p + vec2(0.008, 0.0)).rgb) * 0.5;
@@ -40,9 +44,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   // sensor static: fine, different every frame, stronger in the dark
   float n = lensHash(floor(uv * resolution) + fract(time * 61.0) * vec2(97.0, 131.0)) - 0.5;
   float l = luma(col);
-  col += n * (0.016 + 0.014 * (1.0 - l)) * (1.0 + uVhs * 0.8);
-  // exposure breathes
-  col *= 1.0 + 0.012 * sin(time * 1.3) + 0.006 * sin(time * 7.1);
+  col += n * (0.045 + 0.02 * (1.0 - l)) * (1.0 + uVhs * 0.5);
+  // and some colour in it, like a small sensor
+  vec3 cn = vec3(lensHash(floor(uv * resolution * 0.5) + fract(time * 47.0) * 13.0), lensHash(floor(uv * resolution * 0.5) + fract(time * 53.0) * 17.0), lensHash(floor(uv * resolution * 0.5) + fract(time * 59.0) * 19.0)) - 0.5;
+  col += cn * 0.025;
+  // exposure hunts, slowly, like auto-exposure that never quite settles
+  col *= 1.0 + 0.03 * sin(time * 0.9) * sin(time * 0.37) + 0.008 * sin(time * 7.1);
+  // corners fall off (lens vignetting, on top of the grade)
+  col *= 1.0 - 0.25 * smoothstep(0.12, 0.5, r2);
   outputColor = vec4(col, inputColor.a);
 }`;
 
