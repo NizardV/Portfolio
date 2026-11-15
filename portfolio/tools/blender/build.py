@@ -147,7 +147,7 @@ def house(name="house", w=6.0, d=7.0, h=2.9, floors=2, color="#efd27a", trim="#f
         for dz in (-wh / 2 - 0.03, wh / 2 + 0.03):
             parts.append(box("frame", fr, (x, y, z + dz), white))
         for dd in (-ww / 2 - 0.03, ww / 2 + 0.03):
-            parts.append(box("frame", sd, (x + (0 if not facing_x else 0), y + (dd if facing_x else 0), z) if facing_x else (x + dd, y, z), white))
+            parts.append(box("frame", sd, (x, y + dd, z) if facing_x else (x + dd, y, z), white))
         # muntins: a cross
         parts.append(box("muntin", (0.05, 0.03, wh) if facing_x else (0.03, 0.05, wh), (x, y, z), white))
         parts.append(box("muntin", (0.05, ww, 0.03) if facing_x else (ww, 0.05, 0.03), (x, y, z), white))
