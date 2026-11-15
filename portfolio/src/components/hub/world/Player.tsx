@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { MathUtils, type PerspectiveCamera } from "three";
 import { collide as collideBoxes, inside } from "./collision";
+import { useHubDebug } from "./debug";
 import { readMove, type Controls } from "./input";
 import { doorwaySide, type Interactable, type Portal, type Spawn, type Zone } from "./zones";
 
@@ -71,6 +72,16 @@ export default function Player(props: Props) {
     },
     [zone, blockers],
   );
+
+  // building tools (scripts/hub-tour.mjs): jump anywhere; doorways re-arm only once stepped away from
+  const teleport = useCallback(
+    (x: number, z: number, yaw: number, pitch = 0) => {
+      Object.assign(me.current, { x, z, yaw, pitch: MathUtils.clamp(pitch, -PITCH_MAX, PITCH_MAX), bob: 0, phase: 0 });
+      for (const p of zone.portals) if (p.link) armed.current.set(p, false);
+    },
+    [zone],
+  );
+  useHubDebug(zone, ground, teleport);
 
   useEffect(() => {
     camera.rotation.order = "YXZ"; // yaw then pitch: no roll creeping in

@@ -63,10 +63,18 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
   de vide aux raccords. `Solid.ghost` = collision seule (la clôture de la salle de jeux, dessinée par la scène).
 - **Audit à la 1re personne** : `pnpm hub:audit [LIEU]` (`scripts/hub-audit.mjs`, sans navigateur) lance 144 rayons depuis
   l'œil, tous les 2 m de chaque lieu atteignable, et compte : **vide** (rayon qui s'échappe), **fantôme** (mur traversable),
-  **invisible** (blocage sans mur). À relancer après chaque modif de plan. Reste connu (2026-11-14) : ~0,05 % de rayons
-  dans le Lobby, des pièces générées qui se frôlent (0-40 cm) → à corriger dans le générateur.
+  **invisible** (blocage sans mur). Plus des rayons **verticaux** (sol / plafond) tous les 25 cm de tout l'intérieur, 8 cm
+  sur les raccords entre formes : le sol doit être à `ground`, le plafond à `ceiling` (formes `open` exclues ; sur un
+  raccord, toute hauteur entre les deux côtés est acceptée). `--full` liste tous les endroits. À relancer après chaque
+  modif de plan. Reste connu (2026-11-15) : fentes de vide sol/plafond aux raccords (334 endroits dans le Lobby, cf.
+  éclats noirs au sol), rampe « route C » de la salle de jeux dessinée jusqu'à 17 cm à côté du plan (sommets manquants
+  aux coudes de la rampe) → à corriger dans `build.ts`.
 - **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` fait
-  démarrer le rêve à cet endroit (captures Playwright d'un lieu précis).
+  démarrer le rêve à cet endroit (captures Playwright d'un lieu précis) et expose `window.__hub` (`debug.ts` :
+  scène, zone, `teleport`). Le groupe de l'architecture s'appelle `archi` (exclu de l'audit des objets).
+- **Tournée** : `node scripts/hub-tour.mjs <zone>` — vues automatiques, carte, audit des objets posés par les scènes,
+  draw calls ; puis revue par l'agent `hub-critic` (`.claude/agents/`) selon
+  `skills/hub-level-design/references/liminal-rubric.md`.
 - **Construction découpée** (`slice.ts`) : `buildSpace` est un générateur ; `lazyBuilt` le joue par tranches (6 ms en
   préparation, 40 ms dès qu'on est dans le lieu) et renvoie une promesse lue par `use()` dans la scène. `PREPARE` (`scenes/index.ts`) prépare code + géométrie des lieux
   derrière les portes du lieu courant : la porte montre son lieu sans saccade.

@@ -64,11 +64,19 @@ ressource chargée depuis un domaine externe (CSP).
 - Lumière : la pool suit le joueur ; limiter les point lights propres à la scène (≤ 8 visibles).
 
 ## 5. Vérifier comme un joueur
-- `pnpm hub:audit <LIEU>` : tout atteignable, 0 mur fantôme, vide < 0,05 % des rayons, pas de blocage invisible.
-- **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })`
-  puis captures Playwright (SwiftShader : attendre ~15 s, `timeout: 180000` sur les captures). Une capture par point
-  d'intérêt + depuis l'entrée + les lignes de vue. Regarder chaque image ; corriger ce qui est moche, vide ou bizarre
-  avant de livrer.
+Grille commune : `references/liminal-rubric.md` (bugs, langage liminal, envie d'explorer, finition, sévérités).
+- `pnpm hub:audit <LIEU> [--full]` : l'**architecture** — tout atteignable, 0 mur fantôme, vide < 0,05 % des rayons,
+  pas de blocage invisible, 0 trou de sol ou de plafond (rayons verticaux, raccords compris).
+- `node scripts/hub-tour.mjs <zone>` (`pnpm hub:tour`, ~20 s par vue sous SwiftShader, lancer en arrière-plan) : les
+  **objets posés par les scènes** (traversables, flottants, enfoncés, dans un mur), une carte de dessus
+  (`map.png` : zones inaccessibles en bleu nuit), des vues choisies seules (arrivée, interactions, passages, coins les
+  plus éloignés, objets signalés), draw calls par vue, erreurs console. Sortie : `<tmp>/hub-tour/<zone>/`.
+  Rebuild automatique si les sources sont plus récentes ; `--port 3101` si un vieux serveur occupe 3100.
+- **Revue à froid** : lancer l'agent `hub-critic` sur ce dossier (il n'a pas construit la zone, il lit la grille et
+  chaque planche). Trier ses constats avec l'utilisateur, corriger par lots, relancer tournée + critique jusqu'à
+  0 bloquant. Ne pas se contenter de sa propre relecture des captures : c'est le biais qu'on évite.
+- Vue ponctuelle à la main : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` ; avec
+  ce réglage, `window.__hub.teleport(x, z, yaw, pitch)` déplace la caméra sans recharger (`debug.ts`).
 - `tsc`, `eslint`, `next build`, E2E hub (`e2e-tests`). Tuer tout `next start` resté sur le port 3100 avant de relancer.
 
 ## 6. Livrer
