@@ -66,9 +66,12 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
   **invisible** (blocage sans mur). Plus des rayons **verticaux** (sol / plafond) tous les 25 cm de tout l'intérieur, 8 cm
   sur les raccords entre formes : le sol doit être à `ground`, le plafond à `ceiling` (formes `open` exclues ; sur un
   raccord, toute hauteur entre les deux côtés est acceptée). `--full` liste tous les endroits. À relancer après chaque
-  modif de plan. Reste connu (2026-11-15) : fentes de vide sol/plafond aux raccords (334 endroits dans le Lobby, cf.
-  éclats noirs au sol), rampe « route C » de la salle de jeux dessinée jusqu'à 17 cm à côté du plan (sommets manquants
-  aux coudes de la rampe) → à corriger dans `build.ts`.
+  modif de plan. Corrigé le 2026-11-15 (`build.ts`) : fentes de vide aux raccords (une pièce réduite à une bande de
+  quelques cm entre deux pièces posées après elle n'était plus tracée par la grille de 40 cm) → chaque forme déborde de
+  20 cm, 8 mm en retrait, sur les pièces antérieures dont le sol est aussi haut ou plus haut (plafond aussi bas ou plus
+  bas), et la bande sous / au-dessus des pièces suivantes passe à 25 cm (10 cm sous un ciel ouvert) ; sols en rampe
+  découpés aux lignes où la pente commence et s'arrête (sinon jusqu'à 17 cm d'écart). Reste : une dizaine d'encoches
+  par lieu dans les coins, ~70 rayons « vide » dans le Lobby (raccords de murs).
 - **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` fait
   démarrer le rêve à cet endroit (captures Playwright d'un lieu précis) et expose `window.__hub` (`debug.ts` :
   scène, zone, `teleport`). Le groupe de l'architecture s'appelle `archi` (exclu de l'audit des objets).

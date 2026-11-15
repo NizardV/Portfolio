@@ -10,7 +10,8 @@
  *       in-wall      an object whose centre is inside a wall or outside the place
  *   - draw calls / triangles per view, console errors;
  *   - contact sheets (6 views per image) + every view at full size.
- * Usage, from portfolio/:  node scripts/hub-tour.mjs <zone> [--samples N] [--port P] [--no-build] [--keep-server]
+ * Usage, from portfolio/:  node scripts/hub-tour.mjs <zone> [--samples N] [--only V03,V52] [--port P] [--no-build] [--keep-server]
+ *   --only  re-shoot just these views of the last full tour (same spots), into <tmp>/hub-tour/<zone>-recheck/
  *   zone = meadow, lobby, bureaux, bassins, canaux, rouge, commerce, hotel, jeux, collines, lotissement
  * Output: <tmp>/hub-tour/<zone>/ (report.md, report.json, map.png, sheets/, views/). Uses the production build on
  * port 3100 or --port P (rebuilt first if a source file is newer than it, unless --no-build).
@@ -34,7 +35,12 @@ if (!zoneId) {
 }
 const PORT = opt("port", 3100);
 const BASE = `http://localhost:${PORT}`;
-const OUT = path.join(os.tmpdir(), "hub-tour", zoneId);
+const only = (() => {
+  const i = args.indexOf("--only");
+  return i >= 0 && args[i + 1] ? new Set(args[i + 1].split(",")) : null;
+})();
+const previous = only ? JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "hub-tour", zoneId, "report.json"), "utf8")) : null;
+const OUT = path.join(os.tmpdir(), "hub-tour", only ? `${zoneId}-recheck` : zoneId);
 const SHOT = { w: 960, h: 540 };
 // next itself, not `pnpm build` / `pnpm exec`: those reinstall node_modules when the local pnpm is not the repo's
 const NEXT = path.join(ROOT, "node_modules/next/dist/bin/next");
@@ -126,11 +132,12 @@ try {
 
   const audit = await page.evaluate(auditProps);
   const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: audit.flags.slice(0, 6) });
+  if (previous) plan.views = previous.views.filter((v) => only.has(v.id)).map(({ id, x, z, yaw, pitch, label }) => ({ id, x, z, yaw, pitch, label }));
 
   /* ---------- views ---------- */
   const views = [];
   for (const [i, v] of plan.views.entries()) {
-    const id = `V${String(i + 1).padStart(2, "0")}`;
+    const id = v.id ?? `V${String(i + 1).padStart(2, "0")}`;
     const perf = await page.evaluate(async (v) => {
       const h = window.__hub;
       h.teleport(v.x, v.z, v.yaw, v.pitch);

@@ -67,7 +67,8 @@ ressource chargée depuis un domaine externe (CSP).
 Grille commune : `references/liminal-rubric.md` (bugs, langage liminal, envie d'explorer, finition, sévérités).
 - `pnpm hub:audit <LIEU> [--full]` : l'**architecture** — tout atteignable, 0 mur fantôme, vide < 0,05 % des rayons,
   pas de blocage invisible, 0 trou de sol ou de plafond (rayons verticaux, raccords compris).
-- `node scripts/hub-tour.mjs <zone>` (`pnpm hub:tour`, ~20 s par vue sous SwiftShader, lancer en arrière-plan) : les
+- `node scripts/hub-tour.mjs <zone> [--only V03,V52]` (`pnpm hub:tour`, ~20 s par vue, en arrière-plan ; `--only` = revoir
+  ces vues de la dernière tournée après une correction) : les
   **objets posés par les scènes** (traversables, flottants, enfoncés, dans un mur), une carte de dessus
   (`map.png` : zones inaccessibles en bleu nuit), des vues choisies seules (arrivée, interactions, passages, coins les
   plus éloignés, objets signalés), draw calls par vue, erreurs console. Sortie : `<tmp>/hub-tour/<zone>/`.

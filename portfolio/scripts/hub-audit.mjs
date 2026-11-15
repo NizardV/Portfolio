@@ -228,8 +228,10 @@ function vertical(sp, mesh, ray, found) {
     else if (h.point.y < cLo - TOL || h.point.y > cHi + TOL) note("ceiling", x, z, `ceiling at ${h.point.y.toFixed(2)} m in ${at}, plan says ${c.toFixed(2)} m`);
     return owners.size > 1;
   };
-  for (let x = x0 + STEP / 2; x < x1; x += STEP) {
-    for (let z = z0 + STEP / 2; z < z1; z += STEP) {
+  // off the grid the geometry is traced on by an odd fraction: a ray exactly on a triangle edge may slip through
+  const J = 0.0137;
+  for (let x = x0 + STEP / 2 + J; x < x1; x += STEP) {
+    for (let z = z0 + STEP / 2 + J; z < z1; z += STEP) {
       if (!probe(x, z)) continue;
       // a seam: look closer
       for (const ox of [-0.083, 0, 0.083]) for (const oz of [-0.083, 0, 0.083]) if (ox || oz) probe(x + ox, z + oz);

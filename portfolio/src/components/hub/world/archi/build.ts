@@ -43,6 +43,27 @@ class Builder {
   }
 }
 
+/** a convex polygon split along the line t(x, z) = at: the part where t ≤ at, the part where t ≥ at */
+function cutPolygon(poly: Pt[], t: (x: number, z: number) => number, at: number): Pt[][] {
+  const lo: Pt[] = [];
+  const hi: Pt[] = [];
+  for (let k = 0; k < poly.length; k++) {
+    const p = poly[k];
+    const q = poly[(k + 1) % poly.length];
+    const tp = t(p[0], p[1]) - at;
+    const tq = t(q[0], q[1]) - at;
+    if (tp <= 0) lo.push(p);
+    if (tp >= 0) hi.push(p);
+    if (tp * tq < 0) {
+      const r = tp / (tp - tq);
+      const m: Pt = [p[0] + (q[0] - p[0]) * r, p[1] + (q[1] - p[1]) * r];
+      lo.push(m);
+      hi.push(m);
+    }
+  }
+  return [lo, hi];
+}
+
 class Bins {
   private map = new Map<string, Builder>();
   get(k: string) {
@@ -315,10 +336,16 @@ function* buildSteps(space: Space): Steps<Built> {
     // where the outline of the rooms and this shape's own outline are traced a little apart), minus later shapes
     // Three fields over the same grid, sampled in one pass (each neighbouring room measured once):
     // [0] the shape's own region (for its boundary faces);
-    // [1] its floor, [2] its ceiling: the same, but running 10 cm on under a higher floor (above a lower ceiling) of
+    // [1] its floor, [2] its ceiling: the same, but running BAND on under a higher floor (above a lower ceiling) of
     //     the next room, hidden there, so no hairline crack of void is left where two rooms of different heights
     //     meet. That band sits 4 mm back, so where both are at the same height the later room stays on top.
-    const BAND = 0.1;
+    // [1] and [2] also spill SEAM beyond the shape over earlier rooms whose floor is as high or higher (ceiling as low
+    //     or lower), 8 mm back: hidden under theirs, or behind the riser / soffit between them. Where generated rooms
+    //     overlap, an earlier room may keep only a strip a few cm wide that the 40 cm grid cannot trace: nobody drew its
+    //     floor or ceiling there, and the void showed through (black slivers, found by hub:audit's vertical rays).
+    const BAND = 0.25; // wide enough that a strip of this room squeezed between two others is still traced on the grid
+    const BAND_OPEN = 0.1; // over an open room it would show as a ledge against the sky
+    const SEAM = 0.2;
     const fl = (x: number, z: number) => floorAt(s.floor, x, z);
     const fields = (x: number, z: number, out: number[]) => {
       const d = geomDist(s, x, z);
@@ -329,44 +356,70 @@ function* buildSteps(space: Space): Steps<Built> {
       let notUnder = 10;
       let above = 10;
       let notAbove = 10;
+      let aboveOpen = 10;
+      let spillFloor = 10;
+      let spillCeil = 10;
       for (const j of space.nearShapes(x, z)) {
         const o = space.shapes[j];
         const dj = j === i ? d : geomDist(o, x, z);
         if (dj < room) room = dj;
+        if (j < i) {
+          if (floorAt(o.floor, x, z) >= f - 0.01) spillFloor = Math.min(spillFloor, dj); // its floor hides mine
+          if (!o.open && !s.open && o.ceil <= s.ceil + 0.01) spillCeil = Math.min(spillCeil, dj); // its ceiling hides mine
+        }
         if (j <= i) continue;
         if (dj < later) later = dj;
         if (floorAt(o.floor, x, z) >= f - 0.01) under = Math.min(under, dj);
         else notUnder = Math.min(notUnder, dj);
-        if (o.open || o.ceil <= s.ceil + 0.01) above = Math.min(above, dj);
+        if (o.open) aboveOpen = Math.min(aboveOpen, dj);
+        else if (o.ceil <= s.ceil + 0.01) above = Math.min(above, dj);
         else notAbove = Math.min(notAbove, dj);
       }
       // the shape, plus a 12 cm band beyond the outer walls (hidden behind them: no crack at the foot of a wall)
       const base = Math.min(d, Math.max(d - 0.12, -room));
       out[0] = Math.max(base, -later);
-      out[1] = Math.max(base, -notUnder, -under - BAND);
-      out[2] = Math.max(base, -notAbove, -above - BAND);
+      out[1] = Math.max(Math.min(base, Math.max(d - SEAM, spillFloor)), -notUnder, -under - BAND);
+      out[2] = Math.max(Math.min(base, Math.max(d - SEAM, spillCeil)), -notAbove, -above - BAND, -aboveOpen - BAND_OPEN);
     };
     const [loops, floorLoops, ceilLoops] = yield* contourSetSteps(fields, 3, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
     if (!loops.length) continue;
-    const surface = (outline: Pt[][], b: Builder, y: (x: number, z: number) => number, ny: number, tile: number) => {
+    /** ramp is where a sloping floor starts (0) and stops (1): the height bends there, so triangles are cut along it */
+    const surface = (outline: Pt[][], b: Builder, y: (x: number, z: number) => number, ny: number, tile: number, ramp?: (x: number, z: number) => number) => {
       const outers = outline.filter((l) => loopArea(l) < 0);
       const holes = outline.filter((l) => loopArea(l) >= 0);
+      // beyond the shape (spill over an earlier room, band behind a wall): 8 mm back, under the room that owns it;
+      // under a later room: 4 mm back, so the later room stays on top
+      const back = (x: number, z: number) => (geomDist(s, x, z) > 0.005 ? 0.008 : space.laterDist(i, x, z) < -0.005 ? 0.004 : 0);
+      const vert = ([x, z]: Pt) => b.vert(x, y(x, z) - ny * back(x, z), z, 0, ny, 0, x / tile, z / tile);
+      // facing up (floors) or down (ceilings)
+      const face = (p: Pt, q: Pt, r: Pt, ip: number, iq: number, ir: number) => {
+        const up = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]) < 0;
+        b.idx.push(ip, up === ny > 0 ? iq : ir, up === ny > 0 ? ir : iq);
+      };
       for (const outer of outers) {
         const mine = holes.filter((h) => pointInLoop(h[0], outer));
         const tris = ShapeUtils.triangulateShape(outer.map(([x, z]) => new Vector2(x, z)), mine.map((h) => h.map(([x, z]) => new Vector2(x, z))));
         const all = [...outer, ...mine.flat()];
-        const idx = all.map(([x, z]) => b.vert(x, y(x, z) - (space.laterDist(i, x, z) < -0.005 ? ny * 0.004 : 0), z, 0, ny, 0, x / tile, z / tile));
+        if (!ramp) {
+          const idx = all.map(vert);
+          for (const [a, c, d] of tris) face(all[a], all[c], all[d], idx[a], idx[c], idx[d]);
+          continue;
+        }
+        // a ramp: a triangle across the line where it starts or stops would cut the corner (up to 17 cm off the
+        // floor you walk on, found by hub:audit): split it there, each piece is then exactly flat or exactly sloping
         for (const [a, c, d] of tris) {
-          // facing up (floors) or down (ceilings)
-          const [ax, az] = all[a];
-          const [cx, cz] = all[c];
-          const [dx, dz] = all[d];
-          const up = (cx - ax) * (dz - az) - (cz - az) * (dx - ax) < 0;
-          b.idx.push(idx[a], up === ny > 0 ? idx[c] : idx[d], up === ny > 0 ? idx[d] : idx[c]);
+          let pieces: Pt[][] = [[all[a], all[c], all[d]]];
+          for (const at of [0, 1]) pieces = pieces.flatMap((p) => cutPolygon(p, ramp, at)).filter((p) => p.length >= 3);
+          for (const p of pieces) {
+            const idx = p.map(vert);
+            for (let k = 1; k < p.length - 1; k++) face(p[0], p[k], p[k + 1], idx[0], idx[k], idx[k + 1]);
+          }
         }
       }
     };
-    surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"]);
+    const f = s.floor;
+    const ramp = f !== undefined && typeof f !== "number" ? (x: number, z: number) => ((x - f.ax) * (f.bx - f.ax) + (z - f.az) * (f.bz - f.az)) / ((f.bx - f.ax) ** 2 + (f.bz - f.az) ** 2 || 1) : undefined;
+    surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"], ramp);
     const ck = s.ceilMat ?? ceilingSurface(s.mat);
     if (!s.open) surface(ceilLoops, flats.get(`c:${ck}`), () => s.ceil, -1, TILE[ck]);
 
