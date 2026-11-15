@@ -105,7 +105,7 @@ export default function Architecture({ built, palette, flicker = 0.05 }: { built
 
   const tint = (k: string) => palette.surfaces[k];
   return (
-    <group ref={root}>
+    <group ref={root} name="archi">
       {[...built.walls].map(([k, g]) => <Surface key={`w${k}`} geometry={g} kind={k} tint={tint(k)} roughness={palette.roughness} side={2} />)}
       {[...built.floors].map(([k, g]) => <Surface key={`f${k}`} geometry={g} kind={k} tint={tint(`floor:${k}`) ?? tint(k)} roughness={k === "tile" || k === "marble" ? 0.35 : 0.95} />)}
       {[...built.ceilings].map(([k, g]) => <Surface key={`c${k}`} geometry={g} kind={k} tint={tint(`ceil:${k}`) ?? tint(k)} />)}

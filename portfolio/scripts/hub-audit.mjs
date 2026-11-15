@@ -4,7 +4,8 @@
  *   void       a ray that escapes in a closed place (a hole onto the outside), except through an open roof
  *   phantom    a wall standing where you can walk on both sides of it (seen, no collision)
  *   invisible  something stops you over 30 cm or more where nothing is seen (collision, no wall)
- * Usage, from portfolio/: node scripts/hub-audit.mjs [PLACE]   (PLACE = LOBBY, POOLS, CANALS…; all by default)
+ *   floor / ceiling  straight down and up every 25 cm (8 cm on seams): no floor or ceiling, or not at the height the plan says
+ * Usage, from portfolio/: node scripts/hub-audit.mjs [PLACE]   [--full]  (PLACE = LOBBY, POOLS, CANALS…; all by default)
  */
 import fs from "fs";
 import os from "os";
@@ -167,16 +168,83 @@ function audit(sp, spawn) {
       }
     }
   }
+  vertical(sp, mesh, ray, found);
   return { spots: list.length, rays, found };
 }
 
-const only = process.argv[2];
+/**
+ * Straight up and down over the whole interior (reachable or not: a hole is seen from afar), every 25 cm, and every
+ * 8 cm along seams between shapes, where slivers of void hide. The plan says where the floor and the ceiling are (pits
+ * and wells included: they have their own deep floor), so any other answer is a hole or a misplaced piece:
+ *   floor    nothing below, or a floor higher / lower than the plan's (seeing through to a floor further down)
+ *   ceiling  nothing above under a roof, or a ceiling higher / lower than the plan's (open shapes: skipped)
+ * On a seam, floors and ceilings overlap on purpose (see build.ts): any height between the two sides is fine there.
+ */
+function vertical(sp, mesh, ray, found) {
+  const TOL = 0.05;
+  const STEP = 0.25;
+  const R = 0.3;
+  const up = new THREE.Vector3(0, 1, 0);
+  const down = new THREE.Vector3(0, -1, 0);
+  const from = new THREE.Vector3();
+  const [x0, z0, x1, z1] = sp.bounds;
+  found.floor = new Map();
+  found.ceiling = new Map();
+  const note = (kind, x, z, what) => {
+    const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
+    const e = found[kind].get(k) ?? { n: 0, what };
+    e.n++;
+    found[kind].set(k, e);
+  };
+  const AROUND = [[0, 0], [R, 0], [-R, 0], [0, R], [0, -R], [R, R], [-R, -R], [R, -R], [-R, R]];
+  const probe = (x, z) => {
+    if (sp.dist(x, z) > -0.03) return;
+    const owners = new Set();
+    let gLo = Infinity, gHi = -Infinity, cLo = Infinity, cHi = -Infinity, open = false;
+    for (const [dx, dz] of AROUND) {
+      const i = sp.ownerIndex(x + dx, z + dz);
+      if (i < 0) continue;
+      owners.add(i);
+      const g = sp.ground(x + dx, z + dz);
+      gLo = Math.min(gLo, g);
+      gHi = Math.max(gHi, g);
+      cLo = Math.min(cLo, sp.shapes[i].ceil);
+      cHi = Math.max(cHi, sp.shapes[i].ceil);
+      open ||= !!sp.shapes[i].open;
+    }
+    const i = sp.ownerIndex(x, z);
+    if (i < 0) return;
+    const at = `#${i}${sp.shapes[i].tag ? ` (${sp.shapes[i].tag})` : ""}${owners.size > 1 ? " seam" : ""}`;
+    const g = sp.ground(x, z);
+    const c = sp.ceiling(x, z);
+    ray.set(from.set(x, open ? gHi + 1.2 : Math.min(gHi + 1.2, cLo - 0.02), z), down);
+    const f = ray.intersectObject(mesh)[0];
+    if (!f) note("floor", x, z, `no floor under ${at} (plan: ${g.toFixed(2)} m)`);
+    else if (f.point.y < gLo - TOL || f.point.y > gHi + TOL) note("floor", x, z, `floor at ${f.point.y.toFixed(2)} m in ${at}, plan says ${g.toFixed(2)} m`);
+    if (open) return;
+    ray.set(from.set(x, Math.max(g, f ? f.point.y : g) + 0.05, z), up); // from the floor actually drawn
+    const h = ray.intersectObject(mesh)[0];
+    if (!h) note("ceiling", x, z, `no ceiling over ${at} (plan: ${c.toFixed(2)} m)`);
+    else if (h.point.y < cLo - TOL || h.point.y > cHi + TOL) note("ceiling", x, z, `ceiling at ${h.point.y.toFixed(2)} m in ${at}, plan says ${c.toFixed(2)} m`);
+    return owners.size > 1;
+  };
+  for (let x = x0 + STEP / 2; x < x1; x += STEP) {
+    for (let z = z0 + STEP / 2; z < z1; z += STEP) {
+      if (!probe(x, z)) continue;
+      // a seam: look closer
+      for (const ox of [-0.083, 0, 0.083]) for (const oz of [-0.083, 0, 0.083]) if (ox || oz) probe(x + ox, z + oz);
+    }
+  }
+}
+
+const only = process.argv.slice(2).find((a) => !a.startsWith("--"));
+const full = process.argv.includes("--full"); // every spot, not just the 4 worst of each kind
 for (const [name, { space, spawn }] of Object.entries(places)) {
   if (only && name !== only) continue;
   const { spots: n, rays, found } = audit(space, spawn);
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
-  console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}`);
-  for (const kind of ["void", "phantom", "invisible"]) {
-    for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
+  console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
+  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling"]) {
+    for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
   }
 }
