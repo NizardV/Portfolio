@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { BackSide, CanvasTexture, Color, SRGBColorSpace, type Group } from "three";
+import { BackSide, CanvasTexture, Color, SRGBColorSpace, Vector3, type Group } from "three";
 
 export const HORIZON = "#d4e6f7"; // also the fog colour: distant hills melt into the sky
 const MID = "#7fb5ee";
@@ -82,6 +82,7 @@ function useClouds(top: string, under: string, count: number): Puff[] {
 /** A gradient sky dome with a sun, and drifting cumulus. Colours default to the meadow's clear day. */
 export default function Sky({ horizon = HORIZON, mid = MID, zenith = ZENITH, cloud = "#ffffff", cloudUnder = "#e3ebf5", cloudCount = 16, sun = SUN_DIR }: { horizon?: string; mid?: string; zenith?: string; cloud?: string; cloudUnder?: string; cloudCount?: number; sun?: [number, number, number] } = {}) {
   const clouds = useRef<Group>(null);
+  const root = useRef<Group>(null);
   const puff = useMemo(puffTexture, []);
   const puffs = useClouds(cloud, cloudUnder, cloudCount);
   const uniforms = useMemo(
@@ -94,12 +95,18 @@ export default function Sky({ horizon = HORIZON, mid = MID, zenith = ZENITH, clo
     [horizon, mid, zenith, sun],
   );
 
-  useFrame((_, dt) => {
+  useFrame(({ camera }, dt) => {
     if (clouds.current) clouds.current.rotation.y += dt * 0.0025; // clouds drift, slowly
+    // the sky is infinitely far: it travels with the eye (also seen through a doorway, in that place's own frame)
+    const g = root.current;
+    if (g?.parent) {
+      g.parent.worldToLocal(EYE.copy(camera.position));
+      g.position.set(EYE.x, 0, EYE.z);
+    }
   });
 
   return (
-    <>
+    <group ref={root}>
       <mesh renderOrder={-1}>
         <sphereGeometry args={[560, 32, 16]} />
         <shaderMaterial vertexShader={skyVertex} fragmentShader={skyFragment} uniforms={uniforms} side={BackSide} depthWrite={false} fog={false} />
@@ -111,6 +118,8 @@ export default function Sky({ horizon = HORIZON, mid = MID, zenith = ZENITH, clo
           </sprite>
         ))}
       </group>
-    </>
+    </group>
   );
 }
+
+const EYE = new Vector3();
