@@ -3,7 +3,7 @@ import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
 import type { Sfx } from "./audio";
 import type { Emitter } from "./sounds";
-import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, MEADOW_LIMIT, MEADOW_POI, SKY_WALL, meadowHeight } from "./terrain";
+import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSE, MEADOW_HOUSES, MEADOW_LIMIT, MEADOW_POI, SKY_WALL, meadowHeight } from "./terrain";
 import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
 import { back } from "./places/common";
 import { OFFICES_ENTRY, OFFICES_SPACE, OFFICES_SPAWN } from "./places/offices";
@@ -168,7 +168,8 @@ export const ZONES: Record<ZoneId, Zone> = {
       ...MEADOW_WALLS,
       box(MEADOW_POI.swing.x, MEADOW_POI.swing.z, 1.1, 1.1),
       box(MEADOW_POI.lamp.x, MEADOW_POI.lamp.z, 0.4, 0.4),
-      box(MEADOW_POI.bathtub.x, MEADOW_POI.bathtub.z, 1.7, 1.7),
+      box(MEADOW_POI.bathtub.x, MEADOW_POI.bathtub.z, 2.4, 2.4),
+      box(MEADOW_HOUSE.x, MEADOW_HOUSE.z, 8.6, 8.6), // the house on the ridge (turned: a square that holds it)
       ...Array.from({ length: Math.floor((MEADOW_POI.power.x1 - MEADOW_POI.power.x0) / MEADOW_POI.power.step) - 1 }, (_, k) => box(MEADOW_POI.power.x0 + k * MEADOW_POI.power.step, MEADOW_POI.power.z, 0.4, 0.4)),
       box(MEADOW_POI.power.x1, MEADOW_POI.power.z, 0.4, 0.4),
     ],

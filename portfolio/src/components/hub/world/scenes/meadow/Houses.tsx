@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { BufferGeometry, CanvasTexture, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, InstancedMesh, MeshLambertMaterial, Object3D, SphereGeometry, SRGBColorSpace, TubeGeometry, Vector3 } from "three";
+import { BufferGeometry, CanvasTexture, PlaneGeometry, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, InstancedMesh, MeshLambertMaterial, Object3D, SphereGeometry, SRGBColorSpace, TubeGeometry, Vector3 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import Model from "../../Model";
 import { useWorldState } from "../../state";
@@ -168,7 +168,7 @@ function PowerLine() {
 /** The lone tree on its hill, and its swing that moves by itself. */
 function SwingTree() {
   const { x, z } = MEADOW_POI.swing;
-  return <Model id="treeSwing" position={[x, meadowHeight(x, z) - 0.3, z]} rotation={[0, -0.6, 0]} node="swing" animate={(n, t) => (n.rotation.z = Math.sin(t * 1.25) * 0.32)} />;
+  return <Model id="treeSwing" position={[x, meadowHeight(x, z) - 0.3, z]} rotation={[0, -0.6, 0]} node="swing" animate={(n, t) => (n.rotation.x = Math.sin(t * 1.25) * 0.32)} />;
 }
 
 /** An abandoned picnic at the bottom of a hollow: a checked blanket, plates, a basket, and a radio playing. */
@@ -184,17 +184,26 @@ function Picnic() {
     }
   });
   const things = useMemo(() => {
-    const p = [
-      { x: x - 0.5, y: y + 0.02, z: z + 0.3, w: 0.26, h: 0.02, d: 0.26 },
-      { x: x + 0.4, y: y + 0.02, z: z - 0.4, w: 0.26, h: 0.02, d: 0.26 },
-      { x: x + 0.7, y: y + 0.02, z: z + 0.5, w: 0.5, h: 0.32, d: 0.34 }, // basket
+    const on = (px: number, pz: number) => meadowHeight(px, pz) + 0.035;
+    return [
+      { x: x - 0.5, y: on(x - 0.5, z + 0.3), z: z + 0.3, w: 0.26, h: 0.02, d: 0.26 },
+      { x: x + 0.4, y: on(x + 0.4, z - 0.4), z: z - 0.4, w: 0.26, h: 0.02, d: 0.26 },
+      { x: x + 0.7, y: on(x + 0.7, z + 0.5) - 0.02, z: z + 0.5, w: 0.5, h: 0.32, d: 0.34 }, // basket
     ];
-    return p;
-  }, [x, y, z]);
+  }, [x, z]);
+  // the blanket lies on the ground: a fine grid, each point set on the relief
+  const blanket = useMemo(() => {
+    const g = new PlaneGeometry(2.4, 1.9, 16, 12);
+    g.rotateX(-Math.PI / 2);
+    g.rotateY(0.3);
+    const pos = g.attributes.position;
+    for (let i = 0; i < pos.count; i++) pos.setY(i, meadowHeight(x + pos.getX(i), z + pos.getZ(i)) + 0.025);
+    g.computeVertexNormals();
+    return g;
+  }, [x, z]);
   return (
     <group>
-      <mesh position={[x, y + 0.03, z]} rotation={[-Math.PI / 2, 0, 0.3]}>
-        <planeGeometry args={[2.4, 1.9]} />
+      <mesh geometry={blanket} position={[x, 0, z]}>
         <meshStandardMaterial map={checks} roughness={1} side={DoubleSide} />
       </mesh>
       <Pieces pieces={things} color="#e9e2d0" roughness={0.6} />
@@ -314,7 +323,7 @@ function Bathtub() {
   }, [x, z]);
   return (
     <>
-      <Model id="bathtub" position={[x, meadowHeight(x, z) - 0.05, z]} rotation={[0, 0.7, 0.02]} />
+      <Model id="bathtub" position={[x, meadowHeight(x, z) - 0.05, z]} rotation={[0, 0.7, 0.02]} scale={1.25} />
       <primitive object={flowers[0]} />
       <primitive object={flowers[1]} />
     </>
@@ -382,7 +391,7 @@ function SkyWall() {
     <>
       <mesh position={[0, y0 + h / 2, z]}>
         <planeGeometry args={[w, h]} />
-        <meshBasicMaterial map={paint} fog={false} side={DoubleSide} transparent depthWrite={false} toneMapped={false} />
+        <meshBasicMaterial map={paint} fog={false} side={DoubleSide} transparent toneMapped={false} />
       </mesh>
       <group position={[12, doorY, z + 0.05]}>
         <mesh position={[0, 1.05, 0]}>

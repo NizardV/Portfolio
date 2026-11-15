@@ -79,6 +79,9 @@ const along = (ax: number, az: number, bx: number, bz: number, width: number, ex
   ...extra,
 }) as Shape;
 
+/** the ramp up to the ring (filled in by ring(): its railings are drawn by the scene) */
+export const RAMP = { ax: 0, az: 0, bx: 0, bz: 0, w: 2.6 };
+
 /** the raised ring of the rotunda: short boxes around the circle (its top is walkable, its sides are white walls) */
 function ring(): Shape[] {
   const { r, width, h, from, to } = G.ring;
@@ -87,7 +90,7 @@ function ring(): Shape[] {
   for (let k = 0; k < n; k++) {
     const a = ((from + ((to - from) * (k + 0.5)) / n) * Math.PI) / 180;
     const len = (2 * r * Math.sin((((to - from) / n) * Math.PI) / 360)) + 0.6;
-    out.push({ kind: "box", x: G.rotunda.x + Math.sin(a) * r, z: G.rotunda.z + Math.cos(a) * r, w: len, d: width, a, floor: h, ceil: G.rotunda.ceil, mat: "lawn", wall: "plaster", lights: 0 });
+    out.push({ kind: "box", x: G.rotunda.x + Math.sin(a) * r, z: G.rotunda.z + Math.cos(a) * r, w: len, d: width, a, floor: h, ceil: G.rotunda.ceil, mat: "lawn", wall: "plaster", rails: false, lights: 0 });
   }
   // the ramp up: tangent to the circle where the ring starts
   const a0 = (from * Math.PI) / 180;
@@ -97,7 +100,11 @@ function ring(): Shape[] {
   const tz = -Math.sin(a0);
   const sx = px - tx * 10;
   const sz = pz - tz * 10;
-  out.unshift(along(sx, sz, px + tx * 0.8, pz + tz * 0.8, 2.6, { ceil: G.rotunda.ceil, mat: "lawn", wall: "plaster", lights: 0, floor: { ax: sx, az: sz, bx: px, bz: pz, ha: 0, hb: h } }));
+  out.unshift(along(sx, sz, px + tx * 0.8, pz + tz * 0.8, 2.6, { ceil: G.rotunda.ceil, mat: "lawn", wall: "plaster", rails: false, lights: 0, floor: { ax: sx, az: sz, bx: px, bz: pz, ha: 0, hb: h } }));
+  RAMP.ax = sx;
+  RAMP.az = sz;
+  RAMP.bx = px;
+  RAMP.bz = pz;
   return out;
 }
 
@@ -169,8 +176,8 @@ const shapes: Shape[] = [
   room(0, -28.85, BACKDROP.gate.w + 0.4, 7.7, { ceil: BACKDROP.gate.h, mat: "wood", ...sky }), // through the gate to the pit
   room(P.bedroom.x, P.bedroom.z, P.bedroom.w, P.bedroom.d, { ceil: P.bedroom.ceil, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }),
   { kind: "box", x: 33.5, z: -32.1, w: 1.1, d: 1.6, ceil: 1.1, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }, // the little door (crawl)
-  ...P.steps.map((s): Shape => ({ kind: "box", x: s.x, z: s.z, w: 1.6, d: 1.6, floor: s.h, ceil: P.bedroom.ceil, mat: "wood", wall: "panel", rails: false, lights: 0 })),
-  room(P.bed.x, P.bed.z, P.bed.w, P.bed.d, { floor: P.bed.top, ceil: P.bedroom.ceil, mat: "carpet", wall: "panel", rails: false, lights: 0 }),
+  ...P.steps.map((s): Shape => ({ kind: "box", x: s.x, z: s.z, w: 1.6, d: 1.6, floor: s.h, ceil: P.bedroom.ceil, mat: "wood", wall: "plaster", ceilMat: "sky", rails: false, lights: 0 })),
+  room(P.bed.x, P.bed.z, P.bed.w, P.bed.d, { floor: P.bed.top, ceil: P.bedroom.ceil, mat: "carpet", wall: "plaster", ceilMat: "sky", rails: false, lights: 0 }),
   room(P.blocks.x, P.blocks.z, P.blocks.w, P.blocks.d, { ceil: 7, mat: "lawn", ...sky }),
   { kind: "box", x: P.pit.x, z: P.pit.z, w: P.pit.w, d: P.pit.d, round: P.pit.round, floor: -0.4, ceil: 7, mat: "void", ...sky, slow: 0.45, drop: true },
   room(P.clouds.x, P.clouds.z, P.clouds.w, P.clouds.d, { ceil: 3.2, mat: "carpet", ...sky }),
@@ -196,7 +203,7 @@ const shapes: Shape[] = [
   room(G.garden.x, G.garden.z, G.garden.w, G.garden.d, { ceil: G.garden.ceil, mat: "lawn", ...white, lights: 0 }),
   room(G.pool.x, G.pool.z, G.pool.w, G.pool.d, { ceil: 6, mat: "tile", wall: "tile", ceilMat: "tile", lights: 0 }),
   room(G.basin.x, G.basin.z, G.basin.w, G.basin.d, { floor: -0.4, ceil: 6, mat: "tile", wall: "tile", ceilMat: "tile", lights: 0, slow: 0.6 }),
-  room(G.white.x, G.white.z, G.white.w, G.white.d, { ceil: 2.9, mat: "stain", ...white, lights: 3.2, dead: 0.25 }),
+  room(G.white.x, G.white.z, G.white.w, G.white.d, { ceil: 2.9, mat: "stain", ...white, lights: 4.6, dead: 0.45 }),
   room(G.lookout.x, G.lookout.z, G.lookout.w, G.lookout.d, { floor: G.lookout.h, ceil: G.lookout.h + 6, mat: "wood", ...white, lights: 4.5 }),
   room(G.holeRoom.x, G.holeRoom.z, G.holeRoom.w, G.holeRoom.d, { ceil: 3.4, mat: "lawn", ...white, lights: 3.2 }),
   { kind: "circle", x: G.hole.x, z: G.hole.z, r: G.hole.r, floor: -0.35, ceil: 3.4, mat: "void", ...white, lights: 0 },
@@ -231,11 +238,13 @@ export const PLAY_FALL = box(G.hole.x, G.hole.z, 1.4, 1.4);
 /** where each part sounds different (Zone.ambienceAt) */
 export function playAmbience(x: number, z: number) {
   if (z > -86) {
+    if (x > 46 && z < -70) return "quiet" as const; // leaving the purple room for the white rooms
     if (x > 21 && z < -49) return "purple" as const;
     if (x < -2 && z < -25.3 && z > -29.8) return "quiet" as const;
     return undefined; // the nursery
   }
-  if (x > 20.5 && z > -126 && z < -98) return "water" as const;
+  if (x > 55) return "quiet" as const; // the service corridor of route B
+  if (x > 20.5 && x < 52 && z > -126 && z < -98) return "water" as const;
   if (x > 9 && z < -136) return "quiet" as const;
   return "garden" as const;
 }

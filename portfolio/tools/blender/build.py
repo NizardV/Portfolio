@@ -156,7 +156,9 @@ def house(name="house", w=6.0, d=7.0, h=2.9, floors=2, color="#efd27a", trim="#f
         zc = 0.45 + f * h + h * 0.55
         xs = [-w / 4 - 0.3, w / 4 + 0.3] if open_front and f == 0 else ([-w / 4, w / 4] if w < 7 else [-w / 3, 0, w / 3])
         for x in xs:
-            window(x, -d / 2 - 0.03, zc)
+            # the front door (ground floor, at w * 0.18) takes the place of a window
+            if not (f == 0 and not open_front and abs(x - w * 0.18) < 1.2):
+                window(x, -d / 2 - 0.03, zc)
             window(x, d / 2 + 0.03, zc)
         for y in ([-d / 4, d / 4] if d > 5 else [0]):
             window(-w / 2 - 0.03, y, zc, True)
@@ -226,10 +228,14 @@ def tree_swing():
             z = cz + math.sin(el) * d * 0.7
             parts.append(blob(f"leaf{i}", cr * rnd.uniform(0.38, 0.55), (x, y, z), leaves if i % 3 else leaves2, seed=i, rough=0.45, subdiv=3))
             i += 1
-    # the swing hangs from the long branch: ropes + seat in their own node, pivoting at the branch
-    pivot = (2.6, 0.32, 5.85)
-    ropes = [tube(f"rope{s}", [(pivot[0], pivot[1] + s * 0.35, pivot[2]), (pivot[0], pivot[1] + s * 0.35, 0.65)], 0.018, rope) for s in (-1, 1)]
-    seat = box("seat", (0.32, 0.85, 0.05), (pivot[0], pivot[1], 0.62), seat_m, bev=0.01)
+    # the swing hangs from a low, straight limb: the ropes are tied around it, the node pivots on its axis
+    pivot = (2.6, 0.0, 4.6)
+    parts.append(tube("limb", [(0.2, 0.0, 4.15), (1.3, 0.0, 4.55), (pivot[0], 0.0, pivot[2]), (3.4, 0.0, 4.75)], 0.13, bark, verts=8))
+    # the ropes are spread along the limb (x); the seat swings across it (about the x axis)
+    for s in (-1, 1):
+        parts.append(cyl(f"knot{s}", 0.16, 0.07, (pivot[0] + s * 0.35, 0, pivot[2] + s * 0.02), rope, rot=(0, math.pi / 2, 0), verts=12))
+    ropes = [tube(f"rope{s}", [(pivot[0] + s * 0.35, 0, pivot[2] - 0.12), (pivot[0] + s * 0.35, 0, 0.65)], 0.018, rope) for s in (-1, 1)]
+    seat = box("seat", (0.85, 0.32, 0.05), (pivot[0], pivot[1], 0.62), seat_m, bev=0.01)
     swing = group("swing", ropes + [seat], loc=pivot)
     swing.name = "swing"
     lib.finish("tree_swing", height=3)
@@ -264,38 +270,64 @@ def street_lamp():
 
 # ---------------------------------------------------------------- bathtub
 def bathtub():
-    enamel = mat("enamel", "#f4f2ec", 0.15)
+    """A claw-foot roll-top tub: an oval with steep sides, one end higher and sloping, a rolled rim, brass feet and tap."""
+    enamel = mat("enamel", "#f4f2ec", 0.12)
+    outside = mat("tub_outside", "#e9ece6", 0.3)
     brass = mat("brass", "#c9a24a", 0.25, 0.9)
     water = mat("water", "#9cc8d8", 0.05)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=1, segments=32, ring_count=16, location=(0, 0, 0.62))
-    tub = bpy.context.active_object
-    tub.name = "tub"
-    tub.scale = (0.85, 0.42, 0.45)
-    bpy.ops.object.transform_apply(scale=True)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="DESELECT")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    for v in tub.data.vertices:
-        v.select = v.co.z > 0.62
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.delete(type="VERT")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    tub.modifiers.new("shell", "SOLIDIFY").thickness = 0.04
-    lib.shade_smooth(tub)
-    lib.assign(tub, enamel)
-    tube("rim", [(math.cos(a) * 0.85, math.sin(a) * 0.42, 0.62) for a in [k / 48 * TAU for k in range(49)]], 0.035, enamel)
+    import bmesh as bm
+    L, W, H = 1.7, 0.78, 0.62
+    mesh = bpy.data.meshes.new("tub")
+    b = bm.new()
+    rings = []
+    for k in range(9):
+        t = k / 8
+        # from the floor of the tub (narrow) to the rim (wide), the high end rising at the back
+        sx = (L / 2) * (0.78 + 0.22 * math.sin(t * math.pi / 2))
+        sy = (W / 2) * (0.7 + 0.3 * math.sin(t * math.pi / 2))
+        ring = []
+        for j in range(48):
+            ang = j / 48 * TAU
+            x = math.cos(ang) * sx
+            y = math.sin(ang) * sy
+            back = max(0.0, -math.cos(ang)) ** 2
+            z = 0.22 + t * (H - 0.22) + back * t * 0.18
+            ring.append(b.verts.new((x, y, z)))
+        rings.append(ring)
+    for k in range(8):
+        for j in range(48):
+            b.faces.new((rings[k][j], rings[k][(j + 1) % 48], rings[k + 1][(j + 1) % 48], rings[k + 1][j]))
+    b.faces.new(list(reversed(rings[0])))
+    b.to_mesh(mesh)
+    b.free()
+    tub = bpy.data.objects.new("tub", mesh)
+    bpy.context.scene.collection.objects.link(tub)
+    bpy.context.view_layer.objects.active = tub
+    tub.modifiers.new("shell", "SOLIDIFY").thickness = -0.05
+    lib.smooth(tub, 1)
+    tub.data.materials.append(enamel)
+    tub.data.materials.append(outside)
+    rim = []
+    for j in range(97):
+        ang = j / 96 * TAU
+        back = max(0.0, -math.cos(ang)) ** 2
+        rim.append((math.cos(ang) * L / 2, math.sin(ang) * W / 2, H + back * 0.18 + 0.01))
+    tube("rim", rim, 0.04, enamel)
     for sx in (-1, 1):
         for sy in (-1, 1):
-            cyl("leg", 0.05, 0.2, (sx * 0.5, sy * 0.2, 0.17), brass, r2=0.035, verts=10)
-            sphere("claw", 0.06, (sx * 0.5, sy * 0.2, 0.06), brass, scale=(1.2, 1.2, 0.8), segs=10)
-    bpy.ops.mesh.primitive_circle_add(radius=1, vertices=48, fill_type="NGON", location=(0, 0, 0.55))
+            x, y = sx * L * 0.33, sy * W * 0.3
+            cyl("leg", 0.055, 0.24, (x, y, 0.13), brass, r2=0.035, verts=10)
+            sphere("claw", 0.07, (x, y, 0.04), brass, scale=(1.3, 1.3, 0.6), segs=10)
+    bpy.ops.mesh.primitive_circle_add(radius=1, vertices=48, fill_type="NGON", location=(0, 0, H - 0.12))
     w = bpy.context.active_object
     w.name = "water"
-    w.scale = (0.8, 0.38, 1)
+    w.scale = (L / 2 - 0.08, W / 2 - 0.07, 1)
     bpy.ops.object.transform_apply(scale=True)
     lib.assign(w, water)
-    tube("tap", [(-0.8, 0, 0.6), (-0.8, 0, 0.82), (-0.65, 0, 0.86)], 0.025, brass)
-    lib.finish("bathtub", height=1)
+    tube("tap", [(L / 2 - 0.05, 0, H - 0.05), (L / 2 - 0.05, 0, H + 0.25), (L / 2 - 0.25, 0, H + 0.3)], 0.025, brass)
+    for s2 in (-1, 1):
+        cyl("handle", 0.035, 0.08, (L / 2 - 0.05, s2 * 0.14, H + 0.12), brass, verts=8)
+    lib.finish("bathtub", height=1.2)
 
 
 MODELS = {

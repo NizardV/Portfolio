@@ -2,11 +2,11 @@
 import { MeshPortalMaterial } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef, useState } from "react";
-import { DoubleSide, ExtrudeGeometry, Path, RepeatWrapping, Shape, ShapeGeometry, Vector2, type Mesh } from "three";
+import { Path, RepeatWrapping, Shape, ShapeGeometry, Vector2, type Mesh } from "three";
 import type { Piece } from "../../archi/build";
 import { Water } from "../../archi/Place";
 import Model from "../../Model";
-import { GARDENS, PLAY, PLAY_IDS } from "../../places/playground";
+import { GARDENS, PLAY, PLAY_IDS, RAMP } from "../../places/playground";
 import { HILLS_SPAWN } from "../../places/dreamcore";
 import { PreviewContext } from "../../PortalWindow";
 import { useWorldState } from "../../state";
@@ -382,20 +382,21 @@ export function PurpleRoom() {
     const r = seeded(21);
     return Array.from({ length: 16 }, () => ({ x: purple.x + (r() - 0.5) * 20, y: 2.5 + r() * 6.5, z: purple.z + (r() - 0.5) * 22, s: 0.15 + r() * 0.25 }));
   }, [purple]);
-  const chute = useMemo(() => {
-    const len = slide.x0 - slide.x1;
-    const g = new ExtrudeGeometry(
-      (() => {
-        const s = new Shape();
-        s.absarc(0, 0, 1.15, Math.PI, Math.PI * 2, false);
-        s.absarc(0, 0, 1.05, Math.PI * 2, Math.PI, true);
-        return s;
-      })(),
-      { depth: len, bevelEnabled: false, curveSegments: 20 },
-    );
-    return g;
-  }, [slide]);
-  const drop = balcony.h - 0.6;
+  // the slide follows its ramp exactly: from the balcony (x0, its floor height) down to the pit (x1 + 1, 0.6)
+  const chute = useMemo<Piece[]>(() => {
+    const run = slide.x0 - (slide.x1 + 1);
+    const rise = balcony.h - 0.6;
+    const tilt = Math.atan2(rise, run);
+    const span = Math.hypot(run, rise);
+    const cx = (slide.x0 + slide.x1 + 1) / 2;
+    const mid = (balcony.h + 0.6) / 2;
+    return [
+      { x: cx, y: mid + 0.005, z: slide.z, w: span, h: 0.04, d: 2.2, tilt },
+      ...[-1, 1].map((s) => ({ x: cx, y: mid, z: slide.z + s * 1.12, w: span, h: 0.55, d: 0.07, tilt })),
+      // the last metre, flat, into the balls
+      { x: slide.x1 + 0.5, y: 0.6, z: slide.z, w: 1.2, h: 0.04, d: 2.2 },
+    ];
+  }, [slide, balcony.h]);
   return (
     <>
       {globes.map((g, k) => (
@@ -407,10 +408,8 @@ export function PurpleRoom() {
       <pointLight position={[purple.x - 1, 7, purple.z - 2]} intensity={30} distance={26} decay={1.3} color="#a98cff" />
       <pointLight position={[purple.x + 5, 2.5, purple.z + 6]} intensity={12} distance={16} decay={1.5} color="#e6dcff" />
       <pointLight position={[balcony.x, balcony.h + 2.2, balcony.z]} intensity={10} distance={14} decay={1.5} color="#d8c8ff" />
-      {/* the slide: a yellow half-pipe from the balcony down to the pit */}
-      <mesh geometry={chute} position={[slide.x0, balcony.h + 0.95, slide.z]} rotation={[Math.atan2(drop, slide.x0 - slide.x1), -Math.PI / 2, 0, "YXZ"]}>
-        <meshStandardMaterial color="#e8c547" roughness={0.35} side={DoubleSide} />
-      </mesh>
+      {/* the slide: a yellow chute from the balcony down to the pit */}
+      <Pieces pieces={chute} color="#e8c547" roughness={0.35} />
     </>
   );
 }
@@ -500,6 +499,44 @@ export function Backstage() {
 
 /* ---------------------------------------------------------------- zone 2: the gardens */
 
+/** Railings along both edges of the ring (smooth arcs) and both sides of the ramp up to it. */
+function RingRails() {
+  const { rotunda, ring } = G;
+  const pieces = useMemo<Piece[]>(() => {
+    const p: Piece[] = [];
+    const from = (ring.from * Math.PI) / 180;
+    const to = (ring.to * Math.PI) / 180;
+    for (const r of [ring.r - ring.width / 2 + 0.08, ring.r + ring.width / 2 - 0.08]) {
+      const n = Math.ceil(((to - from) * r) / 0.6);
+      for (let k = 0; k < n; k++) {
+        const a0 = from + ((to - from) * k) / n;
+        const a1 = from + ((to - from) * (k + 1)) / n;
+        const am = (a0 + a1) / 2;
+        const x = rotunda.x + Math.sin(am) * r;
+        const z = rotunda.z + Math.cos(am) * r;
+        const len = 2 * r * Math.sin((a1 - a0) / 2) + 0.02;
+        p.push({ x, y: ring.h + 0.92, z, w: len, h: 0.06, d: 0.06, a: am });
+        if (k % 2 === 0) p.push({ x: rotunda.x + Math.sin(a0) * r, y: ring.h, z: rotunda.z + Math.cos(a0) * r, w: 0.05, h: 0.95, d: 0.05 });
+      }
+    }
+    // the ramp: both sides, sloping
+    const { ax, az, bx, bz, w } = RAMP;
+    const len = Math.hypot(bx - ax, bz - az);
+    const dx = (bx - ax) / len;
+    const dz = (bz - az) / len;
+    const a = Math.atan2(-dz, dx);
+    const tilt = Math.atan2(ring.h, len);
+    for (const s of [-1, 1]) {
+      const ox = -dz * (w / 2 - 0.08) * s;
+      const oz = dx * (w / 2 - 0.08) * s;
+      p.push({ x: (ax + bx) / 2 + ox, y: ring.h / 2 + 0.92, z: (az + bz) / 2 + oz, w: Math.hypot(len, ring.h), h: 0.06, d: 0.06, a, tilt });
+      for (let t = 0.6; t < len; t += 1.4) p.push({ x: ax + dx * t + ox, y: (ring.h * t) / len, z: az + dz * t + oz, w: 0.05, h: 0.95, d: 0.05 });
+    }
+    return p;
+  }, [rotunda, ring]);
+  return <Pieces pieces={pieces} color="#f4f1ea" roughness={0.6} />;
+}
+
 /** The rotunda: daylight from a round skylight; the raised ring and its tiny houses, trees, one turbine. */
 export function Rotunda() {
   const { rotunda, ring } = G;
@@ -522,10 +559,7 @@ export function Rotunda() {
         const [x, z] = at(a, ring.r + 0.6);
         return <Tree key={a} x={x} y={ring.h} z={z} s={0.55} seed={k + 11} />;
       })}
-      {(() => {
-        const [x, z] = at(185, ring.r - 0.4);
-        return <Turbine x={x} y={ring.h} z={z} s={0.11} />;
-      })()}
+      <RingRails />
       <Tree x={rotunda.x} z={rotunda.z} s={1.1} seed={9} />
       <Sign x={rotunda.x + 3} z={rotunda.z + 17} ry={-0.3} tilt={0.09} lines={["EXIT", "ONLY"]} />
     </>
@@ -573,7 +607,7 @@ export function Garden() {
           <Tree x={p.x} y={0.45} z={p.z} s={1.3} seed={40 + k} />
         </group>
       ))}
-      <Turbine x={turbine.x} z={turbine.z} s={0.3} />
+      <Turbine x={turbine.x} z={turbine.z} s={0.17} />
       {[-144, -172].map((z) => (
         <mesh key={z} geometry={arch} position={[x1 - 0.03, 0, z]} rotation={[0, -Math.PI / 2, 0]}>
           <meshBasicMaterial color="#0d0d0f" />

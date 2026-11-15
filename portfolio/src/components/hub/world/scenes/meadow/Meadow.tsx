@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { BufferAttribute, Color, PlaneGeometry } from "three";
 import { HOLE_REACH, MEADOW_HOLE, MEADOW_HOUSE, meadowHeight } from "../../terrain";
 import Houses from "./Houses";
+import Model from "../../Model";
 import { grassTint } from "./tint";
 import Flowers from "./Flowers";
 import Grass from "./Grass";
@@ -37,29 +38,9 @@ function useHills() {
   }, []);
 }
 
-/** The small white house on its ridge: far, quiet, out of reach. */
+/** The small white house on its ridge, at the edge of the world, against the painted sky. */
 function House() {
-  const y = meadowHeight(MEADOW_HOUSE.x, MEADOW_HOUSE.z);
-  return (
-    <group position={[MEADOW_HOUSE.x, y, MEADOW_HOUSE.z]} rotation={[0, 0.5, 0]}>
-      <mesh position={[0, 2, 0]}>
-        <boxGeometry args={[8, 4.5, 6]} />
-        <meshLambertMaterial color="#f3f2ec" />
-      </mesh>
-      {[-1, 1].map((side) => (
-        <mesh key={side} position={[0, 5.2, side * 1.6]} rotation={[side * 0.6, 0, 0]}>
-          <boxGeometry args={[8.6, 0.25, 3.9]} />
-          <meshLambertMaterial color="#7d8794" />
-        </mesh>
-      ))}
-      {[-2.2, 0.6].map((x) => (
-        <mesh key={x} position={[x, 2.4, 3.01]}>
-          <planeGeometry args={[1.1, 1.2]} />
-          <meshBasicMaterial color="#2c3440" />
-        </mesh>
-      ))}
-    </group>
-  );
+  return <Model id="houseCottage" position={[MEADOW_HOUSE.x, meadowHeight(MEADOW_HOUSE.x, MEADOW_HOUSE.z) - 0.38, MEADOW_HOUSE.z]} rotation={[0, 0.5, -0.03]} tint="#f3f2ec" />;
 }
 
 export default function Meadow() {
