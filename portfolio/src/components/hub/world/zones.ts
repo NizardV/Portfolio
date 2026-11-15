@@ -3,7 +3,7 @@ import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
 import type { Sfx } from "./audio";
 import type { Emitter } from "./sounds";
-import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, meadowHeight } from "./terrain";
+import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, MEADOW_LIMIT, MEADOW_POI, SKY_WALL, meadowHeight } from "./terrain";
 import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
 import { back } from "./places/common";
 import { OFFICES_ENTRY, OFFICES_SPACE, OFFICES_SPAWN } from "./places/offices";
@@ -95,8 +95,9 @@ export type Zone = {
 
 const MEADOW_DOOR_Z = MEADOW_DOOR.z;
 export const MEADOW_DOOR_ID = "meadow-door";
-const MEADOW_LIMIT = 110; // invisible edge: the hills beyond it are scenery only
+export const MEADOW_RADIO = "meadow-radio";
 const MEADOW_EDGES = [
+  box(0, SKY_WALL.z + 0.6, MEADOW_LIMIT * 2, 1), // the sky wall
   box(0, -MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(0, MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(-MEADOW_LIMIT, 0, 1, MEADOW_LIMIT * 2),
@@ -160,11 +161,30 @@ export const ZONES: Record<ZoneId, Zone> = {
     description: "Des collines vertes à perte de vue, le vent dans l'herbe, quelques maisons. Dans l'une d'elles, une porte blanche.",
     // a little off-axis, facing the door 35 m away: it is the only landmark
     spawn: { x: 6, z: 22, yaw: -0.1 },
-    colliders: [...MEADOW_EDGES, ...MEADOW_DOOR_POSTS, ...MEADOW_WALLS],
+    colliders: [
+      ...MEADOW_EDGES,
+      ...MEADOW_DOOR_POSTS,
+      ...MEADOW_WALLS,
+      box(MEADOW_POI.swing.x, MEADOW_POI.swing.z, 1.1, 1.1),
+      box(MEADOW_POI.lamp.x, MEADOW_POI.lamp.z, 0.4, 0.4),
+      box(MEADOW_POI.bathtub.x, MEADOW_POI.bathtub.z, 1.7, 1.7),
+      ...Array.from({ length: Math.floor((MEADOW_POI.power.x1 - MEADOW_POI.power.x0) / MEADOW_POI.power.step) - 1 }, (_, k) => box(MEADOW_POI.power.x0 + k * MEADOW_POI.power.step, MEADOW_POI.power.z, 0.4, 0.4)),
+      box(MEADOW_POI.power.x1, MEADOW_POI.power.z, 0.4, 0.4),
+    ],
+    emitters: [
+      { kind: "radio", x: MEADOW_POI.picnic.x, z: MEADOW_POI.picnic.z, radius: 38, mute: MEADOW_RADIO },
+      { kind: "creak", x: MEADOW_POI.swing.x, z: MEADOW_POI.swing.z, radius: 30 },
+      { kind: "drip", x: MEADOW_POI.bathtub.x, z: MEADOW_POI.bathtub.z, radius: 14, level: 0.8 },
+      ...Array.from({ length: 6 }, (_, k) => ({ kind: "hum" as const, x: MEADOW_POI.power.x0 + 16 + k * MEADOW_POI.power.step, z: MEADOW_POI.power.z, radius: 14, level: 0.6 })),
+    ],
+    // near the sky wall, the wind stops
+    ambienceAt: (_x, z) => (z < SKY_WALL.z + 30 ? "quiet" : undefined),
     ground: meadowHeight,
     floor: "grass",
     interactables: [
       { id: MEADOW_DOOR_ID, x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, radius: 2.6, verb: "Ouvrir la porte", blocker: box(MEADOW_DOOR.x, MEADOW_DOOR_Z, 1.2, 0.12) },
+      { id: MEADOW_RADIO, x: MEADOW_POI.picnic.x - 0.3, z: MEADOW_POI.picnic.z - 0.5, radius: 1.8, verb: "Tourner le bouton", toggle: true, sfx: "switch" },
+      { id: "sky-wall-door", x: 12, z: SKY_WALL.z + 0.8, radius: 2, verb: "Ouvrir", locked: { name: "Porte de service", text: "Fermée de l'autre côté. Derrière, on entend du vent.", color: "#8d97a3" } },
     ],
     portals: [meadowLobby, fall("jeux", box(MEADOW_HOLE.x, MEADOW_HOLE.z, HOLE_REACH.inner * 2 + 0.6, HOLE_REACH.inner * 2 + 0.6), PLAY_SPAWN)],
     ambience: "wind",

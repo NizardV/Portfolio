@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { isIOS, isStandalone, type Quality, type Settings } from "./settings";
+import { CREDITS, MADE_HERE } from "./credits";
 import type { Lens } from "./CameraLens";
 import { ZONE_ORDER, ZONES, type ZoneId } from "./zones";
 
@@ -23,6 +24,7 @@ const TABS = [
   { id: "graphics", label: "Graphismes" },
   { id: "audio", label: "Audio" },
   { id: "controls", label: "Contrôles" },
+  { id: "credits", label: "Crédits" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -164,10 +166,27 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
               <Toggle label="Inverser l'axe vertical" checked={settings.invertY} onChange={(invertY) => onSettings({ invertY })} />
               <p className="mt-3 text-xs leading-relaxed text-white/50">
                 {touch
-                  ? "Joystick à gauche pour marcher (poussé à fond : courir), glisse à droite pour regarder."
-                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · E ou clic : utiliser · Tab ou Échap : ouvrir / fermer le menu."}
+                  ? "Joystick à gauche pour marcher (poussé à fond : courir), glisse à droite pour regarder, bouton ACCROUPI pour se baisser."
+                  : "Clique pour regarder autour · ZQSD / WASD ou flèches pour marcher · Maj pour courir · C : s'accroupir · E ou clic : utiliser · Tab ou Échap : ouvrir / fermer le menu."}
               </p>
             </>
+          )}
+          {tab === "credits" && (
+            <div className="space-y-3 text-xs leading-relaxed text-white/60">
+              <p>{MADE_HERE}</p>
+              {CREDITS.length > 0 && (
+                <ul className="space-y-2">
+                  {CREDITS.map((c) => (
+                    <li key={c.url}>
+                      <a href={c.url} target="_blank" rel="noreferrer" className="text-white/85 underline decoration-white/30 underline-offset-2 hover:decoration-white">
+                        {c.title}
+                      </a>{" "}
+                      — {c.author}, {c.licence} · {c.usedIn}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
 
