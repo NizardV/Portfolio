@@ -31,7 +31,7 @@ export const PLAY = {
   vent: { x: -44, z: -52 },
   pit: { x: 0, z: -45, w: 34, d: 26, round: 9 },
   carousel: { x: 0, z: -45, r: 2.4 },
-  clouds: { x: 33.5, z: -41.2, w: 7, d: 18.4 },
+  clouds: { x: 33.5, z: -41.7, w: 7, d: 18.4 }, // 60 cm of wall from the bedroom: only the little door leads there
   purple: { x: 34, z: -63, w: 24, d: 26, ceil: 10 },
   balcony: { x: 25, z: -62, w: 6, d: 24, h: 3 },
   slide: { z: -54, x0: 23.5, x1: 14.5 },
@@ -164,7 +164,7 @@ const shapes: Shape[] = [
   room(52, -72, 12.6, 3, { ceil: 3, mat: "stain", ...white, lights: 4, dead: 0.25 }), // route B: purple room -> white rooms
   room(58, -105, 3, 67, { ceil: 3, mat: "stain", ...white, lights: 4, dead: 0.3 }),
   { kind: "box", x: -46.5, z: P.vent.z, w: 6, d: 1.3, ceil: 1.1, mat: "concrete", wall: "concrete", ceilMat: "concrete", lights: 0 }, // the vent (crawl)
-  room(-50.3, -79, 2.4, 56, { ceil: 5.6, mat: "concrete", wall: "concrete", ceilMat: "concrete", lights: 6, dead: 0.5, floor: { ax: -50.3, az: -60, bx: -50.3, bz: -100, ha: 0, hb: G.lookout.h } }), // route C
+  room(-50.3, -79, 2.4, 56, { ceil: 5.6, mat: "concrete", wall: "concrete", ceilMat: "concrete", lights: 4, dead: 0.25, floor: { ax: -50.3, az: -60, bx: -50.3, bz: -100, ha: 0, hb: G.lookout.h } }), // route C (a panel every 4 m: at 6 m, half of them dead, it read as 50 m of black)
   room(G.mouth.x, G.mouth.z, G.mouth.w, G.mouth.d, { ceil: 3, mat: "lawn", ...white, lights: 0 }), // route A: the round hole
   room(20, -111.5, 7, 4, { ceil: 2.2, mat: "tile", wall: "tile", ceilMat: "tile", lights: 0 }), // low passage to the pool
   room(15.5, -163, 12, 4, { ceil: 2.8, mat: "stain", ...white, lights: 3 }), // garden -> white rooms
@@ -181,7 +181,7 @@ const shapes: Shape[] = [
   room(0, P.stage.z - P.stage.d / 2, BACKDROP.gate.w + 0.4, 0.8, { ceil: P.stage.ceil, mat: "lawn", ...sky }),
   room(0, -28.85, BACKDROP.gate.w + 0.4, 7.7, { ceil: BACKDROP.gate.h, mat: "wood", ...sky }), // through the gate to the pit
   room(P.bedroom.x, P.bedroom.z, P.bedroom.w, P.bedroom.d, { ceil: P.bedroom.ceil, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }),
-  { kind: "box", x: 33.5, z: -32.1, w: 1.1, d: 1.6, ceil: 1.1, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }, // the little door (crawl)
+  { kind: "box", x: 33.5, z: -32.35, w: 1.1, d: 2.1, ceil: 1.1, mat: "wood", wall: "wallpaper", ceilMat: "sky", lights: 0 }, // the little door (crawl), through that wall
   ...P.steps.map((s): Shape => ({ kind: "box", x: s.x, z: s.z, w: 1.6, d: 1.6, floor: s.h, ceil: P.bedroom.ceil, mat: "wood", wall: "plaster", ceilMat: "sky", rails: false, lights: 0 })),
   room(P.bed.x, P.bed.z, P.bed.w, P.bed.d, { floor: P.bed.top, ceil: P.bedroom.ceil, mat: "carpet", wall: "plaster", ceilMat: "sky", rails: false, lights: 0 }),
   room(P.blocks.x, P.blocks.z, P.blocks.w, P.blocks.d, { ceil: 7, mat: "lawn", ...sky }),
@@ -260,7 +260,7 @@ function props(): Solid[] {
     round(-3, P.tunnel.z + 6, 0.36),
     // the rotunda: its tree (leaves down to head height), the tiny houses and trees on the ring
     round(G.rotunda.x, G.rotunda.z, 1),
-    ...ROTUNDA_HOUSES.map((a) => round(...onRing(a, G.ring.r), 0.8, 1.9)), // 1.6 × 1.85 m: room to pass on both sides
+    ...ROTUNDA_HOUSES.map((a) => round(...onRing(a, G.ring.r), 0.9, 1.9)), // 1.6 × 1.85 m, eaves at head height: still ~1 m to pass on both sides
     ...ROTUNDA_TREES.map((a) => round(...onRing(a, G.ring.r + 0.6), 0.55)),
     // the garden: trees in planters, the bench; the phone's table; the lookout's bench
     ...GARDEN_PLANTERS.map((z) => box(G.garden.x + 5.5, z, 1.6, 1.6, 0.45)),
