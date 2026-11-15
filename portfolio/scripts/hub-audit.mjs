@@ -180,6 +180,23 @@ function audit(sp, spawn) {
  *   ceiling  nothing above under a roof, or a ceiling higher / lower than the plan's (open shapes: skipped)
  * On a seam, floors and ceilings overlap on purpose (see build.ts): any height between the two sides is fine there.
  */
+/** the floors and ceilings the plan has within r of (x, z): on a seam, any height between them is right */
+function heightsAround(sp, x, z, r) {
+  const out = { owners: new Set(), gLo: Infinity, gHi: -Infinity, cLo: Infinity, cHi: -Infinity, open: false };
+  for (const [dx, dz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, -r], [r, -r], [-r, r]]) {
+    const i = sp.ownerIndex(x + dx, z + dz);
+    if (i < 0) continue;
+    out.owners.add(i);
+    const g = sp.ground(x + dx, z + dz);
+    out.gLo = Math.min(out.gLo, g);
+    out.gHi = Math.max(out.gHi, g);
+    out.cLo = Math.min(out.cLo, sp.shapes[i].ceil);
+    out.cHi = Math.max(out.cHi, sp.shapes[i].ceil);
+    out.open ||= !!sp.shapes[i].open;
+  }
+  return out;
+}
+
 function vertical(sp, mesh, ray, found) {
   const TOL = 0.05;
   const STEP = 0.25;
@@ -196,22 +213,9 @@ function vertical(sp, mesh, ray, found) {
     e.n++;
     found[kind].set(k, e);
   };
-  const AROUND = [[0, 0], [R, 0], [-R, 0], [0, R], [0, -R], [R, R], [-R, -R], [R, -R], [-R, R]];
   const probe = (x, z) => {
     if (sp.dist(x, z) > -0.03) return;
-    const owners = new Set();
-    let gLo = Infinity, gHi = -Infinity, cLo = Infinity, cHi = -Infinity, open = false;
-    for (const [dx, dz] of AROUND) {
-      const i = sp.ownerIndex(x + dx, z + dz);
-      if (i < 0) continue;
-      owners.add(i);
-      const g = sp.ground(x + dx, z + dz);
-      gLo = Math.min(gLo, g);
-      gHi = Math.max(gHi, g);
-      cLo = Math.min(cLo, sp.shapes[i].ceil);
-      cHi = Math.max(cHi, sp.shapes[i].ceil);
-      open ||= !!sp.shapes[i].open;
-    }
+    const { owners, gLo, gHi, cLo, cHi, open } = heightsAround(sp, x, z, R);
     const i = sp.ownerIndex(x, z);
     if (i < 0) return;
     const at = `#${i}${sp.shapes[i].tag ? ` (${sp.shapes[i].tag})` : ""}${owners.size > 1 ? " seam" : ""}`;
