@@ -19,6 +19,8 @@ const STEP_RATE = { walk: 10, run: 14 }; // phase speed: one footstep per 2π
 const FOV = { walk: 70, run: 76 }; // running widens the view a little
 const FACING = Math.cos((55 * Math.PI) / 180); // an object counts as « in front » within ±55°
 const STEP_MAX = 0.45; // the highest step up or down you take without a ramp
+const CROUCH = { eye: 0.8, speed: 0.45 }; // crouched: eye this much lower, this share of the speed
+const HEADROOM = { stand: 1.9, crouch: 1.05 }; // the least room between floor and ceiling to stand, to crawl
 /** a doorway arms once you are this far before it, and fires when you reach its plane */
 const ARM = -0.4;
 
@@ -49,7 +51,7 @@ type Props = {
 export default function Player(props: Props) {
   const { zone, spawn, controls, paused, touch, sensitivity, invertY, bob, used, pose, onMove, onStep, onFocus, onPortal } = props;
   const camera = useThree((s) => s.camera) as PerspectiveCamera;
-  const me = useRef({ x: spawn.x, z: spawn.z, yaw: spawn.yaw, pitch: spawn.pitch ?? 0, phase: 0, bob: 0, moved: false, gone: false, focus: "" });
+  const me = useRef({ x: spawn.x, z: spawn.z, yaw: spawn.yaw, pitch: spawn.pitch ?? 0, phase: 0, bob: 0, crouch: 0, moved: false, gone: false, focus: "" });
   const armed = useRef(new Map<Portal, boolean>());
 
   // closed doors are walls until opened
@@ -58,6 +60,8 @@ export default function Player(props: Props) {
     [zone, used],
   );
   const ground = useMemo(() => zone.ground ?? (zone.space ? (x: number, z: number) => zone.space!.ground(x, z) : () => 0), [zone]);
+  const room = useMemo(() => (zone.space ? (x: number, z: number) => zone.space!.ceiling(x, z) - zone.space!.ground(x, z) : () => Infinity), [zone]);
+  const slowAt = useMemo(() => (zone.space ? (x: number, z: number) => zone.space!.slowAt(x, z) : () => 1), [zone]);
   const collide = useMemo(
     () => (x: number, z: number): [number, number] => {
       let p: [number, number] = zone.space ? zone.space.collide(x, z, RADIUS) : [x, z];
@@ -94,7 +98,11 @@ export default function Player(props: Props) {
     look.dx = look.dy = 0;
 
     const move = paused || s.gone ? { x: 0, z: 0, run: false } : readMove(controls);
-    const speed = (move.run ? RUN : WALK) * dt;
+    // crouching: wanted, or forced while there is no room to stand up
+    const down = controls.crouch || room(s.x, s.z) < HEADROOM.stand;
+    s.crouch = MathUtils.damp(s.crouch, down ? 1 : 0, 9, dt);
+    if (down) move.run = false;
+    const speed = (move.run ? RUN : WALK) * (1 - (1 - CROUCH.speed) * s.crouch) * slowAt(s.x, s.z) * dt;
     const sin = Math.sin(s.yaw);
     const cos = Math.cos(s.yaw);
     const mx = (-sin * move.z + cos * move.x) * speed;
@@ -102,7 +110,8 @@ export default function Player(props: Props) {
     if (mx || mz) {
       // slide along walls; refuse steps too high (or drops too deep) unless a ramp leads there
       const g0 = ground(s.x, s.z);
-      const ok = ([x, z]: [number, number]) => Math.abs(ground(x, z) - g0) < STEP_MAX;
+      const need = down ? HEADROOM.crouch : HEADROOM.stand;
+      const ok = ([x, z]: [number, number]) => Math.abs(ground(x, z) - g0) < STEP_MAX && room(x, z) >= need;
       const tries: [number, number][] = [collide(s.x + mx, s.z + mz), collide(s.x + mx, s.z), collide(s.x, s.z + mz)];
       const next = tries.find(ok);
       if (next) [s.x, s.z] = next;
@@ -153,7 +162,7 @@ export default function Player(props: Props) {
     s.bob = MathUtils.damp(s.bob, walking && bob ? (move.run ? 1.5 : 1) : 0, 6, dt);
     const sway = Math.sin(s.phase / 2) * SWAY * s.bob;
     const floor = ground(s.x, s.z);
-    camera.position.set(s.x + cos * sway, floor + EYE - Math.abs(Math.sin(s.phase / 2)) * BOB * s.bob, s.z - sin * sway);
+    camera.position.set(s.x + cos * sway, floor + EYE - CROUCH.eye * s.crouch - Math.abs(Math.sin(s.phase / 2)) * BOB * s.bob, s.z - sin * sway);
     camera.rotation.set(s.pitch, s.yaw, 0);
     const fov = MathUtils.damp(camera.fov, walking && move.run && bob ? FOV.run : FOV.walk, 4, dt);
     if (Math.abs(fov - camera.fov) > 0.01) {
@@ -165,7 +174,7 @@ export default function Player(props: Props) {
     // what can be used: close enough and roughly in front of us
     let focus: Interactable | null = null;
     for (const item of zone.interactables ?? []) {
-      if (used.has(item.id) && !item.locked) continue;
+      if (used.has(item.id) && !item.locked && !item.toggle) continue;
       const dx = item.x - s.x;
       const dz = item.z - s.z;
       const dist = Math.hypot(dx, dz);

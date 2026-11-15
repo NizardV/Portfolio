@@ -10,9 +10,11 @@ export type Controls = {
   joy: { x: number; y: number };
   /** look deltas in pixels, consumed (reset) by the player each frame */
   look: { dx: number; dy: number };
+  /** crouching wanted (C toggles it, or the button on phones); the player stays down under a low ceiling */
+  crouch: boolean;
 };
 
-export const createControls = (): Controls => ({ keys: new Set(), joy: { x: 0, y: 0 }, look: { dx: 0, dy: 0 } });
+export const createControls = (): Controls => ({ keys: new Set(), joy: { x: 0, y: 0 }, look: { dx: 0, dy: 0 }, crouch: false });
 
 // KeyboardEvent.code is the PHYSICAL key: "KeyW" is Z on AZERTY, so ZQSD and WASD both work.
 const FORWARD = ["KeyW", "ArrowUp"];
@@ -44,6 +46,10 @@ export function useKeyboard(c: Controls, enabled: boolean) {
       return;
     }
     const down = (e: KeyboardEvent) => {
+      if (e.code === "KeyC" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        c.crouch = !c.crouch;
+        return;
+      }
       if (!MOVE_KEYS.has(e.code) || e.ctrlKey || e.metaKey || e.altKey) return;
       c.keys.add(e.code);
       e.preventDefault(); // arrows would scroll

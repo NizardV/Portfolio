@@ -1,6 +1,8 @@
 import { box, type Box } from "./collision";
 import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
+import type { Sfx } from "./audio";
+import type { Emitter } from "./sounds";
 import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, meadowHeight } from "./terrain";
 import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
 import { back } from "./places/common";
@@ -54,6 +56,10 @@ export type Interactable = {
   blocker?: Box;
   /** a threshold that does not open yet: using it says what lies behind */
   locked?: { name: string; text: string; color: string };
+  /** can be used again and again: each use switches it (a lamp, a phone…); scenes read it from `used` */
+  toggle?: boolean;
+  /** the sound of using it (default: a door) */
+  sfx?: Sfx;
 };
 
 /** Post-processing mood of a place (see DreamFilter). */
@@ -71,6 +77,10 @@ export type Zone = {
   colliders?: readonly Box[];
   portals: readonly Portal[];
   ambience: AmbienceId;
+  /** a different ambience in some parts of the zone (crossfaded as you walk); falls back to `ambience` */
+  ambienceAt?: (x: number, z: number) => AmbienceId | undefined;
+  /** sounds placed in the zone, heard from nearby */
+  emitters?: Emitter[];
   /** ground height under the player (default: the space's floors, or 0) */
   ground?: (x: number, z: number) => number;
   /** footstep sound */
