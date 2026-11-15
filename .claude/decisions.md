@@ -15,3 +15,5 @@ Format : date · décision · pourquoi. Ajouter en bas, ne pas réécrire l'hist
 - **2026-11-05 · Porte Vigil en attente.** L'utilisateur reprend Vigil (l'outil ne lui convient pas tel quel) : ne pas construire la porte du hub sur la version actuelle.
 - **2026-11-08 · Refonte du hub en monde liminal à la première personne** (prairie dreamcore, hall d'hôtel, Poolrooms, centre commercial, bureaux Vigil, entrée Backrooms). Espaces grands et réalistes, les projets n'en occupent qu'une petite partie. Mobile : expérience complète allégée. Assets CC0 hébergés dans le site. Détails : Notion « Design — Hub liminal v2 ».
 - **2026-11-08 · Blindtest abandonné** (sa porte disparaît) ; **Infra intégrée à Vigil** (salles serveurs). La porte Vigil n'est plus en attente : le nouveau Vigil est en prod.
+
+- **2026-11-15 — Ressources 3D du hub** : CC0 de préférence ; CC-BY accepté avec crédit dans un onglet « Crédits » du menu Tab (pas d'écran de fin). Refus : NoAI, NC, ND, licences floues. Modèles sur mesure générés par scripts Blender (`portfolio/tools/blender/`).

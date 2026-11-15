@@ -5,6 +5,9 @@ description: Ajouter un lieu ou ouvrir une branche du hub secret (/hub, monde li
 
 # Ajouter un lieu / ouvrir une branche du hub
 
+> Pour concevoir ou retravailler le contenu d'une zone (plan, points d'intérêt, modèles Blender, vérification), suivre
+> le skill `hub-level-design`. Ce skill-ci couvre le branchement technique (zones, portails, portes de projet).
+
 1. Lire `.claude/specs/hub.md` (architecture, pièges) et la page Notion « Design — Hub liminal v2 » (parcours,
    direction artistique, étape suivante).
 2. **Nouveau lieu** (une PR par lieu) :
@@ -17,7 +20,7 @@ description: Ajouter un lieu ou ouvrir une branche du hub secret (/hub, monde li
    salle jaune (`PROJECT_DOORS`, 3 emplacements). **Ouvrir une branche** : retirer `locked` de son interactable et
    lui donner `blocker` + un portail `requires` vers le nouveau lieu.
 4. Contraintes :
-   - aucun asset réseau externe (CSP) : procédural, ou fichiers CC0 dans `public/` (crédits tenus à jour) ;
+   - aucun asset réseau externe (CSP) : procédural, fichiers CC0, ou CC-BY crédités (`credits.ts`, onglet Crédits) dans `public/` ;
    - three.js uniquement sur `/hub` ;
    - données live (Vigil, VPS) via une route publique agrégée côté Vigil, jamais de secret côté client ;
    - pas de texte flottant : texte seulement sur des objets du décor (plaques, écrans) ;
