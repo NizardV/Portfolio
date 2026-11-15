@@ -94,6 +94,10 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
 - `Atmosphere.tsx` pose fond + brouillard via `useThree` (marche aussi dans les scènes de portail ; un `<color attach>`
   dans un `<group>` laisse le ciel noir). Post-traitement par lieu (`Zone.post`) : bloom, teinte, contraste, grain,
   vignettage. **Pas d'AO** : N8AO plante avec three r172+, SSAO trop bruité. Réverbération par lieu (`Zone.reverb`).
+- **Draw calls** (budget 300 par vue, mesuré par `hub:tour`) : `Model.tsx` fusionne chaque modèle Blender par matériau au
+  chargement (une maison = ~100 morceaux → < 10) ; les nœuds animés restent à part (`node`, et `moving` pour ceux qu'il
+  porte, ex. les chevaux du manège). Feuillages des arbres (`Kit.tsx`) fusionnés par couleur. Ne pas multiplier les
+  petits `<mesh>` répétés : fusionner (`mergeGeometries`) ou instancier.
 - Pièges : ne jamais retirer une lumière (recompilation des shaders) : intensité 0. Pas de « faisceau » en boîte
   translucide : vu de près, il recouvre l'écran d'un triangle net, même très transparent.
 - Tests locaux : tuer tout `next start` resté sur le port 3100 avant de relancer (sinon chunks périmés, page blanche).
