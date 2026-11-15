@@ -245,6 +245,6 @@ for (const [name, { space, spawn }] of Object.entries(places)) {
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
   console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
   for (const kind of ["void", "phantom", "invisible", "floor", "ceiling"]) {
-    for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? undefined : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
+    for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
   }
 }

@@ -350,7 +350,8 @@ function planViews({ samples, flags }) {
     const dx = -Math.sin(yaw);
     const dz = -Math.cos(yaw);
     let t = 0;
-    while (t < 80 && (!sp || sp.dist(x + dx * t, z + dz * t) < 0)) t += 0.5;
+    if (!sp) return 80; // open place without a built space: no walls to stop the eye
+    while (t < 80 && sp.dist(x + dx * t, z + dz * t) < 0) t += 0.5;
     return t;
   };
   const near = (tx, tz, dMin, dMax) => {
