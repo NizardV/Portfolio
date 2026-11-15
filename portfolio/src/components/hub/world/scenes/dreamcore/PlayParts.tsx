@@ -6,7 +6,7 @@ import { Path, RepeatWrapping, Shape, ShapeGeometry, Vector2, type Mesh } from "
 import type { Piece } from "../../archi/build";
 import { Water } from "../../archi/Place";
 import Model from "../../Model";
-import { GARDENS, PLAY, PLAY_IDS, RAMP } from "../../places/playground";
+import { BACKSTAGE_CRATE, GARDEN_PLANTERS, GARDENS, PLAY, PLAY_IDS, RAMP, ROTUNDA_HOUSES, ROTUNDA_TREES } from "../../places/playground";
 import { HILLS_SPAWN } from "../../places/dreamcore";
 import { PreviewContext } from "../../PortalWindow";
 import { useWorldState } from "../../state";
@@ -224,8 +224,9 @@ export function Bedroom() {
   return (
     <>
       <Pieces pieces={frame} color="#f4f1ea" roughness={0.6} />
-      <mesh position={[bed.x, bed.top - 0.16, bed.z - 0.6]}>
-        <boxGeometry args={[bed.w + 0.02, 0.34, bed.d * 0.8]} />
+      {/* the blanket lies ON the mattress (the bed's top is walkable: 8 cm of soft cloth under your feet) */}
+      <mesh position={[bed.x, bed.top + 0.04, bed.z - 0.6]}>
+        <boxGeometry args={[bed.w + 0.02, 0.08, bed.d * 0.8]} />
         <meshStandardMaterial map={stripes} roughness={0.95} />
       </mesh>
       <mesh position={[bed.x, bed.top + 0.25, bed.z + bed.d / 2 - 1.1]} scale={[1, 0.38, 0.6]}>
@@ -473,18 +474,18 @@ export function Backstage() {
       p.push({ x, y: 0, z: z0 - 0.35, w: 0.12, h: 6.8, d: 0.12 });
       p.push({ x, y: 0, z: z0 - 1.6, w: 0.1, h: 0.1, d: 2.6, a: 0 });
     }
-    p.push({ x: -13.6, y: 0, z: -28.4, w: 0.9, h: 0.6, d: 0.7 }); // a crate under the TV
+    p.push({ x: BACKSTAGE_CRATE.x, y: 0, z: BACKSTAGE_CRATE.z, w: 0.9, h: 0.6, d: 0.7 }); // a crate under the TV
     return p;
   }, [backstage, z0]);
   return (
     <>
       <Pieces pieces={struts} color="#b98a5a" surfaceKey="wood" tile={1.2} />
       {/* the TV: a box with a screen that shows the meadow */}
-      <mesh position={[-13.6, 0.6 + 0.3, -28.4]}>
+      <mesh position={[BACKSTAGE_CRATE.x, 0.6 + 0.3, BACKSTAGE_CRATE.z]}>
         <boxGeometry args={[0.8, 0.6, 0.6]} />
         <meshStandardMaterial color="#3a3530" roughness={0.6} />
       </mesh>
-      <ViewWindow zone="meadow" x={-13.18} y={0.92} z={-28.4} ry={Math.PI / 2} w={0.5} h={0.38} from={{ x: 96, y: meadowHeight(96, -50), z: -50, yaw: -1.0 }} near={9} />
+      <ViewWindow zone="meadow" x={BACKSTAGE_CRATE.x + 0.42} y={0.92} z={BACKSTAGE_CRATE.z} ry={Math.PI / 2} w={0.5} h={0.38} from={{ x: 96, y: meadowHeight(96, -50), z: -50, yaw: -1.0 }} near={9} />
       <pointLight position={[-13, 1.2, -28]} intensity={3} distance={6} decay={1.5} color="#bfe0ff" />
       <pointLight position={[-8, 5.5, -27.5]} intensity={6} distance={12} decay={1.4} color="#ffe2b0" />
       {[-11, -4].map((x) => (
@@ -541,8 +542,8 @@ function RingRails() {
 export function Rotunda() {
   const { rotunda, ring } = G;
   const at = (deg: number, r = ring.r) => [rotunda.x + Math.sin((deg * Math.PI) / 180) * r, rotunda.z + Math.cos((deg * Math.PI) / 180) * r] as const;
-  const houses = [80, 140, 200, 265];
-  const trees = [110, 170, 235, 295];
+  const houses = ROTUNDA_HOUSES;
+  const trees = ROTUNDA_TREES;
   return (
     <>
       <mesh position={[rotunda.x, rotunda.ceil - 0.02, rotunda.z]} rotation={[Math.PI / 2, 0, 0]}>
@@ -580,7 +581,7 @@ export function Garden() {
     for (const y of [0.3, 0.75]) p.push({ x: fx + 0.04, y, z: (z0 + z1) / 2, w: 0.03, h: 0.07, d: z0 - z1 });
     return p;
   }, [garden.x, z0, z1, turbine.z]);
-  const planters = useMemo(() => [-142, -150, -166, -174].map((z) => ({ x: garden.x + 5.5, z })), [garden.x]);
+  const planters = useMemo(() => GARDEN_PLANTERS.map((z) => ({ x: garden.x + 5.5, z })), [garden.x]);
   const boxes = useMemo<Piece[]>(() => [
     ...planters.map((p) => ({ x: p.x, y: 0, z: p.z, w: 1.6, h: 0.45, d: 1.6 })),
     { x: x0 + 0.6, y: 0.42, z: -147, w: 0.5, h: 0.06, d: 1.8 },

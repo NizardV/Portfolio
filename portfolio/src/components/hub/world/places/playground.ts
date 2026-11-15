@@ -63,6 +63,12 @@ export const GARDENS = {
   hillsWindow: { x: -57, z: -113, w: 12, h: 4.6 },
 };
 
+/** where the scenes put things you bump into (drawn there, collided here: see props()) */
+export const BACKSTAGE_CRATE = { x: -13.6, z: -28.4 };
+export const ROTUNDA_HOUSES = [80, 140, 200, 265]; // degrees around the ring
+export const ROTUNDA_TREES = [110, 170, 235, 295];
+export const GARDEN_PLANTERS = [-142, -150, -166, -174]; // z, along the garden
+
 const sky = { wall: "sky", ceilMat: "sky", lights: 0 } as const;
 const white = { wall: "plaster", ceilMat: "plaster" } as const;
 const P = PLAY;
@@ -228,7 +234,61 @@ const solids: Solid[] = [
   // the lookout's big window: glass you cannot walk through
   { kind: "box", x: G.hillsWindow.x + 0.2, z: G.hillsWindow.z, w: 0.3, d: G.hillsWindow.w, ghost: true },
   ...partitions(),
+  ...props(),
 ];
+
+/**
+ * Collisions of the things the scenes draw (found walk-through by hub:tour): same places and sizes as in Playroom.tsx /
+ * PlayParts.tsx. A circle for a trunk with its low leaves, a box for furniture; h = how tall it looks.
+ */
+function props(): Solid[] {
+  const box = (x: number, z: number, w: number, d: number, h: number): Solid => ({ kind: "box", x, z, w, d, h, ghost: true });
+  const round = (x: number, z: number, r: number, h = 3): Solid => ({ kind: "circle", x, z, r, h, ghost: true });
+  const onRing = (deg: number, r: number): [number, number] => [G.rotunda.x + Math.sin((deg * Math.PI) / 180) * r, G.rotunda.z + Math.cos((deg * Math.PI) / 180) * r];
+  const out: Solid[] = [
+    // the stage: the toy bridge, the seesaw, the alphabet cubes, two cartoon trees
+    box(0, P.stage.z + 1.5, 1.4, 3, 0.52),
+    box(5, P.stage.z - 1, 3, 0.3, 0.5),
+    box(7.8, P.stage.z + 3, 1.5, 0.75, 1.47),
+    round(-10.5, P.stage.z - 4, 0.45),
+    round(11, P.stage.z - 6, 0.35),
+    // backstage: the crate and its TV, the struts behind the painted sky
+    box(BACKSTAGE_CRATE.x, BACKSTAGE_CRATE.z, 0.9, 0.7, 1.2),
+    // the bedroom's night light, the trees of the block corner and of the tunnel
+    round(P.nightlight.x, P.nightlight.z, 0.3, 0.6),
+    round(-36, -40, 0.4),
+    round(-3, P.tunnel.z + 6, 0.36),
+    // the rotunda: its tree (leaves down to head height), the tiny houses and trees on the ring
+    round(G.rotunda.x, G.rotunda.z, 1),
+    ...ROTUNDA_HOUSES.map((a) => round(...onRing(a, G.ring.r), 0.8, 1.9)), // 1.6 × 1.85 m: room to pass on both sides
+    ...ROTUNDA_TREES.map((a) => round(...onRing(a, G.ring.r + 0.6), 0.55)),
+    // the garden: trees in planters, the bench; the phone's table; the lookout's bench
+    ...GARDEN_PLANTERS.map((z) => box(G.garden.x + 5.5, z, 1.6, 1.6, 0.45)),
+    box(G.garden.x - G.garden.w / 2 + 0.5, -147, 0.6, 1.8, 0.98),
+    box(G.phone.x, G.phone.z, 0.8, 0.5, 0.8),
+    box(G.hillsWindow.x + 3.3, G.hillsWindow.z, 0.6, 2.4, 0.98),
+  ];
+  for (let x = P.backstage.x - P.backstage.w / 2 + 1; x < P.backstage.x + P.backstage.w / 2; x += 2.2) out.push(round(x, P.stage.z - P.stage.d / 2 - 0.35, 0.1, 6.8));
+  // the ring's railings, 8 cm in from its edges where RingRails draws them: you could walk through them to the edge
+  const { r: rr, width, from, to } = G.ring;
+  for (const r of [rr - width / 2 + 0.08, rr + width / 2 - 0.08]) {
+    const n = Math.ceil((((to - from) * Math.PI) / 180) * r / 2); // pieces of about 2 m
+    for (let k = 0; k < n; k++) {
+      const [x0, z0] = onRing(from + ((to - from) * k) / n, r);
+      const [x1, z1] = onRing(from + ((to - from) * (k + 1)) / n, r);
+      out.push({ kind: "capsule", ax: x0, az: z0, bx: x1, bz: z1, r: 0.06, h: 1, ghost: true });
+    }
+  }
+  // the ramp up to the ring: its railings (low end: you could step onto it from the side, through them)
+  const { ax, az, bx, bz, w } = RAMP;
+  const len = Math.hypot(bx - ax, bz - az);
+  const [nx, nz] = [-(bz - az) / len, (bx - ax) / len];
+  for (const s of [-1, 1]) {
+    const o = s * (w / 2 - 0.08); // where RingRails draws them
+    out.push({ kind: "capsule", ax: ax + nx * o, az: az + nz * o, bx: bx + nx * o, bz: bz + nz * o, r: 0.06, h: 1, ghost: true });
+  }
+  return out;
+}
 
 export const PLAY_SPACE = new Space(shapes, solids);
 export const playBuilt = lazyBuilt(PLAY_SPACE);

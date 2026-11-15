@@ -142,7 +142,8 @@ function SetPieces() {
   }, []);
   const toys = useMemo<Piece[]>(() => [
     { x: 0, y: 0.02, z: stage.z + 1.5, w: 1.4, h: 0.5, d: 3 }, // the bridge
-    { x: 5, y: 0.35, z: stage.z - 1, w: 3, h: 0.14, d: 0.25 }, // seesaw
+    { x: 5, y: 0.28, z: stage.z - 1, w: 3, h: 0.1, d: 0.25, tilt: 0.12 }, // seesaw, one end down
+    { x: 5, y: 0, z: stage.z - 1, w: 0.18, h: 0.3, d: 0.4 }, // and its pivot
   ], []);
   const cubes: [number, number, number, string][] = [[7.4, 0, stage.z + 3, "#e8c547"], [8.2, 0, stage.z + 3, "#e53b3b"], [7.8, 0.75, stage.z + 3, "#2c6fd6"]];
   return (
