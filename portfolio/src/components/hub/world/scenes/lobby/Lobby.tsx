@@ -187,15 +187,21 @@ function Glitch({ w, h, color }: { w: number; h: number; color: string }) {
   );
 }
 
-function Plate({ text, color, at }: { text: string; color: string; at: [number, number, number] }) {
+function Plate({ text, color, at }: Readonly<{ text: string; color: string; at: [number, number, number] }>) {
   const map = usePlateTexture(text, color);
+  const placed = { position: at };
   return (
-    <mesh position={at}>
+    <mesh {...placed}>
       <planeGeometry args={[0.8, 0.2]} />
       <meshBasicMaterial map={map} toneMapped={false} />
     </mesh>
   );
 }
+
+/** the shop's glass doors: tinted, see-through (they used to read as white slabs) */
+const SHOP_GLASS = { color: "#8fb0bf", transparent: true, opacity: 0.16, roughness: 0.05, metalness: 0.3, depthWrite: false } as const;
+/** the light of a threshold, a hint of the place behind */
+const WELCOME_LIGHT = { intensity: 1.4, distance: 6, decay: 1.6 } as const;
 
 /**
  * Where a threshold's sign can be seen, in the threshold's own frame (+z into the Lobby): on the front of the low box
@@ -259,7 +265,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.5), h / 2, 0.05]}>
               <boxGeometry args={[0.98, h, 0.03]} />
-              <meshStandardMaterial color="#8fb0bf" transparent opacity={0.16} roughness={0.05} metalness={0.3} depthWrite={false} />
+              <meshStandardMaterial {...SHOP_GLASS} />
             </mesh>
           ))}
         </>
@@ -284,7 +290,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
       )}
       {kind === "secret" && <Frame w={w} h={h} color="#3a3320" />}
       {/* a hint of the place behind, on the Lobby side (it used to shine beyond the door) */}
-      {kind !== "sealed" && kind !== "secret" && <pointLight position={[0, h * 0.8, 0.8]} intensity={1.4} distance={6} decay={1.6} color={color} />}
+      {kind !== "sealed" && kind !== "secret" && <pointLight position={[0, h * 0.8, 0.8]} {...WELCOME_LIGHT} color={color} />}
     </group>
   );
 }
