@@ -69,11 +69,11 @@ function flatten(root: Object3D, keep: ReadonlySet<string>): Group {
 
 /** merge geometries even when some are indexed and some not, or carry an extra attribute the others lack */
 function mergeAll(geos: BufferGeometry[]): BufferGeometry | null {
-  const common = Object.keys(geos[0].attributes).filter((k) => geos.every((g) => k in g.attributes));
+  const common = new Set(Object.keys(geos[0].attributes).filter((k) => geos.every((g) => k in g.attributes)));
   const indexed = geos.every((g) => g.index);
   const ready = geos.map((g) => {
-    const h = indexed ? g : g.index ? g.toNonIndexed() : g;
-    for (const k of Object.keys(h.attributes)) if (!common.includes(k)) h.deleteAttribute(k);
+    const h = !indexed && g.index ? g.toNonIndexed() : g;
+    for (const k of Object.keys(h.attributes)) if (!common.has(k)) h.deleteAttribute(k);
     h.morphAttributes = {};
     return h;
   });
@@ -81,11 +81,17 @@ function mergeAll(geos: BufferGeometry[]): BufferGeometry | null {
 }
 
 function flat(scene: Object3D, keep: readonly string[]): Group {
-  const key = [...keep].sort().join(",");
+  const key = [...keep].sort((a, b) => a.localeCompare(b)).join(",");
   let byKeep = flattened.get(scene);
-  if (!byKeep) flattened.set(scene, (byKeep = new Map()));
+  if (!byKeep) {
+    byKeep = new Map();
+    flattened.set(scene, byKeep);
+  }
   let g = byKeep.get(key);
-  if (!g) byKeep.set(key, (g = flatten(scene, new Set(keep))));
+  if (!g) {
+    g = flatten(scene, new Set(keep));
+    byKeep.set(key, g);
+  }
   return g;
 }
 
@@ -104,7 +110,7 @@ type Props = {
 };
 
 /** One placed copy of a model (copies share the merged geometry and the materials, unless tinted). */
-export default function Model({ id, position, rotation, scale, tint, animate, node, moving }: Props) {
+export default function Model({ id, position, rotation, scale, tint, animate, node, moving }: Readonly<Props>) {
   const { scene } = useGLTF(MODELS[id], false, false);
   const copy = useMemo(() => {
     const c = flat(scene, [...(node ? [node] : []), ...(moving ?? [])]).clone(true);
