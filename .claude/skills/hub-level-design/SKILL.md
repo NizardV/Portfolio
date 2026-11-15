@@ -58,6 +58,10 @@ ressource chargée depuis un domaine externe (CSP).
 - Plan : `components/hub/world/places/<zone>.ts` avec le kit `archi/` (voir le spec). Règles :
   ≥ 0,3 m de recouvrement entre formes qui se touchent ; solides = collision exacte ; `ghost` pour les collisions
   d'objets dessinés par la scène ; `ceilMat` pour un plafond différent du sol.
+- **Tout objet qu'on peut heurter a sa collision** dès sa création : un solide `ghost` (cercle pour un tronc et ses
+  feuilles basses, boîte pour un meuble, capsule pour un garde-corps), positions partagées entre plan et scène (ex.
+  `props()` et les constantes exportées de `places/playground.ts`). Garder ≥ 1 m de passage (joueur : 70 cm de
+  diamètre). `hub:tour` signale les objets traversables restants.
 - Scène : `scenes/<zone>/` ; modèles via `useGLTF(url, "/draco/")` (décodeur servi localement depuis `public/draco/`),
   préchargés avec `PREPARE` (`scenes/index.ts`).
 - Son : nouvelle ambiance dans `audio.ts` si besoin, **et** changement d'ambiance par sous-zone.
