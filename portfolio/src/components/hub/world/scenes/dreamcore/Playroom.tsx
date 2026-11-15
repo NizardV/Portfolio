@@ -1,25 +1,28 @@
 "use client";
-import { memo, use, useMemo } from "react";
-import { BackSide, Path, Shape, ShapeGeometry, Vector2 } from "three";
+import { memo, use, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { BackSide, Path, Shape, ShapeGeometry, Vector2, Vector3, type Group } from "three";
 import type { Palette } from "../../archi/Architecture";
 import type { Piece } from "../../archi/build";
 import { Place } from "../../archi/Place";
-import { BACKDROP, PLAY, playBuilt } from "../../places/dreamcore";
+import { BACKDROP, GARDENS, PLAY, playBuilt } from "../../places/playground";
 import { usePreview } from "../../PortalWindow";
 import { Pieces, useCanvas } from "../props";
-import { BallPit, Bed, Bench, Garden, Hall, PurpleRoom, StageExtras, Tunnel } from "./PlayParts";
+import { CartoonTree, HangingCloud, Sign } from "./Kit";
+import { Backstage, BallPit, Bedroom, BlockCorner, CalmPool, CloudCorridor, Garden, Lookout, PurpleRoom, Rotunda, Tunnel, WhiteRooms } from "./PlayParts";
 
 const PALETTE: Palette = {
   surfaces: {
     sky: "#7f9fd6", "ceil:sky": "#4a64a0", wallpaper: "#a9cdea", lawn: "#e6f2dc", wood: "#d2a874",
     void: "#1d1d22", carpet: "#4b3c7c", panel: "#5a46a0", "ceil:concrete": "#241c40", plaster: "#f4f1ea", "ceil:plaster": "#fbf9f3",
+    stain: "#dcd8cf", tile: "#e8eef0", concrete: "#9a9a96", "floor:concrete": "#7a7a76",
   },
   trim: "#e9e4d8",
   rail: "#ffffff",
   panel: "#fff8ea",
   light: "#fff1dc",
-  intensity: 16,
-  range: 18,
+  intensity: 11,
+  range: 16,
 };
 const AIR = "#0c1124";
 const { stage } = PLAY;
@@ -56,8 +59,8 @@ function Backdrop() {
     ctx.beginPath();
     ctx.arc(0, 0, 74, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#2a1a0c";
-    for (const x of [-26, 26]) { ctx.beginPath(); ctx.ellipse(x, -14, 9, 13, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = "#fff8e8";
+    for (const x of [-26, 26]) { ctx.beginPath(); ctx.ellipse(x, -14, 12, 16, 0, 0, Math.PI * 2); ctx.fill(); }
     ctx.beginPath();
     ctx.arc(0, 12, 40, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.lineWidth = 8;
@@ -72,6 +75,9 @@ function Backdrop() {
     const { w, h } = BACKDROP.gate;
     const outline = new Shape([new Vector2(-W / 2, 0), new Vector2(W / 2, 0), new Vector2(W / 2, H), new Vector2(-W / 2, H)]);
     outline.holes.push(new Path([new Vector2(-w / 2, 0.001), new Vector2(-w / 2, h), new Vector2(w / 2, h), new Vector2(w / 2, 0.001)]));
+    // the slit at the left end, where the painted cloth does not quite meet the wall
+    const { x: sx, w: sw, h: sh } = BACKDROP.slit;
+    outline.holes.push(new Path([new Vector2(sx - sw / 2, 0.001), new Vector2(sx - sw / 2, sh), new Vector2(sx + sw / 2, sh), new Vector2(sx + sw / 2, 0.001)]));
     const g = new ShapeGeometry(outline);
     const pos = g.attributes.position;
     const uv = g.attributes.uv;
@@ -90,6 +96,36 @@ function Backdrop() {
         <planeGeometry args={[3, 3]} />
         <meshStandardMaterial map={sun} transparent roughness={0.8} />
       </mesh>
+      <SunEyes z={z + 0.17} />
+    </>
+  );
+}
+
+const EYE = new Vector3();
+/** The sun's pupils follow you around the stage, slowly. */
+function SunEyes({ z }: { z: number }) {
+  const eyes = useRef<(Group | null)[]>([]);
+  useFrame(({ camera }, dt) => {
+    eyes.current.forEach((g, k) => {
+      if (!g) return;
+      const cx = (k ? 1 : -1) * 0.3;
+      EYE.set(camera.position.x - cx, camera.position.y - 5.76, camera.position.z - z).normalize();
+      const tx = Math.max(-0.05, Math.min(0.05, EYE.x * 0.08));
+      const ty = Math.max(-0.07, Math.min(0.05, EYE.y * 0.08));
+      g.position.x += (cx + tx - g.position.x) * Math.min(1, dt * 1.5);
+      g.position.y += (5.76 + ty - g.position.y) * Math.min(1, dt * 1.5);
+    });
+  });
+  return (
+    <>
+      {[0, 1].map((k) => (
+        <group key={k} ref={(g) => { eyes.current[k] = g; }} position={[(k ? 1 : -1) * 0.3, 5.76, z]}>
+          <mesh scale={[1, 1.4, 1]}>
+            <circleGeometry args={[0.065, 16]} />
+            <meshBasicMaterial color="#2a1a0c" />
+          </mesh>
+        </group>
+      ))}
     </>
   );
 }
@@ -99,8 +135,8 @@ function SetPieces() {
   const fence = useMemo(() => {
     const p: Piece[] = [];
     const gap = BACKDROP.gate.w / 2;
-    for (let x = -stage.w / 2 + 0.6; x < stage.w / 2 - 0.4; x += 0.38) if (Math.abs(x) > gap) p.push({ x, y: 0, z: BACKDROP.fence, w: 0.08, h: 0.95, d: 0.05 });
-    const rail = (stage.w - 1) / 2 - gap;
+    for (let x = -12.5; x < 12.5; x += 0.38) if (Math.abs(x) > gap) p.push({ x, y: 0, z: BACKDROP.fence, w: 0.08, h: 0.95, d: 0.05 });
+    const rail = 12.5 - gap;
     for (const s of [-1, 1]) p.push({ x: s * (gap + rail / 2), y: 0.6, z: BACKDROP.fence - 0.02, w: rail, h: 0.08, d: 0.04 });
     return p;
   }, []);
@@ -134,6 +170,27 @@ function SetPieces() {
   );
 }
 
+/** Wooden palisades, trees and signs on the stage, like the corners of a play set. */
+function StageExtras() {
+  const palisade = useMemo<Piece[]>(() => {
+    const p: Piece[] = [];
+    for (let k = 0; k < 7; k++) p.push({ x: -9.5 + k * 0.18, y: 0, z: stage.z + 3.5 + Math.sin(k) * 0.05, w: 0.16, h: 1.9 + (k % 2) * 0.1, d: 0.06, a: 0.4 });
+    for (let k = 0; k < 6; k++) p.push({ x: -8.2 + k * 0.17, y: 0, z: stage.z + 2.6, w: 0.15, h: 1.8, d: 0.06, a: -0.5 });
+    return p;
+  }, []);
+  return (
+    <>
+      <Pieces pieces={palisade} color="#b98a5a" surfaceKey="wood" tile={1.2} />
+      <CartoonTree x={-10.5} z={stage.z - 4} seed={2} />
+      <CartoonTree x={11} z={stage.z - 6} s={0.75} seed={8} />
+      <Sign x={-4.5} z={stage.z + 6} ry={0.3} tilt={0.05} lines={["HILL", "BLOCKS", "VIEW"]} />
+      <Sign x={-12.5} z={stage.z + 1} ry={0.9} tilt={-0.1} lines={["SCENIC", "ROUTE"]} scale={0.8} />
+      <HangingCloud x={-5} y={5.6} z={stage.z + 2} top={stage.ceil} ry={0.2} />
+      <HangingCloud x={5.5} y={5.2} z={stage.z + 4} top={stage.ceil} ry={-0.3} s={0.8} />
+    </>
+  );
+}
+
 function Playroom() {
   const built = use(playBuilt(!usePreview())); // urgent when standing in it, not through a doorway
   return (
@@ -141,16 +198,21 @@ function Playroom() {
       <Backdrop />
       <SetPieces />
       <StageExtras />
+      <Backstage />
       <BallPit />
-      <Bed />
-      <Bench />
+      <Bedroom />
+      <BlockCorner />
+      <CloudCorridor />
       <PurpleRoom />
       <Tunnel />
-      <Hall />
+      <Rotunda />
       <Garden />
+      <CalmPool />
+      <WhiteRooms />
+      <Lookout />
       {/* the rabbit hole: a perfectly black circle in the green room's floor */}
-      <mesh position={[PLAY.hole.x, -0.33, PLAY.hole.z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[PLAY.hole.r - 0.05, 40]} />
+      <mesh position={[GARDENS.hole.x, -0.33, GARDENS.hole.z]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[GARDENS.hole.r - 0.05, 40]} />
         <meshBasicMaterial color="#000000" />
       </mesh>
     </Place>

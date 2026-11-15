@@ -62,6 +62,7 @@ export default function Player(props: Props) {
   const ground = useMemo(() => zone.ground ?? (zone.space ? (x: number, z: number) => zone.space!.ground(x, z) : () => 0), [zone]);
   const room = useMemo(() => (zone.space ? (x: number, z: number) => zone.space!.ceiling(x, z) - zone.space!.ground(x, z) : () => Infinity), [zone]);
   const slowAt = useMemo(() => (zone.space ? (x: number, z: number) => zone.space!.slowAt(x, z) : () => 1), [zone]);
+  const dropAt = useMemo(() => (zone.space ? (x: number, z: number) => zone.space!.dropAt(x, z) : () => false), [zone]);
   const collide = useMemo(
     () => (x: number, z: number): [number, number] => {
       let p: [number, number] = zone.space ? zone.space.collide(x, z, RADIUS) : [x, z];
@@ -111,7 +112,11 @@ export default function Player(props: Props) {
       // slide along walls; refuse steps too high (or drops too deep) unless a ramp leads there
       const g0 = ground(s.x, s.z);
       const need = down ? HEADROOM.crouch : HEADROOM.stand;
-      const ok = ([x, z]: [number, number]) => Math.abs(ground(x, z) - g0) < STEP_MAX && room(x, z) >= need;
+      const ok = ([x, z]: [number, number]) => {
+        const g = ground(x, z);
+        const step = Math.abs(g - g0) < STEP_MAX || (g < g0 && dropAt(x, z));
+        return step && room(x, z) >= need;
+      };
       const tries: [number, number][] = [collide(s.x + mx, s.z + mz), collide(s.x + mx, s.z), collide(s.x, s.z + mz)];
       const next = tries.find(ok);
       if (next) [s.x, s.z] = next;

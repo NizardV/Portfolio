@@ -12,7 +12,8 @@ import { CANALS_CRACK, CANALS_ENTRY, CANALS_SPACE, CANALS_SPAWN, CANALS_UP } fro
 import { CITY_BACK, CITY_ENTRY, CITY_SPACE, CITY_SPAWN } from "./places/redcity";
 import { MALL_ENTRY, MALL_SPACE, MALL_SPAWN } from "./places/mall";
 import { HOTEL_ENTRY, HOTEL_SPACE, HOTEL_SPAWN } from "./places/hotel";
-import { HILLS_FALL, HILLS_SPACE, HILLS_SPAWN, PLAY_FALL, PLAY_SPACE, PLAY_SPAWN, SUBURB_FALL, SUBURB_SPACE, SUBURB_SPAWN } from "./places/dreamcore";
+import { HILLS_FALL, HILLS_SPACE, HILLS_SPAWN, SUBURB_FALL, SUBURB_SPACE, SUBURB_SPAWN } from "./places/dreamcore";
+import { GARDENS, PLAY, PLAY_FALL, PLAY_IDS, PLAY_SPACE, PLAY_SPAWN, playAmbience } from "./places/playground";
 
 /**
  * The world's map: each zone is a separate scene loaded on demand (see scenes/index.ts).
@@ -283,6 +284,19 @@ export const ZONES: Record<ZoneId, Zone> = {
     space: PLAY_SPACE,
     portals: [fall("collines", PLAY_FALL, HILLS_SPAWN)],
     ambience: "nursery",
+    ambienceAt: playAmbience,
+    interactables: [
+      { id: PLAY_IDS.nightlight, x: PLAY.nightlight.x, z: PLAY.nightlight.z, radius: 1.8, verb: "Allumer la veilleuse", toggle: true, sfx: "switch" },
+      { id: PLAY_IDS.phone, x: GARDENS.phone.x, z: GARDENS.phone.z, radius: 1.6, verb: "Décrocher", sfx: "pickup" },
+    ],
+    emitters: [
+      { kind: "musicbox", x: PLAY.carousel.x, z: PLAY.carousel.z, radius: 48 },
+      { kind: "clock", x: PLAY.table.x, z: PLAY.table.z, radius: 24, level: 0.7 },
+      { kind: "lullaby", x: PLAY.nightlight.x, z: PLAY.nightlight.z, radius: 20, needs: PLAY_IDS.nightlight },
+      { kind: "tv", x: -13.6, z: -28.4, radius: 9, level: 0.7 },
+      { kind: "lapping", x: GARDENS.basin.x, z: GARDENS.basin.z, radius: 22 },
+      { kind: "phone", x: GARDENS.phone.x, z: GARDENS.phone.z, radius: 34, mute: PLAY_IDS.phone },
+    ],
     floor: "grass",
     reverb: 0.5,
     post: { ...indoor, saturation: 0.05, bloom: 1 },

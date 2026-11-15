@@ -38,6 +38,10 @@ export type Shape = Geom & {
   open?: boolean;
   /** walking speed here, as a share of normal (a ball pit: 0.45) */
   slow?: number;
+  /** no railing on its edges, even above a drop (a bed, a giant toy block: furniture, not a balcony) */
+  rails?: false;
+  /** you may step down into it from any height (the end of a slide): the way back up stays closed */
+  drop?: true;
 };
 
 /** something standing in the space: a pillar, a partition, a house in a hangar. h = its height (default: up to the ceiling) */
@@ -202,6 +206,12 @@ export class Space {
   ground(x: number, z: number): number {
     const i = this.ownerIndex(x, z);
     return i < 0 ? 0 : floorAt(this.shapes[i].floor, x, z);
+  }
+
+  /** stepping down into here is allowed from any height */
+  dropAt(x: number, z: number): boolean {
+    const i = this.ownerIndex(x, z);
+    return i >= 0 && this.shapes[i].drop === true;
   }
 
   slowAt(x: number, z: number): number {
