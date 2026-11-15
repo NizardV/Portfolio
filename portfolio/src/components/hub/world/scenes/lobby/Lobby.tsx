@@ -6,7 +6,7 @@ import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, lobbyBuilt, WELL, type Exit } from "../../lobby";
+import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, WELL, type Exit } from "../../lobby";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
 
@@ -187,21 +187,39 @@ function Glitch({ w, h, color }: { w: number; h: number; color: string }) {
   );
 }
 
-function Plate({ text, color, y }: { text: string; color: string; y: number }) {
+function Plate({ text, color, at }: { text: string; color: string; at: [number, number, number] }) {
   const map = usePlateTexture(text, color);
   return (
-    <mesh position={[0, y, 0.04]}>
+    <mesh position={at}>
       <planeGeometry args={[0.8, 0.2]} />
       <meshBasicMaterial map={map} toneMapped={false} />
     </mesh>
   );
 }
 
+/**
+ * Where a threshold's sign can be seen, in the threshold's own frame (+z into the Lobby): on the front of the low box
+ * the landing makes over the doorway, centred in it; where that box is too thin for it (the hotel), beside the door at
+ * eye height. (Signs used to sit above the landing's ceiling, inside that box: nobody ever saw them.)
+ */
+function signSpot(exit: Exit): [number, number, number] {
+  const { anchor, size } = exit;
+  const fx = -Math.sin(anchor.yaw);
+  const fz = -Math.cos(anchor.yaw);
+  const ceil = (d: number) => LOBBY_SPACE.ceiling(anchor.x - fx * d, anchor.z - fz * d);
+  const low = ceil(0.1);
+  for (let d = 0.1; d < 2; d += 0.02) {
+    const high = ceil(d);
+    if (high > low + 0.35) return [0, (low + high) / 2 - anchor.y, d - 0.06 + 0.015];
+  }
+  return [size[0] / 2 + 0.55, 1.7, 0.04];
+}
+
 /** The thresholds of the branches. Open ones are only a frame: the place behind is seen through them, live. */
 function ExitThreshold({ exit }: { exit: Exit }) {
   const { kind, color, anchor, size } = exit;
   const [w, h] = size;
-  const a = anchor.yaw + Math.PI; // the frame faces into the Lobby
+  const a = anchor.yaw; // +z faces into the Lobby (the side you come from: walking through goes along -z)
   const fx = -Math.sin(anchor.yaw);
   const fz = -Math.cos(anchor.yaw);
   return (
@@ -226,7 +244,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
       {kind === "elevator" && (
         <>
           <Frame w={w} h={h} color="#6e757b" />
-          <Plate text="▲  BUREAUX" color={color} y={h + 0.3} />
+          <Plate text="▲  BUREAUX" color={color} at={signSpot(exit)} />
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.55), h / 2, 0.02]}>
               <boxGeometry args={[0.84, h, 0.05]} />
@@ -241,7 +259,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.5), h / 2, 0.05]}>
               <boxGeometry args={[0.98, h, 0.03]} />
-              <meshStandardMaterial color="#d8e4ec" transparent opacity={0.25} roughness={0.1} />
+              <meshStandardMaterial color="#8fb0bf" transparent opacity={0.16} roughness={0.05} metalness={0.3} depthWrite={false} />
             </mesh>
           ))}
         </>
@@ -249,7 +267,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
       {kind === "velvet" && (
         <>
           <Frame w={w} h={h} color="#5a3220" />
-          <Plate text="HÔTEL  ↑" color="#f2c9a0" y={h + 0.35} />
+          <Plate text="HÔTEL  ↑" color="#f2c9a0" at={signSpot(exit)} />
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.4), 0.5, 0.5]}>
               <cylinderGeometry args={[0.05, 0.08, 1, 12]} />
@@ -261,11 +279,12 @@ function ExitThreshold({ exit }: { exit: Exit }) {
       {kind === "service" && (
         <>
           <Frame w={w} h={h} color="#55585a" />
-          <Plate text="SERVICE" color="#c9ccc4" y={h + 0.25} />
+          <Plate text="SERVICE" color="#c9ccc4" at={signSpot(exit)} />
         </>
       )}
       {kind === "secret" && <Frame w={w} h={h} color="#3a3320" />}
-      {kind !== "sealed" && kind !== "secret" && <pointLight position={[0, h * 0.8, 1]} intensity={3} distance={8} decay={1.6} color={color} />}
+      {/* a hint of the place behind, on the Lobby side (it used to shine beyond the door) */}
+      {kind !== "sealed" && kind !== "secret" && <pointLight position={[0, h * 0.8, 0.8]} intensity={1.4} distance={6} decay={1.6} color={color} />}
     </group>
   );
 }
