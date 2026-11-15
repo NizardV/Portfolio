@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Color, DoubleSide, InstancedMesh, MeshStandardMaterial, Object3D, SphereGeometry, type Group } from "three";
+import { Color, DoubleSide, IcosahedronGeometry, InstancedMesh, MeshStandardMaterial, Object3D, SphereGeometry, type BufferGeometry, type Group } from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Piece } from "../../archi/build";
 import { Pieces, seeded, useCanvas } from "../props";
 
@@ -39,22 +40,47 @@ export function Sign({ x, y = 0, z, ry = 0, tilt = 0.06, lines, scale = 1 }: { x
   );
 }
 
+type Blob = { x: number; y: number; z: number; r: number };
+
+/**
+ * Leaves merged by colour: one draw call per colour, not one per blob (a tree was 7 to 15 draw calls, the playroom ~150
+ * for its foliage alone: found by hub:tour).
+ */
+function useLeaves(blobs: Blob[], detail: number, colourOf: (k: number) => string) {
+  const leaves = useMemo(() => {
+    const byColour = new Map<string, BufferGeometry[]>();
+    blobs.forEach((b, k) => {
+      const g = new IcosahedronGeometry(b.r, detail).translate(b.x, b.y, b.z);
+      byColour.set(colourOf(k), [...(byColour.get(colourOf(k)) ?? []), g]);
+    });
+    return [...byColour].map(([colour, parts]) => {
+      const geometry = mergeGeometries(parts);
+      parts.forEach((g) => g.dispose());
+      return { colour, geometry };
+    });
+  }, [blobs, detail, colourOf]);
+  useEffect(() => () => leaves.forEach((l) => l.geometry.dispose()), [leaves]);
+  return leaves;
+}
+const cartoonLeaf = (k: number) => (k % 2 ? "#2f8a2c" : "#3a9a33");
+const treeLeaf = (k: number) => (k % 3 ? "#3f6e2a" : "#557f33");
+
 /** A cartoon tree: a bent trunk and a few big soft blobs of leaves (flat shaded, like a set piece). */
 export function CartoonTree({ x, y = 0, z, s = 1, seed = 1 }: { x: number; y?: number; z: number; s?: number; seed?: number }) {
   const blobs = useMemo(() => {
     const r = seeded(seed);
     return Array.from({ length: 6 }, () => ({ x: (r() - 0.5) * 2.2, y: 3.4 + r() * 1.2, z: (r() - 0.5) * 1.8, r: 0.9 + r() * 0.6 }));
   }, [seed]);
+  const leaves = useLeaves(blobs, 1, cartoonLeaf);
   return (
     <group position={[x, y, z]} scale={s}>
       <mesh position={[0, 1.6, 0]} rotation={[0, 0, 0.08]}>
         <cylinderGeometry args={[0.22, 0.42, 3.2, 9]} />
         <meshStandardMaterial color="#7a4e2c" roughness={0.9} flatShading />
       </mesh>
-      {blobs.map((b, k) => (
-        <mesh key={k} position={[b.x, b.y, b.z]}>
-          <icosahedronGeometry args={[b.r, 1]} />
-          <meshStandardMaterial color={k % 2 ? "#2f8a2c" : "#3a9a33"} roughness={0.8} flatShading />
+      {leaves.map((l) => (
+        <mesh key={l.colour} geometry={l.geometry}>
+          <meshStandardMaterial color={l.colour} roughness={0.8} flatShading />
         </mesh>
       ))}
     </group>
@@ -63,7 +89,7 @@ export function CartoonTree({ x, y = 0, z, s = 1, seed = 1 }: { x: number; y?: n
 
 /** A real-looking little tree (for the peaceful zone): a slim trunk and clusters of small leaves. */
 export function Tree({ x, y = 0, z, s = 1, seed = 3 }: { x: number; y?: number; z: number; s?: number; seed?: number }) {
-  const leaves = useMemo(() => {
+  const blobs = useMemo(() => {
     const r = seeded(seed);
     return Array.from({ length: 14 }, () => {
       const a = r() * Math.PI * 2;
@@ -72,16 +98,16 @@ export function Tree({ x, y = 0, z, s = 1, seed = 3 }: { x: number; y?: number; 
       return { x: Math.cos(a) * d, y: h, z: Math.sin(a) * d, r: 0.35 + r() * 0.3 };
     });
   }, [seed]);
+  const leaves = useLeaves(blobs, 0, treeLeaf);
   return (
     <group position={[x, y, z]} scale={s}>
       <mesh position={[0, 1.4, 0]}>
         <cylinderGeometry args={[0.06, 0.1, 2.8, 7]} />
         <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
       </mesh>
-      {leaves.map((l, k) => (
-        <mesh key={k} position={[l.x, l.y, l.z]}>
-          <icosahedronGeometry args={[l.r, 0]} />
-          <meshStandardMaterial color={k % 3 ? "#3f6e2a" : "#557f33"} roughness={0.85} flatShading />
+      {leaves.map((l) => (
+        <mesh key={l.colour} geometry={l.geometry}>
+          <meshStandardMaterial color={l.colour} roughness={0.85} flatShading />
         </mesh>
       ))}
     </group>

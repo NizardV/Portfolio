@@ -17,6 +17,9 @@ import { Pieces, seeded, useCanvas } from "../props";
 import { Balls, CartoonTree, HangingCloud, Sign, Tree, WallLetters } from "./Kit";
 import { Turbine } from "./Outdoors";
 
+/** the carousel's horses, bobbing one by one (kept apart when its meshes are merged, see Model) */
+const HORSES = ["horse0", "horse1", "horse2", "horse3", "horse4", "horse5"] as const;
+
 const P = PLAY;
 const G = GARDENS;
 
@@ -158,10 +161,11 @@ export function BallPit() {
         id="carousel"
         position={[carousel.x, -0.4, carousel.z]}
         node="spin"
+        moving={HORSES}
         animate={(n, t) => {
           n.rotation.y = t * 0.22;
-          for (let k = 0; k < 6; k++) {
-            const h = n.getObjectByName(`horse${k}`);
+          for (let k = 0; k < HORSES.length; k++) {
+            const h = n.getObjectByName(HORSES[k]);
             if (h) h.position.y = 1.05 + Math.sin(t * 1.6 + k * 1.3) * 0.16;
           }
         }}
