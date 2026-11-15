@@ -1,7 +1,7 @@
 import { box, type Box } from "./collision";
 import type { AmbienceId, Surface } from "./audio";
 import type { Space } from "./archi/sdf";
-import { MEADOW_DOOR, MEADOW_HOLE, meadowHeight } from "./terrain";
+import { HOLE_REACH, HOUSE_WALL, MEADOW_DOOR, MEADOW_HOLE, MEADOW_HOUSES, meadowHeight } from "./terrain";
 import { EXITS, LOBBY_ARRIVAL, LOBBY_INTERACTABLES, LOBBY_SPACE, LOBBY_SPAWN } from "./lobby";
 import { back } from "./places/common";
 import { OFFICES_ENTRY, OFFICES_SPACE, OFFICES_SPAWN } from "./places/offices";
@@ -85,14 +85,34 @@ export type Zone = {
 
 const MEADOW_DOOR_Z = MEADOW_DOOR.z;
 export const MEADOW_DOOR_ID = "meadow-door";
-const MEADOW_LIMIT = 70; // invisible edge: the hills beyond it are scenery only
+const MEADOW_LIMIT = 110; // invisible edge: the hills beyond it are scenery only
 const MEADOW_EDGES = [
   box(0, -MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(0, MEADOW_LIMIT, MEADOW_LIMIT * 2, 1),
   box(-MEADOW_LIMIT, 0, 1, MEADOW_LIMIT * 2),
   box(MEADOW_LIMIT, 0, 1, MEADOW_LIMIT * 2),
 ];
-const MEADOW_DOOR_POSTS = [box(-0.68, MEADOW_DOOR_Z, 0.16, 0.2), box(0.68, MEADOW_DOOR_Z, 0.16, 0.2)];
+const MEADOW_DOOR_POSTS = [box(MEADOW_DOOR.x - 0.68, MEADOW_DOOR_Z, 0.16, 0.2), box(MEADOW_DOOR.x + 0.68, MEADOW_DOOR_Z, 0.16, 0.2)];
+/**
+ * The houses: closed ones are solid blocks; the door's house has walls, a doorway 1.3 m wide in front, and its
+ * back wall leaves room for the door frame (the door stands 25 cm in front of it: the wall must not stop you first).
+ */
+const MEADOW_WALLS = MEADOW_HOUSES.flatMap((h) => {
+  if (!("door" in h && h.door)) return [box(h.x, h.z, h.w, h.d)];
+  const t = HOUSE_WALL;
+  const gap = 0.65;
+  const side = h.w / 2 - gap;
+  const back = h.w / 2 - 0.78; // either side of the door's frame
+  return [
+    box(h.x - 0.78 - back / 2, h.z - h.d / 2 + t / 2, back, t),
+    box(h.x + 0.78 + back / 2, h.z - h.d / 2 + t / 2, back, t),
+    box(h.x, h.z - h.d / 2 - 0.2, 1.6, 0.2), // behind the door: nothing to see there, nowhere to go
+    box(h.x - h.w / 2 + t / 2, h.z, t, h.d),
+    box(h.x + h.w / 2 - t / 2, h.z, t, h.d),
+    box(h.x - gap - side / 2, h.z + h.d / 2 - t / 2, side, t),
+    box(h.x + gap + side / 2, h.z + h.d / 2 - t / 2, side, t),
+  ];
+});
 const DOOR_Y = meadowHeight(MEADOW_DOOR.x, MEADOW_DOOR_Z);
 /** the white door, seen from the meadow (walking through it = looking north) */
 export const MEADOW_DOOR_IN: Anchor = { x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, y: DOOR_Y, yaw: 0 };
@@ -127,16 +147,16 @@ export const ZONES: Record<ZoneId, Zone> = {
   meadow: {
     id: "meadow",
     name: "La prairie",
-    description: "Des collines vertes à perte de vue, le vent dans l'herbe, et une porte blanche posée au milieu de nulle part.",
+    description: "Des collines vertes à perte de vue, le vent dans l'herbe, quelques maisons. Dans l'une d'elles, une porte blanche.",
     // a little off-axis, facing the door 35 m away: it is the only landmark
-    spawn: { x: 6, z: 22, yaw: 0.175 },
-    colliders: [...MEADOW_EDGES, ...MEADOW_DOOR_POSTS],
+    spawn: { x: 6, z: 22, yaw: -0.1 },
+    colliders: [...MEADOW_EDGES, ...MEADOW_DOOR_POSTS, ...MEADOW_WALLS],
     ground: meadowHeight,
     floor: "grass",
     interactables: [
-      { id: MEADOW_DOOR_ID, x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, radius: 2.6, verb: "Ouvrir la porte", blocker: box(0, MEADOW_DOOR_Z, 1.2, 0.12) },
+      { id: MEADOW_DOOR_ID, x: MEADOW_DOOR.x, z: MEADOW_DOOR_Z, radius: 2.6, verb: "Ouvrir la porte", blocker: box(MEADOW_DOOR.x, MEADOW_DOOR_Z, 1.2, 0.12) },
     ],
-    portals: [meadowLobby, fall("jeux", box(MEADOW_HOLE.x, MEADOW_HOLE.z, 1.6, 1.6), PLAY_SPAWN)],
+    portals: [meadowLobby, fall("jeux", box(MEADOW_HOLE.x, MEADOW_HOLE.z, HOLE_REACH.inner * 2 + 0.6, HOLE_REACH.inner * 2 + 0.6), PLAY_SPAWN)],
     ambience: "wind",
     post: { vignette: 0.42, grain: 0.18, saturation: -0.14, contrast: -0.06 },
   },

@@ -2,7 +2,7 @@
 import { useEffect, useMemo } from "react";
 import { CircleGeometry, Color, InstancedMesh, Matrix4, MeshLambertMaterial, Quaternion, Euler, Vector3 } from "three";
 import { byQuality, useQuality } from "../../settings";
-import { meadowHeight } from "../../terrain";
+import { MEADOW_DOOR, meadowBare, meadowHeight } from "../../terrain";
 
 const WHITE = new Color("#fbfaf2");
 const YELLOW = new Color("#f3cf35");
@@ -27,8 +27,8 @@ export default function Flowers() {
       // half the patches along the way from the wake-up spot to the door, the rest scattered
       const onPath = Math.random() < 0.5;
       const t = Math.random();
-      const cx = onPath ? 6 * (1 - t) + (Math.random() - 0.5) * 18 : (Math.random() - 0.5) * 130;
-      const cz = onPath ? 22 - 34 * t + (Math.random() - 0.5) * 8 : (Math.random() - 0.5) * 130;
+      const cx = onPath ? 6 + (MEADOW_DOOR.x - 6) * t + (Math.random() - 0.5) * 20 : (Math.random() - 0.5) * 200;
+      const cz = onPath ? 22 + (MEADOW_DOOR.z + 6 - 22) * t + (Math.random() - 0.5) * 10 : (Math.random() - 0.5) * 200;
       const yellow = Math.random() < 0.4;
       const n = 20 + Math.floor(Math.random() * 40);
       for (let k = 0; k < n && i < count; k++, i++) {
@@ -37,6 +37,7 @@ export default function Flowers() {
         const x = cx + Math.cos(a) * r;
         const z = cz + Math.sin(a) * r;
         p.set(x, meadowHeight(x, z) + 0.3 + Math.random() * 0.2, z);
+        if (meadowBare(x, z)) p.y = -100; // none indoors or down the hole
         q.setFromEuler(e.set((Math.random() - 0.5) * 0.6, Math.random() * Math.PI, (Math.random() - 0.5) * 0.6));
         const size = 0.7 + Math.random() * 0.7;
         flowers.setMatrixAt(i, m.compose(p, q, s.set(size, size, size)));

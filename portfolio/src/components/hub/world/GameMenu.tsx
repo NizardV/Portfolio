@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { isIOS, isStandalone, type Quality, type Settings } from "./settings";
+import type { Lens } from "./CameraLens";
 import { ZONE_ORDER, ZONES, type ZoneId } from "./zones";
 
 type Props = {
@@ -27,6 +28,11 @@ type Tab = (typeof TABS)[number]["id"];
 
 const BUTTON = "rounded-full border border-white/20 px-4 py-2 text-xs tracking-widest text-white/80 hover:text-white";
 const CHOICE = "rounded-full border px-3 py-1.5 text-xs";
+const LENSES: { id: Lens; label: string }[] = [
+  { id: "off", label: "Aucun" },
+  { id: "camera", label: "Caméra" },
+  { id: "vhs", label: "VHS" },
+];
 const QUALITIES: { id: Quality; label: string }[] = [
   { id: "low", label: "Basse" },
   { id: "auto", label: "Auto" },
@@ -118,6 +124,17 @@ export default function GameMenu({ current, discovered, settings, headBob, touch
                 </div>
               </Row>
               <Toggle label="Filtre de rêve (grain, couleurs)" checked={settings.filter} onChange={(filter) => onSettings({ filter })} />
+              {settings.filter && (
+                <Row label="Objectif">
+                  <div className="flex gap-1.5">
+                    {LENSES.map((l) => (
+                      <button key={l.id} type="button" aria-pressed={settings.lens === l.id} onClick={() => onSettings({ lens: l.id })} className={`${CHOICE} ${settings.lens === l.id ? "border-white/60 text-white" : "border-white/15 text-white/50"}`}>
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                </Row>
+              )}
               <Toggle label="Balancement de la marche" checked={headBob} onChange={(headBob) => onSettings({ headBob })} />
               {fullscreen.available && fullscreen.mode !== "browser" && (
                 <Toggle label="Plein écran" checked={fullscreen.mode === "page"} onChange={fullscreen.toggle} />

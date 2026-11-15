@@ -283,7 +283,7 @@ function Lobby() {
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}
       <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_MOUTH]} rotation={[0, Math.PI, 0]}>
-        <Frame w={1.2} h={2.2} color="#efe9da" />
+        <Frame w={0.98} h={2.02} color="#efe9da" />
       </group>
       {EXITS.map((e) => (
         <ExitThreshold key={e.id} exit={e} />

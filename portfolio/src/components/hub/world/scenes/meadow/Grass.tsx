@@ -29,7 +29,7 @@ void main() {
   vec2 offset = instanceMatrix[3].xz;
   vec2 xz = offset + floor((uCenter - offset) / uPatch + 0.5) * uPatch;
   float d = length(xz - uCenter);
-  float fade = smoothstep(uFade.x, uFade.y, d) * (1.0 - smoothstep(uFade.z, uFade.w, d));
+  float fade = smoothstep(uFade.x, uFade.y, d) * (1.0 - smoothstep(uFade.z, uFade.w, d)) * (1.0 - meadowBare(xz));
   vec3 local = mat3(instanceMatrix) * position;
   local.y *= fade;
   float tip = uv.y;
