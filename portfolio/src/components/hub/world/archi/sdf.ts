@@ -34,6 +34,11 @@ export type Shape = Geom & {
   dead?: number;
   /** free-form label for props (hall, well…) */
   tag?: string;
+  /**
+   * drawn by a model made in Blender (e.g. "slice0" → public/hub/models/skins/slice0.glb) instead of the kit: no walls,
+   * floor, ceiling or soffits of its own here, ceiling lights on a 60 cm tile grid. Collisions are unchanged.
+   */
+  skin?: string;
   /** no ceiling at all (open sky or a void above) */
   open?: boolean;
   /** walking speed here, as a share of normal (a ball pit: 0.45) */

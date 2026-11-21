@@ -10,7 +10,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "hub:audit": "node scripts/hub-audit.mjs",
-    "hub:tour": "node scripts/hub-tour.mjs"
+    "hub:tour": "node scripts/hub-tour.mjs",
+    "hub:plan": "node scripts/hub-export-plan.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",

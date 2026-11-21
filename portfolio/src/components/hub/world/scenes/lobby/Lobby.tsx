@@ -6,7 +6,8 @@ import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, WELL, type Exit } from "../../lobby";
+import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import Skin from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
 
@@ -295,6 +296,31 @@ function ExitThreshold({ exit }: { exit: Exit }) {
   );
 }
 
+/* ---------- slice 0: where its memories will be (greybox markers, the real objects come with the art pass) ---------- */
+
+const MARK: Record<Memory["kind"], { color: string; size: [number, number]; flat: boolean }> = {
+  trace: { color: "#e07a3a", size: [0.3, 0.42], flat: false },
+  objet: { color: "#e07a3a", size: [0.1, 0.12], flat: true },
+  evenement: { color: "#8a5cd6", size: [1.2, 1.2], flat: true },
+  change: { color: "#3aa66a", size: [0.5, 0.7], flat: false },
+};
+
+function MemoryMarkers() {
+  return (
+    <>
+      {SLICE0_MEMORIES.map((m) => {
+        const k = MARK[m.kind];
+        return (
+          <mesh key={m.id} position={[m.x, m.y, m.z]} rotation={k.flat ? [-Math.PI / 2, 0, m.ry] : [0, m.ry, 0]}>
+            <planeGeometry args={k.size} />
+            <meshBasicMaterial color={k.color} toneMapped={false} />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
 /* ---------- scene ---------- */
 
 function Lobby() {
@@ -304,6 +330,12 @@ function Lobby() {
       <Atmosphere background={FOG} fog={FOG} density={0.042} />
       <hemisphereLight args={["#fff2c4", "#3a3016", 0.38]} />
       <Architecture built={built} palette={LOBBY_PALETTE} flicker={0.06} />
+      {SLICE0_READY && (
+        <>
+          <Skin name="slice0" />
+          <MemoryMarkers />
+        </>
+      )}
       <Gallery />
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}

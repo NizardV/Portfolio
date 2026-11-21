@@ -8,51 +8,18 @@
  * Usage, from portfolio/: node scripts/hub-audit.mjs [PLACE]   [--full]  (PLACE = LOBBY, POOLS, CANALS…; all by default)
  */
 import fs from "fs";
-import os from "os";
-import path from "path";
-import { pathToFileURL } from "url";
-import ts from "typescript";
+import { loadPlaces, readGlb, skinFile } from "./lib/places.mjs";
 
-const ROOT = process.cwd();
-const W = path.join(ROOT, "src/components/hub/world");
-const OUT = path.join(os.tmpdir(), "hub-audit");
-const url = (p) => pathToFileURL(p).href;
-const THREE_DIR = path.join(ROOT, "node_modules/three");
-const pnpm = path.join(ROOT, "node_modules/.pnpm");
-const bvhDir = fs.readdirSync(pnpm).find((d) => d.startsWith("three-mesh-bvh@"));
-if (!bvhDir) throw new Error("three-mesh-bvh not found (installed with @react-three/drei)");
+const { THREE, mergeGeometries, BVH, build, places } = await loadPlaces();
+const { buildSpace } = build;
 
-// transpile the plain-TS modules the places are made of (no React in them) into .mjs next to each other
-const fix = (js) =>
-  js
-    .replace(/from "(\.{1,2}\/[\w/]+)"/g, 'from "$1.mjs"')
-    .replace(/from "three\/examples\/jsm\/utils\/BufferGeometryUtils\.js"/, `from "${url(path.join(THREE_DIR, "examples/jsm/utils/BufferGeometryUtils.js"))}"`)
-    .replace(/from "three"/, `from "${url(path.join(THREE_DIR, "build/three.module.js"))}"`)
-    .replace(/import [^;]* from "\.\/zones\.mjs";?/, "");
-const tx = (src) => {
-  const out = path.join(OUT, src.replace(/\.ts$/, ".mjs"));
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  const js = ts.transpileModule(fs.readFileSync(path.join(W, src), "utf8"), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
-  fs.writeFileSync(out, fix(js));
-  return out;
-};
-for (const f of ["sdf", "contour", "build", "slice"]) tx(`archi/${f}.ts`);
-tx("lobby.ts");
-for (const f of fs.readdirSync(path.join(W, "places"))) tx(`places/${f}`);
-fs.writeFileSync(path.join(OUT, "collision.mjs"), "export const box = (x, z, w, d) => ({ x, z, w, d });");
-
-const THREE = await import(url(path.join(THREE_DIR, "build/three.module.js")));
-const { mergeGeometries } = await import(url(path.join(THREE_DIR, "examples/jsm/utils/BufferGeometryUtils.js")));
-const BVH = await import(url(path.join(pnpm, bvhDir, "node_modules/three-mesh-bvh/src/index.js")));
-THREE.Mesh.prototype.raycast = BVH.acceleratedRaycast;
-const { buildSpace } = await import(url(path.join(OUT, "archi/build.mjs")));
-
-const places = {};
-const L = await import(url(path.join(OUT, "lobby.mjs")));
-places.LOBBY = { space: L.LOBBY_SPACE, spawn: L.LOBBY_SPAWN };
-for (const f of fs.readdirSync(path.join(OUT, "places"))) {
-  const M = await import(url(path.join(OUT, "places", f)));
-  for (const [k, v] of Object.entries(M)) if (k.endsWith("_SPACE")) places[k.replace("_SPACE", "")] = { space: v, spawn: M[k.replace("_SPACE", "_SPAWN")] };
+/** the models that draw some rooms instead of the kit (Shape.skin): their triangles join the audited geometry */
+function skins(sp) {
+  const names = [...new Set(sp.shapes.map((s) => s.skin).filter(Boolean))];
+  return names.map((n) => {
+    if (!fs.existsSync(skinFile(n))) throw new Error(`skin « ${n} » has no model: ${skinFile(n)} (run tools/blender/greybox.py)`);
+    return readGlb(skinFile(n), THREE, mergeGeometries);
+  }).filter(Boolean);
 }
 
 /** walkable spots reachable from the spawn, with the step rule, every 2 m */
@@ -92,7 +59,7 @@ function exitOf(sp, x, y, z, dir) {
 
 function audit(sp, spawn) {
   const built = buildSpace(sp);
-  const parts = [...built.walls.values(), ...built.floors.values(), ...built.ceilings.values()].map((g) => {
+  const parts = [...built.walls.values(), ...built.floors.values(), ...built.ceilings.values(), ...skins(sp)].map((g) => {
     const c = new THREE.BufferGeometry();
     c.setAttribute("position", g.attributes.position);
     c.setIndex(g.index);

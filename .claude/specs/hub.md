@@ -75,6 +75,15 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
 - **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` fait
   démarrer le rêve à cet endroit (captures Playwright d'un lieu précis) et expose `window.__hub` (`debug.ts` :
   scène, zone, `teleport`). Le groupe de l'architecture s'appelle `archi` (exclu de l'audit des objets).
+- **Pièces habillées (skins, 2026-11-21)** : une pièce dont `Shape.skin` vaut un nom (ex. `slice0`, la tranche 0 du Lobby :
+  `SLICE0` dans `lobby.ts`) n'est plus dessinée par le kit : murs, sols, plafonds viennent d'un modèle Blender, construit
+  depuis le même plan. Chaîne : `node scripts/hub-export-plan.mjs LOBBY slice0` (plan → `tools/blender/plans/slice0.json`)
+  → `blender --background --python tools/blender/greybox.py -- slice0` (→ `public/hub/models/skins/slice0.glb`) →
+  `archi/Skin.tsx` dans la scène. Mêmes règles que le jeu (la pièce posée après possède le chevauchement), murs droits,
+  plafond en dalles de 60 cm sur la grille de chaque pièce (origine = centre, axes = ses murs) ; le kit pose les
+  plafonniers sur cette même grille (`tilePanels`). Collisions inchangées ; `hub:audit` charge le modèle. Textures : jamais
+  dans le .glb (chargées en `blob:`, refusé par la CSP) → matériaux nommés, habillés en jeu ; vraies textures en fichiers.
+  Souvenirs de la tranche : `SLICE0_MEMORIES` (repères colorés en maquette grise).
 - **Tournée** : `node scripts/hub-tour.mjs <zone>` — vues automatiques, carte, audit des objets posés par les scènes,
   draw calls ; puis revue par l'agent `hub-critic` (`.claude/agents/`) selon
   `skills/hub-level-design/references/liminal-rubric.md`.

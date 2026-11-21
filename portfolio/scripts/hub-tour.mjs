@@ -12,6 +12,7 @@
  *   - contact sheets (6 views per image) + every view at full size.
  * Usage, from portfolio/:  node scripts/hub-tour.mjs <zone> [--samples N] [--only V03,V52] [--port P] [--no-build] [--keep-server]
  *   --only  re-shoot just these views of the last full tour (same spots), into <tmp>/hub-tour/<zone>-recheck/
+ *   --at    shoot these spots only: "x,z,yaw°;x,z,yaw°;…" (yaw 0 = towards -z), into <tmp>/hub-tour/<zone>-at/
  *   zone = meadow, lobby, bureaux, bassins, canaux, rouge, commerce, hotel, jeux, collines, lotissement
  * Output: <tmp>/hub-tour/<zone>/ (report.md, report.json, map.png, sheets/, views/). Uses the production build on
  * port 3100 or --port P (rebuilt first if a source file is newer than it, unless --no-build).
@@ -40,7 +41,15 @@ const only = (() => {
   return i >= 0 && args[i + 1] ? new Set(args[i + 1].split(",")) : null;
 })();
 const previous = only ? JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "hub-tour", zoneId, "report.json"), "utf8")) : null;
-const OUT = path.join(os.tmpdir(), "hub-tour", only ? `${zoneId}-recheck` : zoneId);
+const at = (() => {
+  const i = args.indexOf("--at");
+  if (i < 0 || !args[i + 1]) return null;
+  return args[i + 1].split(";").filter(Boolean).map((spot, k) => {
+    const [x, z, yaw, pitch = "0"] = spot.split(",").map(Number);
+    return { id: `A${String(k + 1).padStart(2, "0")}`, x, z, yaw: (yaw * Math.PI) / 180, pitch: (Number(pitch) * Math.PI) / 180, label: `vue demandée ${k + 1}` };
+  });
+})();
+const OUT = path.join(os.tmpdir(), "hub-tour", only ? `${zoneId}-recheck` : at ? `${zoneId}-at` : zoneId);
 const SHOT = { w: 960, h: 540 };
 // next itself, not `pnpm build` / `pnpm exec`: those reinstall node_modules when the local pnpm is not the repo's
 const NEXT = path.join(ROOT, "node_modules/next/dist/bin/next");
@@ -133,6 +142,7 @@ try {
   const audit = await page.evaluate(auditProps);
   const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: audit.flags.slice(0, 6) });
   if (previous) plan.views = previous.views.filter((v) => only.has(v.id)).map(({ id, x, z, yaw, pitch, label }) => ({ id, x, z, yaw, pitch, label }));
+  if (at) plan.views = at;
 
   /* ---------- views ---------- */
   const views = [];

@@ -239,7 +239,53 @@ for (const e of EXITS) {
 
 /* ---------- the place ---------- */
 // order matters: later shapes win where they overlap (corridors < rooms < ramps and pits < vestibules)
-export const LOBBY_SPACE = new Space([...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules], solids);
+const allShapes: Shape[] = [...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules];
+
+/**
+ * Slice 0, the first stretch rebuilt for realism (zone sheet: https://claude.ai/artifact/XX4DDwunTTo4mYESZPvp2H): the
+ * arrival room, its slanted corridor, the stained room, the long corridor, the pentagon and the heptagon. Their walls,
+ * floors and ceilings come from a Blender model (tools/blender/greybox.py → public/hub/models/skins/slice0.glb), not from
+ * the kit; collisions still come from here. Indices into the seeded list, checked against the arrival room's tag: if the
+ * generator ever changes, the slice falls back to the kit instead of skinning the wrong rooms.
+ */
+export const SLICE0 = [149, 0, 133, 98, 137, 123];
+export const SLICE0_READY = allShapes[149]?.tag === "arrival";
+
+/**
+ * A memory to find (bible: « Bible narrative — le hub, prologue du jeu » in Notion): trace = look at it a while,
+ * objet = pick it up, evenement = witness it; change = what the world shows once a memory is back. ry: the way it faces.
+ */
+export type Memory = { id: string; kind: "trace" | "objet" | "evenement" | "change"; x: number; y: number; z: number; ry: number };
+export const SLICE0_MEMORIES: Memory[] = [];
+
+if (SLICE0_READY) {
+  for (const i of SLICE0) allShapes[i] = { ...allShapes[i], skin: "slice0" };
+  // no random partitions in the slice: what stands there is placed on purpose, on the tile grid
+  for (let k = solids.length - 1; k >= 0; k--) {
+    const so = solids[k];
+    if (SLICE0.some((i) => geomDist(allShapes[i], so.kind === "capsule" ? (so.ax + so.bx) / 2 : so.x, so.kind === "capsule" ? (so.az + so.bz) / 2 : so.z) < 0)) solids.splice(k, 1);
+  }
+  // two pillars in the stained room, on its 60 cm ceiling grid, either side of the way through
+  const stained = allShapes[133];
+  if (stained.kind === "box") {
+    const a = stained.a ?? 0;
+    const across = { x: Math.sin(a), z: Math.cos(a) };
+    for (const v of [-2.4, 2.4]) solids.push({ kind: "box", x: stained.x + v * across.x, z: stained.z + v * across.z, w: 0.4, d: 0.4, a, tag: "pillar" });
+    // 1. the hand-drawn map, taped on the pillar's face that looks into the room
+    const pillar = { x: stained.x - 2.4 * across.x, z: stained.z - 2.4 * across.z };
+    SLICE0_MEMORIES.push({ id: "plan", kind: "trace", x: pillar.x + 0.21 * across.x, y: 1.45, z: pillar.z + 0.21 * across.z, ry: Math.atan2(across.x, across.z) });
+  }
+  SLICE0_MEMORIES.push(
+    // 2. the Polaroid on the carpet of the long corridor, a third of the way along
+    { id: "polaroid", kind: "objet", x: 12.6, y: 0.01, z: 50.4, ry: 0.4 },
+    // 3. looking back from the pentagon: the corridor's lights die one by one
+    { id: "lumieres", kind: "evenement", x: 22.5, y: 0.01, z: 37.3, ry: 0 },
+    // the blank frame of the arrival room, on its west wall: it shows the house once the Polaroid is found
+    { id: "cadre", kind: "change", x: LOBBY_ARRIVAL.x - 3.97, y: 1.6, z: 68, ry: Math.PI / 2 },
+  );
+}
+
+export const LOBBY_SPACE = new Space(allShapes, solids);
 
 /** Geometry is derived once per visit (a few ms per frame, see slice.ts), then shared by the scene and the doorways. */
 export const lobbyBuilt = lazyBuilt(LOBBY_SPACE);

@@ -105,9 +105,42 @@ function around(space: Space, i: number, x: number, z: number, d: number, out: A
     out.room = Math.min(out.room, dj);
     if (j === i) continue;
     const higher = floorAt(o.floor, x, z) >= f - 0.01;
-    if (j < i) earlierRoom(out, s, o, higher, dj);
-    else laterRoom(out, s, o, higher, dj);
+    // a room drawn by its own model (skin) draws nothing past its edge: rooms around it spill under / over it, whatever
+    // the order, where its floor or ceiling hides them (else cracks at the seam, found by hub:audit's vertical rays)
+    if (j < i || o.skin) earlierRoom(out, s, o, higher, dj);
+    if (j > i) laterRoom(out, s, o, higher, dj);
   }
+  return out;
+}
+
+/**
+ * Ceiling lights of a room drawn by its own model: 60 × 120 cm troffers on its 60 cm tile grid (origin at the shape's
+ * centre, axes along its walls, the same grid tools/blender/greybox.py lays the tiles on), every `lights` metres
+ * rounded to whole tiles, kept 30 cm off the walls. One per room is dead, as on the zone sheet.
+ */
+export const TILE_GRID = 0.6;
+function tilePanels(space: Space, i: number): Panel[] {
+  const s = space.shapes[i];
+  const a = "a" in s && s.a ? s.a : 0;
+  const cx = s.kind === "capsule" ? (s.ax + s.bx) / 2 : s.x;
+  const cz = s.kind === "capsule" ? (s.az + s.bz) / 2 : s.z;
+  const [x0, z0, x1, z1] = geomBounds(s);
+  const reach = Math.hypot(x1 - x0, z1 - z0) / 2;
+  const step = Math.max(2, Math.round((s.lights ?? 3) / TILE_GRID)) * TILE_GRID;
+  const c = Math.cos(a);
+  const sn = Math.sin(a);
+  const at = (u: number, v: number): [number, number] => [cx + u * c + v * sn, cz - u * sn + v * c];
+  const out: Panel[] = [];
+  for (let u = -Math.floor(reach / step) * step; u <= reach; u += step) {
+    for (let v = -Math.floor(reach / step) * step + TILE_GRID / 2; v <= reach; v += step) {
+      // the troffer spans two tiles along u and one along v: all four corners in this room, clear of its walls
+      const corners = [[-0.6, -0.3], [0.6, -0.3], [0.6, 0.3], [-0.6, 0.3]].map(([du, dv]) => at(u + du, v + dv));
+      if (!corners.every(([x, z]) => space.ownerIndex(x, z) === i && space.dist(x, z) < -0.3)) continue;
+      const [x, z] = at(u, v);
+      out.push({ x, y: s.ceil - 0.02, z, a, size: [1.2, 0.6], dead: false });
+    }
+  }
+  if (out.length > 2) out[(i * 7) % out.length].dead = true;
   return out;
 }
 
@@ -307,6 +340,10 @@ function* buildSteps(space: Space): Steps<Built> {
         ya = [lo, hi];
         yb = [lo, hi];
       }
+      // a wall a room drawn by its own model faces: that model draws it. Decided like tools/blender/greybox.py does,
+      // 5 cm in front of the middle of the piece (the ends may already lie in the next room)
+      const front = space.ownerIndex((x0 + x1) / 2 + nx * 0.05, (z0 + z1) / 2 + nz * 0.05);
+      if (front >= 0 && space.shapes[front].skin) continue;
       const wall = look((a ?? b)!.o);
       wallFace(walls.get(wall), trim, x0, z0, x1, z1, ya, yb, nx, nz, u0, TILE[wall]);
     }
@@ -440,12 +477,12 @@ function* buildSteps(space: Space): Steps<Built> {
     };
     const f = s.floor;
     const ramp = f !== undefined && typeof f !== "number" ? (x: number, z: number) => ((x - f.ax) * (f.bx - f.ax) + (z - f.az) * (f.bz - f.az)) / ((f.bx - f.ax) ** 2 + (f.bz - f.az) ** 2 || 1) : undefined;
-    surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"], ramp);
+    if (!s.skin) surface(floorLoops, flats.get(`f:${s.mat ?? "carpet"}`), fl, 1, TILE[s.mat ?? "carpet"], ramp);
     const ck = s.ceilMat ?? ceilingSurface(s.mat);
-    if (!s.open) surface(ceilLoops, flats.get(`c:${ck}`), () => s.ceil, -1, TILE[ck]);
+    if (!s.open && !s.skin) surface(ceilLoops, flats.get(`c:${ck}`), () => s.ceil, -1, TILE[ck]);
 
     /* ---- where a later shape takes over: soffits, risers, railings ---- */
-    for (const loop of loops) {
+    for (const loop of s.skin ? [] : loops) {
       // in pieces of a metre at most: a long straight side may border several rooms, each with its own heights
       const pieces: [number, number, number, number][] = [];
       for (let k = 0; k < loop.length; k++) {
@@ -514,7 +551,8 @@ function* buildSteps(space: Space): Steps<Built> {
     }
 
     /* ---- ceiling lights, aligned with the shape ---- */
-    if (s.lights && !s.open) {
+    if (s.skin && s.lights && !s.open) panels.push(...tilePanels(space, i));
+    else if (s.lights && !s.open) {
       const a = "a" in s && s.a ? s.a : s.kind === "capsule" ? Math.atan2(-(s.bz - s.az), s.bx - s.ax) : 0;
       const spacing = s.lights;
       const cx = s.kind === "capsule" ? (s.ax + s.bx) / 2 : s.x;
