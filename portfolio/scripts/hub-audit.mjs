@@ -11,15 +11,17 @@
 import fs from "fs";
 import { loadPlaces, readGlb, skinFile } from "./lib/places.mjs";
 
-const { THREE, mergeGeometries, BVH, build, places } = await loadPlaces();
+const { THREE, mergeGeometries, BVH, build, sdf, places } = await loadPlaces();
+const { geomDist } = sdf;
 const { buildSpace } = build;
 
 /** the models that draw some rooms instead of the kit (Shape.skin): their triangles join the audited geometry */
 function skins(sp) {
   const names = [...new Set(sp.shapes.map((s) => s.skin).filter(Boolean))];
   return names.map((n) => {
-    if (!fs.existsSync(skinFile(n))) throw new Error(`skin « ${n} » has no model: ${skinFile(n)} (run tools/blender/greybox.py)`);
-    return readGlb(skinFile(n), THREE, mergeGeometries);
+    if (!fs.existsSync(skinFile(n))) throw new Error(`skin « ${n} » has no model: ${skinFile(n)} (build it: tools/blender/skin.py)`);
+    // its trims (baseboards, beams under ceiling seams) are finishes, not the building: left out
+    return readGlb(skinFile(n), THREE, mergeGeometries, { skip: ["trims"] });
   }).filter(Boolean);
 }
 
@@ -191,7 +193,7 @@ function construction(sp, built, mesh, ray, found) {
       const [p, q] = [a, b, c].sort((u, v) => u.y - v.y);
       const mx = (p.x + q.x) / 2;
       const mz = (p.z + q.z) / 2;
-      const yb = Math.min(p.y, q.y);
+      const yb = (p.y + q.y) / 2; // the middle of the bottom edge, where the floor is measured (a ramp's side slopes)
       const gFront = sp.ground(mx + n.x * 0.1, mz + n.z * 0.1);
       const gBack = sp.ground(mx - n.x * 0.1, mz - n.z * 0.1);
       if (yb < Math.max(gFront, gBack) + 0.05 && yb > Math.min(gFront, gBack) - 0.3) continue; // stands on a floor
@@ -247,7 +249,9 @@ function heightsAround(sp, x, z, r) {
     out.gLo = Math.min(out.gLo, g);
     out.gHi = Math.max(out.gHi, g);
     out.cLo = Math.min(out.cLo, sp.shapes[i].ceil);
-    out.cHi = Math.max(out.cHi, sp.shapes[i].ceil);
+    // a skinned room shows the highest ceiling over it (tools/blender/skin.py): a later, lower room owns only the floor
+    const over = sp.shapes[i].skin ? Math.max(...sp.nearShapes(x + dx, z + dz).filter((j) => !sp.shapes[j].open && geomDist(sp.shapes[j], x + dx, z + dz) < 0).map((j) => sp.shapes[j].ceil)) : sp.shapes[i].ceil;
+    out.cHi = Math.max(out.cHi, over);
     out.open ||= !!sp.shapes[i].open;
   }
   return out;

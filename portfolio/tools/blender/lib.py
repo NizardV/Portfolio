@@ -191,10 +191,11 @@ def tris():
     return n
 
 
-def export(name, subdir=""):
+def export(name, subdir="", extras=False):
+    """extras: also write the objects' custom properties (glTF extras, userData in three.js)."""
     path = os.path.join(OUT, subdir, f"{name}.glb")
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_apply=True, export_cameras=False, export_lights=False, export_yup=True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_apply=True, export_cameras=False, export_lights=False, export_yup=True, export_extras=extras)
     return path
 
 

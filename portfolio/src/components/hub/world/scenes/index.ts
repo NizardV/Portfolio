@@ -22,7 +22,7 @@ export const SCENES: Record<ZoneId, LazyExoticComponent<ComponentType>> = {
  */
 export const PREPARE: Record<ZoneId, () => Promise<unknown>> = {
   meadow: () => Promise.all([import("./meadow/Meadow"), import("../Model").then((m) => m.preloadModels(["houseOpen", "houseYellow", "houseCottage", "treeSwing", "powerPole", "streetLamp", "bathtub"]))]),
-  lobby: () => Promise.all([import("./lobby/Lobby"), import("../lobby").then((m) => m.lobbyBuilt()), import("../archi/Skin").then((m) => m.preloadSkin("slice0"))]),
+  lobby: () => Promise.all([import("./lobby/Lobby"), import("../lobby").then((m) => m.lobbyBuilt()), import("../archi/Skin").then((m) => m.preloadSkin("lobby"))]),
   bureaux: () => Promise.all([import("./offices/Offices"), import("../places/offices").then((m) => m.officesBuilt())]),
   bassins: () => Promise.all([import("./pools/Pools"), import("../places/pools").then((m) => m.poolsBuilt())]),
   canaux: () => Promise.all([import("./canals/Canals"), import("../places/canals").then((m) => m.canalsBuilt())]),

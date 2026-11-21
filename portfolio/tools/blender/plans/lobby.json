@@ -1,0 +1,9647 @@
+{
+ "place": "LOBBY",
+ "skin": "lobby",
+ "grid": 0.6,
+ "rooms": [
+  {
+   "index": 0,
+   "skinned": true,
+   "outline": [
+    [
+     -1.8202,
+     70.5488
+    ],
+    [
+     6.6038,
+     54.8519
+    ],
+    [
+     8.9728,
+     56.1232
+    ],
+    [
+     0.5488,
+     71.8202
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.0782498314628148,
+   "centre": [
+    3.5763,
+    63.336
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 1,
+   "skinned": true,
+   "outline": [
+    [
+     8.3786,
+     58.4231
+    ],
+    [
+     -5.9551,
+     55.8948
+    ],
+    [
+     -5.43,
+     52.9178
+    ],
+    [
+     8.9037,
+     55.4461
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.96699768351285,
+   "centre": [
+    1.4743,
+    55.6705
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 2,
+   "skinned": true,
+   "outline": [
+    [
+     -3.0176,
+     55.9208
+    ],
+    [
+     -18.7197,
+     55.4994
+    ],
+    [
+     -18.6542,
+     53.061
+    ],
+    [
+     -2.9521,
+     53.4824
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 3.114760879542487,
+   "centre": [
+    -10.8359,
+    54.4909
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 3,
+   "skinned": true,
+   "outline": [
+    [
+     -16.6306,
+     55.821
+    ],
+    [
+     -31.7324,
+     51.5001
+    ],
+    [
+     -31.0614,
+     49.1549
+    ],
+    [
+     -15.9597,
+     53.4758
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.862921873396645,
+   "centre": [
+    -23.846,
+    52.4879
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 4,
+   "skinned": true,
+   "outline": [
+    [
+     -28.6665,
+     51.2079
+    ],
+    [
+     -34.9018,
+     54.2117
+    ],
+    [
+     -35.9148,
+     52.109
+    ],
+    [
+     -29.6795,
+     49.1052
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.692651470704881,
+   "centre": [
+    -32.2906,
+    51.6585
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 5,
+   "skinned": true,
+   "outline": [
+    [
+     -32.7295,
+     52.3801
+    ],
+    [
+     -36.7436,
+     58.0182
+    ],
+    [
+     -38.6449,
+     56.6646
+    ],
+    [
+     -34.6308,
+     51.0264
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.1895055634874154,
+   "centre": [
+    -35.6872,
+    54.5223
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 6,
+   "skinned": true,
+   "outline": [
+    [
+     -35.7284,
+     57.4971
+    ],
+    [
+     -39.3526,
+     57.7735
+    ],
+    [
+     -39.5353,
+     55.378
+    ],
+    [
+     -35.911,
+     55.1017
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -3.0654868479184847,
+   "centre": [
+    -37.6318,
+    56.4376
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 7,
+   "skinned": true,
+   "outline": [
+    [
+     -37.2063,
+     57.8276
+    ],
+    [
+     -40.812,
+     57.3689
+    ],
+    [
+     -40.5088,
+     54.9857
+    ],
+    [
+     -36.9031,
+     55.4444
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 3.0150548453740784,
+   "centre": [
+    -38.8575,
+    56.4067
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 8,
+   "skinned": true,
+   "outline": [
+    [
+     -41.0901,
+     58.2608
+    ],
+    [
+     -42.3371,
+     43.9936
+    ],
+    [
+     -38.784,
+     43.683
+    ],
+    [
+     -37.5369,
+     57.9502
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6579812469278126,
+   "centre": [
+    -39.937,
+    50.9719
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 9,
+   "skinned": true,
+   "outline": [
+    [
+     -40.4086,
+     48.137
+    ],
+    [
+     -50.5221,
+     37.9967
+    ],
+    [
+     -47.9967,
+     35.4779
+    ],
+    [
+     -37.8832,
+     45.6182
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.3548695718464248,
+   "centre": [
+    -44.2026,
+    41.8074
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 10,
+   "skinned": true,
+   "outline": [
+    [
+     -45.7734,
+     38.5413
+    ],
+    [
+     -66.809,
+     51.3494
+    ],
+    [
+     -68.4943,
+     48.5815
+    ],
+    [
+     -47.4587,
+     35.7734
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.5946724003075343,
+   "centre": [
+    -57.1339,
+    43.5614
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 11,
+   "skinned": true,
+   "outline": [
+    [
+     -49.9499,
+     38.5735
+    ],
+    [
+     -42.9511,
+     25.7429
+    ],
+    [
+     -40.4277,
+     27.1194
+    ],
+    [
+     -47.4265,
+     39.9499
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.071427860102789,
+   "centre": [
+    -45.1888,
+    32.8464
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 12,
+   "skinned": true,
+   "outline": [
+    [
+     -44.322,
+     27.1011
+    ],
+    [
+     -31.4263,
+     20.2232
+    ],
+    [
+     -30.0736,
+     22.7594
+    ],
+    [
+     -42.9694,
+     29.6372
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.4899644805530551,
+   "centre": [
+    -37.1978,
+    24.9302
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 13,
+   "skinned": true,
+   "outline": [
+    [
+     -32.157,
+     24.2008
+    ],
+    [
+     -43.519,
+     11.1715
+    ],
+    [
+     -41.3469,
+     9.2773
+    ],
+    [
+     -29.9849,
+     22.3066
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.2879459733588776,
+   "centre": [
+    -36.7519,
+    16.739
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 14,
+   "skinned": true,
+   "outline": [
+    [
+     -42.9857,
+     13.32
+    ],
+    [
+     -46.0095,
+     -7.4998
+    ],
+    [
+     -42.5002,
+     -8.0095
+    ],
+    [
+     -39.4764,
+     12.8103
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.7150255943317383,
+   "centre": [
+    -42.7429,
+    2.6552
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 15,
+   "skinned": true,
+   "outline": [
+    [
+     -45.3029,
+     -4.3507
+    ],
+    [
+     -47.6836,
+     -24.6447
+    ],
+    [
+     -44.7314,
+     -24.991
+    ],
+    [
+     -42.3507,
+     -4.6971
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6875715276615957,
+   "centre": [
+    -45.0172,
+    -14.6709
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 16,
+   "skinned": true,
+   "outline": [
+    [
+     -47.8234,
+     -24.9966
+    ],
+    [
+     -41.6009,
+     -25.2391
+    ],
+    [
+     -41.4666,
+     -21.7952
+    ],
+    [
+     -47.6892,
+     -21.5527
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.038960278742015325,
+   "centre": [
+    -44.645,
+    -23.3959
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 17,
+   "skinned": true,
+   "outline": [
+    [
+     -44.7911,
+     -7.7134
+    ],
+    [
+     -25.5479,
+     -0.6276
+    ],
+    [
+     -26.4702,
+     1.8769
+    ],
+    [
+     -45.7134,
+     -5.2089
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.3528158973398128,
+   "centre": [
+    -35.6306,
+    -2.9182
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 18,
+   "skinned": true,
+   "outline": [
+    [
+     -39.7987,
+     12.1025
+    ],
+    [
+     -60.5704,
+     19.6025
+    ],
+    [
+     -61.4655,
+     17.1233
+    ],
+    [
+     -40.6939,
+     9.6233
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.7950913608025107,
+   "centre": [
+    -50.6321,
+    14.6129
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 19,
+   "skinned": true,
+   "outline": [
+    [
+     -60.8529,
+     20.0706
+    ],
+    [
+     -65.3546,
+     6.6171
+    ],
+    [
+     -62.1247,
+     5.5363
+    ],
+    [
+     -57.6231,
+     18.9899
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.8936929609451265,
+   "centre": [
+    -61.4888,
+    12.8035
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 20,
+   "skinned": true,
+   "outline": [
+    [
+     -44.949,
+     -24.154
+    ],
+    [
+     -32.3061,
+     -29.3721
+    ],
+    [
+     -31.3167,
+     -26.9749
+    ],
+    [
+     -43.9596,
+     -21.7567
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.3914344258238115,
+   "centre": [
+    -38.1329,
+    -25.5644
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 21,
+   "skinned": true,
+   "outline": [
+    [
+     -34.1409,
+     -29.1223
+    ],
+    [
+     -20.5633,
+     -27.4733
+    ],
+    [
+     -20.876,
+     -24.8988
+    ],
+    [
+     -34.4536,
+     -26.5479
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.12086269213862046,
+   "centre": [
+    -27.5085,
+    -27.0106
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 22,
+   "skinned": true,
+   "outline": [
+    [
+     -21.991,
+     -28.8399
+    ],
+    [
+     -8.6449,
+     -15.323
+    ],
+    [
+     -11.1583,
+     -12.8414
+    ],
+    [
+     -24.5044,
+     -26.3583
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.7917573950485256,
+   "centre": [
+    -16.5747,
+    -20.8406
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 23,
+   "skinned": true,
+   "outline": [
+    [
+     -10.3334,
+     -17.4152
+    ],
+    [
+     -6.4419,
+     -8.5547
+    ],
+    [
+     -9.3273,
+     -7.2875
+    ],
+    [
+     -13.2187,
+     -16.1479
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.1569671517858342,
+   "centre": [
+    -9.8303,
+    -12.3513
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 24,
+   "skinned": true,
+   "outline": [
+    [
+     -7.7287,
+     -11.4476
+    ],
+    [
+     -3.754,
+     -2.6242
+    ],
+    [
+     -6.6273,
+     -1.3298
+    ],
+    [
+     -10.602,
+     -10.1532
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.1475456895277785,
+   "centre": [
+    -7.178,
+    -6.3887
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 25,
+   "skinned": true,
+   "outline": [
+    [
+     -12.9771,
+     -14.6654
+    ],
+    [
+     -8.6593,
+     -23.9922
+    ],
+    [
+     -6.1511,
+     -22.8311
+    ],
+    [
+     -10.4689,
+     -13.5042
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.137233520222685,
+   "centre": [
+    -9.5641,
+    -18.7482
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 26,
+   "skinned": true,
+   "outline": [
+    [
+     -9.7626,
+     -21.3439
+    ],
+    [
+     -6.181,
+     -30.9775
+    ],
+    [
+     -3.5904,
+     -30.0143
+    ],
+    [
+     -7.172,
+     -20.3807
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.2148509677614336,
+   "centre": [
+    -6.6765,
+    -25.6791
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 27,
+   "skinned": true,
+   "outline": [
+    [
+     -7.7102,
+     -28.4494
+    ],
+    [
+     -1.9161,
+     -39.7125
+    ],
+    [
+     1.1779,
+     -38.1208
+    ],
+    [
+     -4.6161,
+     -26.8578
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.0956728304631258,
+   "centre": [
+    -3.2661,
+    -33.2851
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 28,
+   "skinned": true,
+   "outline": [
+    [
+     -3.0199,
+     -38.9859
+    ],
+    [
+     9.6162,
+     -39.855
+    ],
+    [
+     9.855,
+     -36.3838
+    ],
+    [
+     -2.7812,
+     -35.5147
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.06867113835392964,
+   "centre": [
+    3.4175,
+    -37.6848
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 29,
+   "skinned": true,
+   "outline": [
+    [
+     8.3349,
+     -39.7457
+    ],
+    [
+     14.8271,
+     -30.1709
+    ],
+    [
+     12.7464,
+     -28.7601
+    ],
+    [
+     6.2543,
+     -38.3349
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.9749607995073567,
+   "centre": [
+    10.5407,
+    -34.2529
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 30,
+   "skinned": true,
+   "outline": [
+    [
+     14.7578,
+     -31.0968
+    ],
+    [
+     9.763,
+     -20.6623
+    ],
+    [
+     7.4956,
+     -21.7477
+    ],
+    [
+     12.4903,
+     -32.1822
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.017242301974614,
+   "centre": [
+    11.1267,
+    -26.4223
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 31,
+   "skinned": true,
+   "outline": [
+    [
+     -22.3189,
+     -24.5827
+    ],
+    [
+     -29.3275,
+     -34.6129
+    ],
+    [
+     -27.2558,
+     -36.0605
+    ],
+    [
+     -20.2472,
+     -26.0303
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.1806813542760164,
+   "centre": [
+    -24.7873,
+    -30.3216
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 32,
+   "skinned": true,
+   "outline": [
+    [
+     -28.774,
+     -32.9821
+    ],
+    [
+     -29.3187,
+     -45.2062
+    ],
+    [
+     -26.7938,
+     -45.3187
+    ],
+    [
+     -26.2491,
+     -33.0946
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6153254332425566,
+   "centre": [
+    -27.7839,
+    -39.1504
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 33,
+   "skinned": true,
+   "outline": [
+    [
+     -29.3629,
+     -42.4385
+    ],
+    [
+     -30.8715,
+     -64.6506
+    ],
+    [
+     -27.9471,
+     -64.8493
+    ],
+    [
+     -26.4385,
+     -42.6371
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6386099563342487,
+   "centre": [
+    -28.655,
+    -53.6439
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 34,
+   "skinned": true,
+   "outline": [
+    [
+     -4.6705,
+     -4.9587
+    ],
+    [
+     -2.9395,
+     7.4725
+    ],
+    [
+     -5.6519,
+     7.8502
+    ],
+    [
+     -7.3829,
+     -4.581
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.43244391555366,
+   "centre": [
+    -5.1612,
+    1.4457
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 35,
+   "skinned": true,
+   "outline": [
+    [
+     -2.9202,
+     5.1638
+    ],
+    [
+     -4.8586,
+     17.5643
+    ],
+    [
+     -7.5643,
+     17.1414
+    ],
+    [
+     -5.6259,
+     4.7408
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.725854967451764,
+   "centre": [
+    -5.2423,
+    11.1526
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 36,
+   "skinned": true,
+   "outline": [
+    [
+     5.9767,
+     -38.3889
+    ],
+    [
+     18.3276,
+     -46.7575
+    ],
+    [
+     19.962,
+     -44.3454
+    ],
+    [
+     7.6111,
+     -35.9767
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.5955169643866361,
+   "centre": [
+    12.9694,
+    -41.3671
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 37,
+   "skinned": true,
+   "outline": [
+    [
+     16.5699,
+     -43.1944
+    ],
+    [
+     15.6945,
+     -58.0878
+    ],
+    [
+     18.6032,
+     -58.2588
+    ],
+    [
+     19.4786,
+     -43.3654
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6295058331445225,
+   "centre": [
+    17.5865,
+    -50.7266
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 38,
+   "skinned": true,
+   "outline": [
+    [
+     17.1536,
+     -58.62
+    ],
+    [
+     25.3157,
+     -51.1228
+    ],
+    [
+     23.4953,
+     -49.1409
+    ],
+    [
+     15.3332,
+     -56.6382
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.7429710959997351,
+   "centre": [
+    20.3244,
+    -53.8805
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 39,
+   "skinned": true,
+   "outline": [
+    [
+     23.6282,
+     -52.9328
+    ],
+    [
+     30.5356,
+     -44.2659
+    ],
+    [
+     28.4312,
+     -42.5887
+    ],
+    [
+     21.5238,
+     -51.2557
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.8979005783997229,
+   "centre": [
+    26.0297,
+    -47.7608
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 40,
+   "skinned": true,
+   "outline": [
+    [
+     27.1464,
+     -45.834
+    ],
+    [
+     40.3846,
+     -46.5018
+    ],
+    [
+     40.5286,
+     -43.649
+    ],
+    [
+     27.2903,
+     -42.9811
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.050409149271689935,
+   "centre": [
+    33.8375,
+    -44.7415
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 41,
+   "skinned": true,
+   "outline": [
+    [
+     38.7432,
+     -47.0028
+    ],
+    [
+     49.3526,
+     -39.0568
+    ],
+    [
+     47.6402,
+     -36.7705
+    ],
+    [
+     37.0308,
+     -44.7165
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.6428324701025177,
+   "centre": [
+    43.1917,
+    -41.8866
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 42,
+   "skinned": true,
+   "outline": [
+    [
+     17.6716,
+     -55.1158
+    ],
+    [
+     -1.9737,
+     -66.3401
+    ],
+    [
+     -0.8079,
+     -68.3806
+    ],
+    [
+     18.8375,
+     -57.1563
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.6225074184745356,
+   "centre": [
+    8.4319,
+    -61.7482
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 43,
+   "skinned": true,
+   "outline": [
+    [
+     9.2505,
+     -24.0497
+    ],
+    [
+     18.2388,
+     -14.1973
+    ],
+    [
+     16.4494,
+     -12.5649
+    ],
+    [
+     7.4611,
+     -22.4172
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.8312290000470013,
+   "centre": [
+    12.8499,
+    -18.3073
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 44,
+   "skinned": true,
+   "outline": [
+    [
+     16.6617,
+     -15.9832
+    ],
+    [
+     25.3263,
+     -5.845
+    ],
+    [
+     23.485,
+     -4.2713
+    ],
+    [
+     14.8204,
+     -14.4096
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.8636096035631711,
+   "centre": [
+    20.0734,
+    -10.1273
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 45,
+   "skinned": true,
+   "outline": [
+    [
+     24.4236,
+     -8.3861
+    ],
+    [
+     29.427,
+     1.6423
+    ],
+    [
+     26.2149,
+     3.2449
+    ],
+    [
+     21.2115,
+     -6.7836
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.1080173798415403,
+   "centre": [
+    25.3192,
+    -2.5706
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 46,
+   "skinned": true,
+   "outline": [
+    [
+     28.0592,
+     -1.478
+    ],
+    [
+     32.0433,
+     8.9972
+    ],
+    [
+     28.6881,
+     10.2733
+    ],
+    [
+     24.704,
+     -0.202
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.2073584822007741,
+   "centre": [
+    28.3736,
+    4.3976
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 47,
+   "skinned": true,
+   "outline": [
+    [
+     28.8391,
+     6.5131
+    ],
+    [
+     32.6612,
+     7.4239
+    ],
+    [
+     32.1052,
+     9.757
+    ],
+    [
+     28.2831,
+     8.8462
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.2339367602227189,
+   "centre": [
+    30.4721,
+    8.1351
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 48,
+   "skinned": true,
+   "outline": [
+    [
+     29.7218,
+     7.5115
+    ],
+    [
+     33.4828,
+     6.3747
+    ],
+    [
+     34.1768,
+     8.6706
+    ],
+    [
+     30.4157,
+     9.8074
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.2935248280150753,
+   "centre": [
+    31.9493,
+    8.091
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 49,
+   "skinned": true,
+   "outline": [
+    [
+     21.3453,
+     -5.6233
+    ],
+    [
+     28.4045,
+     -15.2995
+    ],
+    [
+     31.0336,
+     -13.3815
+    ],
+    [
+     23.9744,
+     -3.7053
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.9405150973674625,
+   "centre": [
+    26.1894,
+    -9.5024
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 50,
+   "skinned": true,
+   "outline": [
+    [
+     26.4817,
+     -12.7025
+    ],
+    [
+     33.6765,
+     -22.2783
+    ],
+    [
+     36.2783,
+     -20.3235
+    ],
+    [
+     29.0835,
+     -10.7476
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.9264324413196502,
+   "centre": [
+    31.38,
+    -16.513
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 51,
+   "skinned": true,
+   "outline": [
+    [
+     31.5271,
+     7.2327
+    ],
+    [
+     26.33,
+     19.4432
+    ],
+    [
+     23.8055,
+     18.3687
+    ],
+    [
+     29.0026,
+     6.1582
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.9732002959339292,
+   "centre": [
+    27.6663,
+    12.8007
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 52,
+   "skinned": true,
+   "outline": [
+    [
+     26.7989,
+     16.1146
+    ],
+    [
+     28.4198,
+     29.2857
+    ],
+    [
+     25.6968,
+     29.6208
+    ],
+    [
+     24.0759,
+     16.4497
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.4483486163293682,
+   "centre": [
+    26.2479,
+    22.8677
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 53,
+   "skinned": true,
+   "outline": [
+    [
+     29.0186,
+     27.2225
+    ],
+    [
+     24.727,
+     37.4421
+    ],
+    [
+     21.7299,
+     36.1835
+    ],
+    [
+     26.0215,
+     25.9639
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.9683739118916448,
+   "centre": [
+    25.3742,
+    31.703
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 54,
+   "skinned": true,
+   "outline": [
+    [
+     26.9364,
+     26.18
+    ],
+    [
+     34.9788,
+     34.6163
+    ],
+    [
+     33.0214,
+     36.4824
+    ],
+    [
+     24.979,
+     28.0461
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.8093002247206794,
+   "centre": [
+    29.9789,
+    31.3312
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 55,
+   "skinned": true,
+   "outline": [
+    [
+     31.6314,
+     33.3074
+    ],
+    [
+     43.2632,
+     32.5643
+    ],
+    [
+     43.4357,
+     35.2632
+    ],
+    [
+     31.8038,
+     36.0063
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.06379275361413599,
+   "centre": [
+    37.5335,
+    34.2853
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 56,
+   "skinned": true,
+   "outline": [
+    [
+     42.6892,
+     32.2236
+    ],
+    [
+     51.9797,
+     53.2932
+    ],
+    [
+     49.5141,
+     54.3804
+    ],
+    [
+     40.2236,
+     33.3108
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.1554988483967514,
+   "centre": [
+    46.1017,
+    43.302
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 57,
+   "skinned": true,
+   "outline": [
+    [
+     51.9571,
+     52.0273
+    ],
+    [
+     45.5634,
+     64.6845
+    ],
+    [
+     43.2329,
+     63.5073
+    ],
+    [
+     49.6267,
+     50.8501
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.038555972995749,
+   "centre": [
+    47.595,
+    57.7673
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 58,
+   "skinned": true,
+   "outline": [
+    [
+     49.155,
+     51.3098
+    ],
+    [
+     59.9978,
+     52.4481
+    ],
+    [
+     59.7519,
+     54.7906
+    ],
+    [
+     48.9091,
+     53.6522
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.10460237627487688,
+   "centre": [
+    54.4535,
+    53.0502
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 59,
+   "skinned": true,
+   "outline": [
+    [
+     57.6048,
+     52.2449
+    ],
+    [
+     68.4842,
+     52.9512
+    ],
+    [
+     68.3316,
+     55.3016
+    ],
+    [
+     57.4522,
+     54.5953
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.0648343916389777,
+   "centre": [
+    62.9682,
+    53.7733
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 60,
+   "skinned": true,
+   "outline": [
+    [
+     47.7128,
+     -40.8718
+    ],
+    [
+     62.8248,
+     -19.522
+    ],
+    [
+     60.3632,
+     -17.7796
+    ],
+    [
+     45.2512,
+     -39.1295
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.95483819486907,
+   "centre": [
+    54.038,
+    -29.3257
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 61,
+   "skinned": true,
+   "outline": [
+    [
+     61.487,
+     -21.4846
+    ],
+    [
+     66.2525,
+     -8.0349
+    ],
+    [
+     63.8852,
+     -7.1962
+    ],
+    [
+     59.1198,
+     -20.6458
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.23028132478284,
+   "centre": [
+    62.6861,
+    -14.3404
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 62,
+   "skinned": true,
+   "outline": [
+    [
+     66.2994,
+     -9.4559
+    ],
+    [
+     60.6568,
+     3.6499
+    ],
+    [
+     58.3501,
+     2.6568
+    ],
+    [
+     63.9927,
+     -10.4491
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.9773511966769368,
+   "centre": [
+    62.3247,
+    -3.3996
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 63,
+   "skinned": true,
+   "outline": [
+    [
+     60.0951,
+     -0.309
+    ],
+    [
+     70.581,
+     11.0779
+    ],
+    [
+     68.177,
+     13.2917
+    ],
+    [
+     57.691,
+     1.9049
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.8265621930985133,
+   "centre": [
+    64.136,
+    6.4914
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 64,
+   "skinned": true,
+   "outline": [
+    [
+     70.114,
+     9.5871
+    ],
+    [
+     68.0004,
+     24.9217
+    ],
+    [
+     64.7629,
+     24.4754
+    ],
+    [
+     66.8765,
+     9.1409
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.7077647957790867,
+   "centre": [
+    67.4384,
+    17.0313
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 65,
+   "skinned": true,
+   "outline": [
+    [
+     45.6399,
+     -37.1267
+    ],
+    [
+     46.3602,
+     -71.5709
+    ],
+    [
+     49.7167,
+     -71.5007
+    ],
+    [
+     48.9964,
+     -37.0565
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.5498869568886215,
+   "centre": [
+    47.6783,
+    -54.3137
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 66,
+   "skinned": true,
+   "outline": [
+    [
+     35.6027,
+     -21.1778
+    ],
+    [
+     30.9054,
+     9.5604
+    ],
+    [
+     28.1249,
+     9.1355
+    ],
+    [
+     32.8222,
+     -21.6027
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.7224388654377774,
+   "centre": [
+    31.8638,
+    -6.0212
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 67,
+   "skinned": true,
+   "outline": [
+    [
+     32.187,
+     -18.9965
+    ],
+    [
+     36.9298,
+     -35.499
+    ],
+    [
+     39.7463,
+     -34.6895
+    ],
+    [
+     35.0035,
+     -18.187
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.290941969837688,
+   "centre": [
+    35.9667,
+    -26.843
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 68,
+   "skinned": true,
+   "outline": [
+    [
+     37.7784,
+     -31.6195
+    ],
+    [
+     26.5783,
+     -44.6343
+    ],
+    [
+     28.7996,
+     -46.5459
+    ],
+    [
+     39.9997,
+     -33.5311
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.2813917559088996,
+   "centre": [
+    33.289,
+    -39.0827
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 69,
+   "skinned": true,
+   "outline": [
+    [
+     -43.6629,
+     -8.0873
+    ],
+    [
+     -35.6189,
+     3.0556
+    ],
+    [
+     -38.0434,
+     4.8058
+    ],
+    [
+     -46.0873,
+     -6.3371
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.9455311456515263,
+   "centre": [
+    -40.8531,
+    -1.6407
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 70,
+   "skinned": true,
+   "outline": [
+    [
+     -39.5137,
+     1.6215
+    ],
+    [
+     -26.1643,
+     -1.644
+    ],
+    [
+     -25.4538,
+     1.2606
+    ],
+    [
+     -38.8033,
+     4.526
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.23989935097190096,
+   "centre": [
+    -32.4838,
+    1.441
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 71,
+   "skinned": true,
+   "outline": [
+    [
+     40.5123,
+     35.8538
+    ],
+    [
+     38.4883,
+     17.3807
+    ],
+    [
+     41.8298,
+     17.0146
+    ],
+    [
+     43.8538,
+     35.4877
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6799254150059941,
+   "centre": [
+    41.1711,
+    26.4342
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 72,
+   "skinned": true,
+   "outline": [
+    [
+     40.3094,
+     21.2452
+    ],
+    [
+     27.3509,
+     7.9249
+    ],
+    [
+     29.7603,
+     5.5809
+    ],
+    [
+     42.7189,
+     18.9012
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.3424301234997835,
+   "centre": [
+    35.0349,
+    13.413
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 73,
+   "skinned": true,
+   "outline": [
+    [
+     43.9867,
+     35.2667
+    ],
+    [
+     31.1983,
+     38.0971
+    ],
+    [
+     30.4783,
+     34.8437
+    ],
+    [
+     43.2667,
+     32.0133
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.923774540460895,
+   "centre": [
+    37.2325,
+    35.0552
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 74,
+   "skinned": true,
+   "outline": [
+    [
+     32.048,
+     38.4293
+    ],
+    [
+     24.5718,
+     27.6747
+    ],
+    [
+     27.3078,
+     25.7728
+    ],
+    [
+     34.7839,
+     36.5274
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.178267069354352,
+   "centre": [
+    29.6779,
+    32.1011
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 75,
+   "skinned": true,
+   "outline": [
+    [
+     41.7876,
+     32.1445
+    ],
+    [
+     69.0883,
+     53.8378
+    ],
+    [
+     67.4451,
+     55.9056
+    ],
+    [
+     40.1445,
+     34.2124
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.6714440114250751,
+   "centre": [
+    54.6164,
+    44.0251
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 76,
+   "skinned": true,
+   "outline": [
+    [
+     -47.5218,
+     39.6012
+    ],
+    [
+     -61.5818,
+     32.0081
+    ],
+    [
+     -60.4588,
+     29.9287
+    ],
+    [
+     -46.3988,
+     37.5218
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.6464232145458566,
+   "centre": [
+    -53.9903,
+    34.7649
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 77,
+   "skinned": true,
+   "outline": [
+    [
+     -61.1797,
+     32.6938
+    ],
+    [
+     -60.9423,
+     16.7163
+    ],
+    [
+     -58.5793,
+     16.7514
+    ],
+    [
+     -58.8167,
+     32.7289
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.5559399681511155,
+   "centre": [
+    -59.8795,
+    24.7226
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 78,
+   "skinned": true,
+   "outline": [
+    [
+     -47.2711,
+     36.0018
+    ],
+    [
+     -37.4705,
+     57.0578
+    ],
+    [
+     -40.1977,
+     58.3271
+    ],
+    [
+     -49.9982,
+     37.2711
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.1351672442026746,
+   "centre": [
+    -43.7344,
+    47.1645
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 79,
+   "skinned": true,
+   "outline": [
+    [
+     -45.5377,
+     38.5986
+    ],
+    [
+     -66.8663,
+     51.5851
+    ],
+    [
+     -68.73,
+     48.5242
+    ],
+    [
+     -47.4014,
+     35.5377
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.5946724003075343,
+   "centre": [
+    -57.1339,
+    43.5614
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 80,
+   "skinned": true,
+   "outline": [
+    [
+     10.4255,
+     -38.2042
+    ],
+    [
+     -10.9383,
+     -12.9134
+    ],
+    [
+     -13.5679,
+     -15.1347
+    ],
+    [
+     7.7958,
+     -40.4255
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.2722201518023524,
+   "centre": [
+    -1.5712,
+    -26.6694
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 81,
+   "skinned": true,
+   "outline": [
+    [
+     -1.1308,
+     71.9852
+    ],
+    [
+     -6.1893,
+     53.5381
+    ],
+    [
+     -3.0733,
+     52.6836
+    ],
+    [
+     1.9852,
+     71.1308
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.8384334667275462,
+   "centre": [
+    -2.102,
+    62.3344
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 82,
+   "skinned": true,
+   "outline": [
+    [
+     31.4053,
+     6.7987
+    ],
+    [
+     29.0562,
+     19.6444
+    ],
+    [
+     26.2195,
+     19.1256
+    ],
+    [
+     28.5687,
+     6.2799
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.7516723527892704,
+   "centre": [
+    28.8124,
+    12.9622
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 83,
+   "skinned": true,
+   "outline": [
+    [
+     29.4746,
+     16.6745
+    ],
+    [
+     28.1829,
+     29.6692
+    ],
+    [
+     25.3133,
+     29.3839
+    ],
+    [
+     26.6051,
+     16.3893
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.669876559474027,
+   "centre": [
+    27.394,
+    23.0292
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 84,
+   "skinned": true,
+   "outline": [
+    [
+     31.6334,
+     6.7253
+    ],
+    [
+     25.0901,
+     37.22
+    ],
+    [
+     21.952,
+     36.5467
+    ],
+    [
+     28.4952,
+     6.0519
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.7821617515953427,
+   "centre": [
+    26.7927,
+    21.636
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 85,
+   "skinned": true,
+   "outline": [
+    [
+     -61.506,
+     19.5053
+    ],
+    [
+     -61.1292,
+     10.4235
+    ],
+    [
+     -57.8116,
+     10.5611
+    ],
+    [
+     -58.1884,
+     19.6429
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.529331995700718,
+   "centre": [
+    -59.6588,
+    15.0332
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 86,
+   "skinned": true,
+   "outline": [
+    [
+     -59.7693,
+     14.4878
+    ],
+    [
+     -65.5359,
+     7.4616
+    ],
+    [
+     -62.9692,
+     5.355
+    ],
+    [
+     -57.2026,
+     12.3812
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.2580539261895347,
+   "centre": [
+    -61.3692,
+    9.9214
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 87,
+   "skinned": true,
+   "outline": [
+    [
+     -47.8977,
+     -24.7914
+    ],
+    [
+     -20.5572,
+     -28.2058
+    ],
+    [
+     -20.1435,
+     -24.8927
+    ],
+    [
+     -47.484,
+     -21.4784
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.12424072895706674,
+   "centre": [
+    -34.0206,
+    -24.8421
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 88,
+   "skinned": true,
+   "outline": [
+    [
+     68.998,
+     22.3959
+    ],
+    [
+     50.8871,
+     54.9972
+    ],
+    [
+     47.8101,
+     53.2878
+    ],
+    [
+     65.9209,
+     20.6866
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.0778720820457437,
+   "centre": [
+    58.404,
+    37.8419
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 89,
+   "skinned": true,
+   "outline": [
+    [
+     46.7564,
+     -36.9397
+    ],
+    [
+     37.5356,
+     -55.0843
+    ],
+    [
+     39.9625,
+     -56.3176
+    ],
+    [
+     49.1833,
+     -38.1731
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.040972638195451,
+   "centre": [
+    43.3595,
+    -46.6287
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 90,
+   "skinned": true,
+   "outline": [
+    [
+     37.5122,
+     -53.9678
+    ],
+    [
+     47.4836,
+     -71.711
+    ],
+    [
+     49.8568,
+     -70.3773
+    ],
+    [
+     39.8854,
+     -52.6341
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.058801275581792,
+   "centre": [
+    43.6845,
+    -62.1725
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 91,
+   "skinned": true,
+   "outline": [
+    [
+     -32.1365,
+     23.9005
+    ],
+    [
+     -43.2187,
+     11.192
+    ],
+    [
+     -41.3674,
+     9.5776
+    ],
+    [
+     -30.2852,
+     22.2861
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.2879459733588776,
+   "centre": [
+    -36.7519,
+    16.739
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 92,
+   "skinned": true,
+   "outline": [
+    [
+     -23.5585,
+     -27.9625
+    ],
+    [
+     -4.5841,
+     -27.5528
+    ],
+    [
+     -4.6526,
+     -24.381
+    ],
+    [
+     -23.627,
+     -24.7907
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.021588481773713888,
+   "centre": [
+    -14.1055,
+    -26.1718
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 93,
+   "skinned": true,
+   "outline": [
+    [
+     -7.3798,
+     -27.9118
+    ],
+    [
+     11.0826,
+     -23.5143
+    ],
+    [
+     10.3475,
+     -20.4281
+    ],
+    [
+     -8.1148,
+     -24.8256
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.23382902020660112,
+   "centre": [
+    1.4839,
+    -24.17
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 94,
+   "skinned": true,
+   "outline": [
+    [
+     -21.6039,
+     -28.6735
+    ],
+    [
+     -3.5068,
+     -3.0106
+    ],
+    [
+     -6.2409,
+     -1.0826
+    ],
+    [
+     -24.338,
+     -26.7454
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.9565972438599365,
+   "centre": [
+    -13.9224,
+    -14.878
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 95,
+   "skinned": true,
+   "outline": [
+    [
+     -41.0586,
+     54.6568
+    ],
+    [
+     -35.3453,
+     54.8009
+    ],
+    [
+     -35.4276,
+     58.0628
+    ],
+    [
+     -41.1409,
+     57.9187
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.025216001272202974,
+   "centre": [
+    -38.2431,
+    56.3598
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 96,
+   "skinned": true,
+   "outline": [
+    [
+     50.0784,
+     -69.4568
+    ],
+    [
+     33.6547,
+     -58.3497
+    ],
+    [
+     31.9803,
+     -60.8254
+    ],
+    [
+     48.4041,
+     -71.9326
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.5469592980246754,
+   "centre": [
+    41.0294,
+    -65.1411
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 97,
+   "skinned": true,
+   "outline": [
+    [
+     35.9507,
+     -61.3596
+    ],
+    [
+     29.5797,
+     -42.5842
+    ],
+    [
+     26.7495,
+     -43.5445
+    ],
+    [
+     33.1204,
+     -62.32
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.8979283110000689,
+   "centre": [
+    31.3501,
+    -52.4521
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 98,
+   "skinned": true,
+   "outline": [
+    [
+     5.3503,
+     56.8924
+    ],
+    [
+     23.6374,
+     33.512
+    ],
+    [
+     25.66,
+     35.094
+    ],
+    [
+     7.3729,
+     58.4743
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.9070314778237626,
+   "centre": [
+    15.5052,
+    45.9932
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 99,
+   "skinned": true,
+   "outline": [
+    [
+     -64.5822,
+     5.7555
+    ],
+    [
+     -39.5497,
+     9.9275
+    ],
+    [
+     -40.1029,
+     13.2466
+    ],
+    [
+     -65.1354,
+     9.0746
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.16514583719284542,
+   "centre": [
+    -52.3426,
+    9.501
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 100,
+   "skinned": true,
+   "outline": [
+    [
+     -66.1958,
+     -66.872
+    ],
+    [
+     -46.8988,
+     -52.1067
+    ],
+    [
+     -48.1749,
+     -50.4389
+    ],
+    [
+     -67.472,
+     -65.2042
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.15,
+   "open": false,
+   "angle": -0.6531300901629093,
+   "centre": [
+    -57.1854,
+    -58.6554
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 101,
+   "skinned": true,
+   "outline": [
+    [
+     -49.8105,
+     -52.2744
+    ],
+    [
+     -28.9465,
+     -64.7275
+    ],
+    [
+     -27.8702,
+     -62.9243
+    ],
+    [
+     -48.7342,
+     -50.4711
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.15,
+   "open": false,
+   "angle": 0.5381165467964951,
+   "centre": [
+    -38.8404,
+    -57.5993
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 102,
+   "skinned": true,
+   "outline": [
+    [
+     23.784,
+     -75.0127
+    ],
+    [
+     18.2471,
+     -54.9349
+    ],
+    [
+     15.4503,
+     -55.7062
+    ],
+    [
+     20.9873,
+     -75.784
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.8398825781708896,
+   "centre": [
+    19.6172,
+    -65.3595
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 103,
+   "skinned": true,
+   "outline": [
+    [
+     74.277,
+     -8.1111
+    ],
+    [
+     58.8339,
+     -19.6046
+    ],
+    [
+     60.4458,
+     -21.7705
+    ],
+    [
+     75.8889,
+     -10.277
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.5017802053152516,
+   "centre": [
+    67.3614,
+    -14.9408
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 104,
+   "skinned": true,
+   "outline": [
+    [
+     76.1226,
+     50.5332
+    ],
+    [
+     66.6996,
+     56.1728
+    ],
+    [
+     65.1101,
+     53.517
+    ],
+    [
+     74.5332,
+     47.8774
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -2.6022842645943824,
+   "centre": [
+    70.6164,
+    52.0251
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 105,
+   "skinned": true,
+   "outline": [
+    [
+     -75.5129,
+     -25.5858
+    ],
+    [
+     -44.4485,
+     -24.8546
+    ],
+    [
+     -44.5215,
+     -21.7559
+    ],
+    [
+     -75.5858,
+     -22.4871
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.023533819888704576,
+   "centre": [
+    -60.0172,
+    -23.6709
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 106,
+   "skinned": true,
+   "outline": [
+    [
+     49.4017,
+     75.5888
+    ],
+    [
+     43.398,
+     62.3324
+    ],
+    [
+     45.585,
+     61.3419
+    ],
+    [
+     51.5888,
+     74.5983
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.9960528742134476,
+   "centre": [
+    47.4934,
+    68.4653
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.18,
+   "tag": null
+  },
+  {
+   "index": 107,
+   "skinned": true,
+   "outline": [
+    [
+     24.7378,
+     5.8887
+    ],
+    [
+     34.5854,
+     5.5952
+    ],
+    [
+     34.7174,
+     10.0266
+    ],
+    [
+     24.8699,
+     10.3201
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.029794033896178004,
+   "centre": [
+    29.7276,
+    7.9577
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.133209102042019,
+   "dead": 0.11357369955163449,
+   "tag": null
+  },
+  {
+   "index": 108,
+   "skinned": true,
+   "outline": [
+    [
+     30.3195,
+     3.0119
+    ],
+    [
+     34.7509,
+     2.8798
+    ],
+    [
+     35.0443,
+     12.7273
+    ],
+    [
+     30.6129,
+     12.8594
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.029794033896178004,
+   "centre": [
+    32.6819,
+    7.8696
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.133209102042019,
+   "dead": 0.11357369955163449,
+   "tag": null
+  },
+  {
+   "index": 109,
+   "skinned": true,
+   "outline": [
+    [
+     31.8938,
+     -5.0748
+    ],
+    [
+     29.485,
+     -11.8848
+    ],
+    [
+     22.6588,
+     -14.2474
+    ],
+    [
+     16.5556,
+     -10.3836
+    ],
+    [
+     15.7712,
+     -3.2029
+    ],
+    [
+     20.8962,
+     1.8875
+    ],
+    [
+     28.0714,
+     1.0544
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.4619824315886945,
+   "centre": [
+    23.6188,
+    -5.9788
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.019901239313185,
+   "dead": 0.12051979128737003,
+   "tag": null
+  },
+  {
+   "index": 110,
+   "skinned": true,
+   "outline": [
+    [
+     -7.7603,
+     51.6778
+    ],
+    [
+     -0.3869,
+     52.0189
+    ],
+    [
+     -0.6478,
+     57.6599
+    ],
+    [
+     -8.0212,
+     57.3188
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.04621655526570975,
+   "centre": [
+    -4.204,
+    54.6688
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2222278457134963,
+   "dead": 0.22731831226032223,
+   "tag": null
+  },
+  {
+   "index": 111,
+   "skinned": true,
+   "outline": [
+    [
+     -60.9279,
+     25.5711
+    ],
+    [
+     -67.5194,
+     17.8251
+    ],
+    [
+     -58.6288,
+     10.2595
+    ],
+    [
+     -52.0373,
+     18.0055
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.2758483609164157,
+   "centre": [
+    -59.7784,
+    17.9153
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.3701490247622132,
+   "dead": 0.20297174287028608,
+   "tag": null
+  },
+  {
+   "index": 112,
+   "skinned": true,
+   "outline": [
+    [
+     -50.7466,
+     -25.2452
+    ],
+    [
+     -41.4845,
+     -25.6062
+    ],
+    [
+     -41.3221,
+     -21.4383
+    ],
+    [
+     -50.5842,
+     -21.0772
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.03896027874201537,
+   "centre": [
+    -46.0343,
+    -23.3417
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.3461271995678543,
+   "dead": 0.08460303040686995,
+   "tag": null
+  },
+  {
+   "index": 113,
+   "skinned": true,
+   "outline": [
+    [
+     -45.5202,
+     -27.9999
+    ],
+    [
+     -41.3523,
+     -28.1623
+    ],
+    [
+     -40.9912,
+     -18.9002
+    ],
+    [
+     -45.1592,
+     -18.7378
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.03896027874201537,
+   "centre": [
+    -43.2557,
+    -23.4501
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.3461271995678543,
+   "dead": 0.08460303040686995,
+   "tag": null
+  },
+  {
+   "index": 114,
+   "skinned": true,
+   "outline": [
+    [
+     12.5137,
+     -48.9468
+    ],
+    [
+     10.5361,
+     -62.8691
+    ],
+    [
+     21.9549,
+     -64.4911
+    ],
+    [
+     23.9325,
+     -50.5687
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.7118956649944064,
+   "centre": [
+    17.2343,
+    -56.7189
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.9653374701738358,
+   "dead": 0.23032193192280825,
+   "tag": null
+  },
+  {
+   "index": 115,
+   "skinned": true,
+   "outline": [
+    [
+     7.296,
+     -66.7774
+    ],
+    [
+     7.2016,
+     -65.5781
+    ],
+    [
+     6.9208,
+     -64.4083
+    ],
+    [
+     6.4604,
+     -63.2969
+    ],
+    [
+     5.8318,
+     -62.2711
+    ],
+    [
+     5.0505,
+     -61.3563
+    ],
+    [
+     4.1357,
+     -60.575
+    ],
+    [
+     3.11,
+     -59.9465
+    ],
+    [
+     1.9985,
+     -59.4861
+    ],
+    [
+     0.8288,
+     -59.2052
+    ],
+    [
+     -0.3706,
+     -59.1108
+    ],
+    [
+     -1.5699,
+     -59.2052
+    ],
+    [
+     -2.7397,
+     -59.4861
+    ],
+    [
+     -3.8511,
+     -59.9465
+    ],
+    [
+     -4.8769,
+     -60.575
+    ],
+    [
+     -5.7917,
+     -61.3563
+    ],
+    [
+     -6.573,
+     -62.2711
+    ],
+    [
+     -7.2016,
+     -63.2969
+    ],
+    [
+     -7.6619,
+     -64.4083
+    ],
+    [
+     -7.9428,
+     -65.5781
+    ],
+    [
+     -8.0372,
+     -66.7774
+    ],
+    [
+     -7.9428,
+     -67.9768
+    ],
+    [
+     -7.6619,
+     -69.1465
+    ],
+    [
+     -7.2016,
+     -70.258
+    ],
+    [
+     -6.573,
+     -71.2837
+    ],
+    [
+     -5.7917,
+     -72.1985
+    ],
+    [
+     -4.8769,
+     -72.9798
+    ],
+    [
+     -3.8511,
+     -73.6084
+    ],
+    [
+     -2.7397,
+     -74.0688
+    ],
+    [
+     -1.5699,
+     -74.3496
+    ],
+    [
+     -0.3706,
+     -74.444
+    ],
+    [
+     0.8288,
+     -74.3496
+    ],
+    [
+     1.9985,
+     -74.0688
+    ],
+    [
+     3.11,
+     -73.6084
+    ],
+    [
+     4.1357,
+     -72.9798
+    ],
+    [
+     5.0505,
+     -72.1985
+    ],
+    [
+     5.8318,
+     -71.2837
+    ],
+    [
+     6.4604,
+     -70.258
+    ],
+    [
+     6.9208,
+     -69.1465
+    ],
+    [
+     7.2016,
+     -67.9768
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -0.3706,
+    -66.7774
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.1590822650119663,
+   "dead": 0.23091231141239404,
+   "tag": null
+  },
+  {
+   "index": 116,
+   "skinned": true,
+   "outline": [
+    [
+     72.0291,
+     23.0798
+    ],
+    [
+     71.9623,
+     23.9283
+    ],
+    [
+     71.7636,
+     24.756
+    ],
+    [
+     71.4379,
+     25.5424
+    ],
+    [
+     70.9932,
+     26.2682
+    ],
+    [
+     70.4404,
+     26.9154
+    ],
+    [
+     69.7931,
+     27.4682
+    ],
+    [
+     69.0674,
+     27.9129
+    ],
+    [
+     68.281,
+     28.2387
+    ],
+    [
+     67.4533,
+     28.4374
+    ],
+    [
+     66.6047,
+     28.5042
+    ],
+    [
+     65.7562,
+     28.4374
+    ],
+    [
+     64.9285,
+     28.2387
+    ],
+    [
+     64.1421,
+     27.9129
+    ],
+    [
+     63.4164,
+     27.4682
+    ],
+    [
+     62.7691,
+     26.9154
+    ],
+    [
+     62.2163,
+     26.2682
+    ],
+    [
+     61.7716,
+     25.5424
+    ],
+    [
+     61.4459,
+     24.756
+    ],
+    [
+     61.2472,
+     23.9283
+    ],
+    [
+     61.1804,
+     23.0798
+    ],
+    [
+     61.2472,
+     22.2312
+    ],
+    [
+     61.4459,
+     21.4036
+    ],
+    [
+     61.7716,
+     20.6172
+    ],
+    [
+     62.2163,
+     19.8914
+    ],
+    [
+     62.7691,
+     19.2442
+    ],
+    [
+     63.4164,
+     18.6914
+    ],
+    [
+     64.1421,
+     18.2466
+    ],
+    [
+     64.9285,
+     17.9209
+    ],
+    [
+     65.7562,
+     17.7222
+    ],
+    [
+     66.6047,
+     17.6554
+    ],
+    [
+     67.4533,
+     17.7222
+    ],
+    [
+     68.281,
+     17.9209
+    ],
+    [
+     69.0674,
+     18.2466
+    ],
+    [
+     69.7931,
+     18.6914
+    ],
+    [
+     70.4404,
+     19.2442
+    ],
+    [
+     70.9932,
+     19.8914
+    ],
+    [
+     71.4379,
+     20.6172
+    ],
+    [
+     71.7636,
+     21.4036
+    ],
+    [
+     71.9623,
+     22.2312
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    66.6047,
+    23.0798
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.0254459770396354,
+   "dead": 0.19218938224483278,
+   "tag": null
+  },
+  {
+   "index": 117,
+   "skinned": true,
+   "outline": [
+    [
+     41.2757,
+     -42.689
+    ],
+    [
+     53.3775,
+     -42.7703
+    ],
+    [
+     53.4307,
+     -34.8507
+    ],
+    [
+     41.3289,
+     -34.7694
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.006715818978846072,
+   "centre": [
+    47.3532,
+    -38.7699
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.1505229635164143,
+   "dead": 0.2606719645485282,
+   "tag": null
+  },
+  {
+   "index": 118,
+   "skinned": true,
+   "outline": [
+    [
+     55.2343,
+     -26.6336
+    ],
+    [
+     66.3037,
+     -26.5574
+    ],
+    [
+     66.2112,
+     -13.1296
+    ],
+    [
+     55.1419,
+     -13.2058
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.006886381069198248,
+   "centre": [
+    60.7228,
+    -19.8816
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.796491850167513,
+   "dead": 0.15271080694627015,
+   "tag": null
+  },
+  {
+   "index": 119,
+   "skinned": true,
+   "outline": [
+    [
+     -27.9767,
+     16.3625
+    ],
+    [
+     -27.7023,
+     27.7717
+    ],
+    [
+     -36.0593,
+     27.9727
+    ],
+    [
+     -36.3337,
+     16.5636
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.5467478217181316,
+   "centre": [
+    -32.018,
+    22.1676
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.875148277916014,
+   "dead": 0.23119014054071158,
+   "tag": null
+  },
+  {
+   "index": 120,
+   "skinned": true,
+   "outline": [
+    [
+     51.7466,
+     46.957
+    ],
+    [
+     46.0845,
+     48.444
+    ],
+    [
+     44.5412,
+     54.0909
+    ],
+    [
+     48.66,
+     58.2509
+    ],
+    [
+     54.3221,
+     56.764
+    ],
+    [
+     55.8654,
+     51.117
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.874816624680534,
+   "centre": [
+    50.2033,
+    52.604
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2313666699454187,
+   "dead": 0.08023051375988871,
+   "tag": null
+  },
+  {
+   "index": 121,
+   "skinned": true,
+   "outline": [
+    [
+     -25.868,
+     -15.1022
+    ],
+    [
+     -33.631,
+     -28.8184
+    ],
+    [
+     -18.1458,
+     -37.5826
+    ],
+    [
+     -10.3828,
+     -23.8664
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.0858208381016237,
+   "centre": [
+    -22.0069,
+    -26.3424
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.301229691505432,
+   "dead": 0.2955601518275216,
+   "tag": null
+  },
+  {
+   "index": 122,
+   "skinned": true,
+   "outline": [
+    [
+     -10.6614,
+     -34.8285
+    ],
+    [
+     -0.7429,
+     -35.3905
+    ],
+    [
+     -0.0732,
+     -23.5727
+    ],
+    [
+     -9.9918,
+     -23.0107
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.05660125505179167,
+   "centre": [
+    -5.3673,
+    -29.2006
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.868622335419059,
+   "dead": 0.1818476666882634,
+   "tag": null
+  },
+  {
+   "index": 123,
+   "skinned": true,
+   "outline": [
+    [
+     28.9106,
+     23.7099
+    ],
+    [
+     24.7242,
+     23.7805
+    ],
+    [
+     22.1692,
+     27.0976
+    ],
+    [
+     23.1697,
+     31.1633
+    ],
+    [
+     26.9721,
+     32.9161
+    ],
+    [
+     30.7133,
+     31.0361
+    ],
+    [
+     31.576,
+     26.9389
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 2.7096618292853236,
+   "centre": [
+    26.8907,
+    28.0918
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.3413569651544095,
+   "dead": 0.20231426450889556,
+   "tag": null
+  },
+  {
+   "index": 124,
+   "skinned": true,
+   "outline": [
+    [
+     -14.6616,
+     -19.5795
+    ],
+    [
+     -7.6373,
+     -19.5911
+    ],
+    [
+     -7.6233,
+     -11.0982
+    ],
+    [
+     -14.6475,
+     -11.0866
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.0016495027486234937,
+   "centre": [
+    -11.1424,
+    -15.3389
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.8682087628170847,
+   "dead": 0.27119163984432815,
+   "tag": null
+  },
+  {
+   "index": 125,
+   "skinned": true,
+   "outline": [
+    [
+     -43.508,
+     54.3873
+    ],
+    [
+     -35.3368,
+     54.5934
+    ],
+    [
+     -35.4296,
+     58.2705
+    ],
+    [
+     -43.6007,
+     58.0644
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.025216001272201534,
+   "centre": [
+    -39.4688,
+    56.3289
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.667859018407762,
+   "dead": 0.1497846411913633,
+   "tag": null
+  },
+  {
+   "index": 126,
+   "skinned": true,
+   "outline": [
+    [
+     -38.7529,
+     52.2588
+    ],
+    [
+     -35.0759,
+     52.3515
+    ],
+    [
+     -35.282,
+     60.5227
+    ],
+    [
+     -38.959,
+     60.4299
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.025216001272201534,
+   "centre": [
+    -37.0174,
+    56.3907
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.667859018407762,
+   "dead": 0.1497846411913633,
+   "tag": null
+  },
+  {
+   "index": 127,
+   "skinned": true,
+   "outline": [
+    [
+     42.5141,
+     -77.3273
+    ],
+    [
+     53.5295,
+     -77.3001
+    ],
+    [
+     53.4926,
+     -62.3877
+    ],
+    [
+     42.4772,
+     -62.415
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.002473858064040539,
+   "centre": [
+    48.0033,
+    -69.8575
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.346061674878001,
+   "dead": 0.09836934674531221,
+   "tag": null
+  },
+  {
+   "index": 128,
+   "skinned": true,
+   "outline": [
+    [
+     22.9383,
+     -48.405
+    ],
+    [
+     34.15,
+     -48.6826
+    ],
+    [
+     34.3512,
+     -40.554
+    ],
+    [
+     23.1396,
+     -40.2764
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.024754254827275876,
+   "centre": [
+    28.6448,
+    -44.4795
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.6282607965171336,
+   "dead": 0.1287114140810445,
+   "tag": null
+  },
+  {
+   "index": 129,
+   "skinned": true,
+   "outline": [
+    [
+     -28.423,
+     43.361
+    ],
+    [
+     -22.7204,
+     51.1689
+    ],
+    [
+     -32.0257,
+     57.9651
+    ],
+    [
+     -37.7283,
+     50.1571
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.9399871935539172,
+   "centre": [
+    -30.2243,
+    50.663
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.7801874263212083,
+   "dead": 0.21770775247365237,
+   "tag": null
+  },
+  {
+   "index": 130,
+   "skinned": true,
+   "outline": [
+    [
+     39.8196,
+     58.0781
+    ],
+    [
+     50.1372,
+     58.0603
+    ],
+    [
+     50.1539,
+     67.7832
+    ],
+    [
+     39.8363,
+     67.8009
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.0017186538968235257,
+   "centre": [
+    44.9868,
+    62.9306
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2361256696283816,
+   "dead": 0.10404517892748118,
+   "tag": null
+  },
+  {
+   "index": 131,
+   "skinned": true,
+   "outline": [
+    [
+     -33.4763,
+     -68.7924
+    ],
+    [
+     -24.9729,
+     -68.6589
+    ],
+    [
+     -25.1437,
+     -57.783
+    ],
+    [
+     -33.647,
+     -57.9166
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.0156998232845217,
+   "centre": [
+    -29.31,
+    -63.2877
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.0836425799876452,
+   "dead": 0.13647155053447932,
+   "tag": null
+  },
+  {
+   "index": 132,
+   "skinned": true,
+   "outline": [
+    [
+     12.3125,
+     -17.3373
+    ],
+    [
+     15.0404,
+     -21.6758
+    ],
+    [
+     13.3492,
+     -26.5135
+    ],
+    [
+     8.5126,
+     -28.2076
+    ],
+    [
+     4.1725,
+     -25.4823
+    ],
+    [
+     3.5971,
+     -20.39
+    ],
+    [
+     7.2198,
+     -16.7651
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.5606934288516641,
+   "centre": [
+    9.172,
+    -22.3388
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.0208605963736774,
+   "dead": 0.20755749195348472,
+   "tag": null
+  },
+  {
+   "index": 133,
+   "skinned": true,
+   "outline": [
+    [
+     11.2488,
+     50.843
+    ],
+    [
+     13.4385,
+     60.0252
+    ],
+    [
+     3.0565,
+     62.5011
+    ],
+    [
+     0.8667,
+     53.319
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.3366879969575558,
+   "centre": [
+    7.1526,
+    56.6721
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.379254930280149,
+   "dead": 0.08877052219118924,
+   "tag": null
+  },
+  {
+   "index": 134,
+   "skinned": true,
+   "outline": [
+    [
+     -55.8734,
+     7.157
+    ],
+    [
+     -59.9993,
+     1.0799
+    ],
+    [
+     -67.3252,
+     1.6145
+    ],
+    [
+     -70.5251,
+     8.2262
+    ],
+    [
+     -66.3992,
+     14.3033
+    ],
+    [
+     -59.0734,
+     13.7687
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.6436424599960446,
+   "centre": [
+    -63.1993,
+    7.6916
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.288314547948539,
+   "dead": 0.16982633110601453,
+   "tag": null
+  },
+  {
+   "index": 135,
+   "skinned": true,
+   "outline": [
+    [
+     -37.3626,
+     16.0811
+    ],
+    [
+     -35.6745,
+     8.8632
+    ],
+    [
+     -42.0176,
+     5.0273
+    ],
+    [
+     -47.6258,
+     9.8745
+    ],
+    [
+     -44.7489,
+     16.7062
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.7127409805543721,
+   "centre": [
+    -41.4859,
+    11.3105
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.8338891757652163,
+   "dead": 0.09769565146882087,
+   "tag": null
+  },
+  {
+   "index": 136,
+   "skinned": true,
+   "outline": [
+    [
+     -32.4147,
+     -4.0687
+    ],
+    [
+     -22.2147,
+     -4.1955
+    ],
+    [
+     -22.1079,
+     4.3959
+    ],
+    [
+     -32.3079,
+     4.5226
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.01242871382273733,
+   "centre": [
+    -27.2613,
+    0.1636
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.0449667247012258,
+   "dead": 0.21034278615377844,
+   "tag": null
+  },
+  {
+   "index": 137,
+   "skinned": true,
+   "outline": [
+    [
+     25.5001,
+     39.4136
+    ],
+    [
+     28.2639,
+     35.0191
+    ],
+    [
+     24.9385,
+     31.0325
+    ],
+    [
+     20.1195,
+     32.9632
+    ],
+    [
+     20.4665,
+     38.1431
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0.381061642896384,
+   "centre": [
+    23.8577,
+    35.3143
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.9470087362453343,
+   "dead": 0.09660471597220749,
+   "tag": null
+  },
+  {
+   "index": 138,
+   "skinned": true,
+   "outline": [
+    [
+     -73.9373,
+     38.5436
+    ],
+    [
+     -57.8533,
+     39.1257
+    ],
+    [
+     -58.5981,
+     59.702
+    ],
+    [
+     -74.6821,
+     59.1198
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.03617828805930912,
+   "centre": [
+    -66.2677,
+    49.1228
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.7276899803429844,
+   "dead": 0.1050025478983298,
+   "tag": null
+  },
+  {
+   "index": 139,
+   "skinned": true,
+   "outline": [
+    [
+     -1.0395,
+     -3.4137
+    ],
+    [
+     -1.0986,
+     -2.6631
+    ],
+    [
+     -1.2744,
+     -1.9309
+    ],
+    [
+     -1.5625,
+     -1.2353
+    ],
+    [
+     -1.9559,
+     -0.5933
+    ],
+    [
+     -2.4449,
+     -0.0208
+    ],
+    [
+     -3.0175,
+     0.4682
+    ],
+    [
+     -3.6595,
+     0.8616
+    ],
+    [
+     -4.3551,
+     1.1498
+    ],
+    [
+     -5.0872,
+     1.3255
+    ],
+    [
+     -5.8378,
+     1.3846
+    ],
+    [
+     -6.5884,
+     1.3255
+    ],
+    [
+     -7.3206,
+     1.1498
+    ],
+    [
+     -8.0162,
+     0.8616
+    ],
+    [
+     -8.6582,
+     0.4682
+    ],
+    [
+     -9.2307,
+     -0.0208
+    ],
+    [
+     -9.7197,
+     -0.5933
+    ],
+    [
+     -10.1131,
+     -1.2353
+    ],
+    [
+     -10.4013,
+     -1.9309
+    ],
+    [
+     -10.577,
+     -2.6631
+    ],
+    [
+     -10.6361,
+     -3.4137
+    ],
+    [
+     -10.577,
+     -4.1643
+    ],
+    [
+     -10.4013,
+     -4.8964
+    ],
+    [
+     -10.1131,
+     -5.592
+    ],
+    [
+     -9.7197,
+     -6.234
+    ],
+    [
+     -9.2307,
+     -6.8066
+    ],
+    [
+     -8.6582,
+     -7.2956
+    ],
+    [
+     -8.0162,
+     -7.689
+    ],
+    [
+     -7.3206,
+     -7.9771
+    ],
+    [
+     -6.5884,
+     -8.1529
+    ],
+    [
+     -5.8378,
+     -8.212
+    ],
+    [
+     -5.0872,
+     -8.1529
+    ],
+    [
+     -4.3551,
+     -7.9771
+    ],
+    [
+     -3.6595,
+     -7.689
+    ],
+    [
+     -3.0175,
+     -7.2956
+    ],
+    [
+     -2.4449,
+     -6.8066
+    ],
+    [
+     -1.9559,
+     -6.234
+    ],
+    [
+     -1.5625,
+     -5.592
+    ],
+    [
+     -1.2744,
+     -4.8964
+    ],
+    [
+     -1.0986,
+     -4.1643
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -5.8378,
+    -3.4137
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.283753459341824,
+   "dead": 0.2859051990834996,
+   "tag": null
+  },
+  {
+   "index": 140,
+   "skinned": true,
+   "outline": [
+    [
+     63.7135,
+     43.6405
+    ],
+    [
+     77.9838,
+     51.7784
+    ],
+    [
+     70.752,
+     64.4598
+    ],
+    [
+     56.4817,
+     56.3219
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -0.5182689066545305,
+   "centre": [
+    67.2328,
+    54.0501
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.833970695361495,
+   "dead": 0.27036615898367017,
+   "tag": null
+  },
+  {
+   "index": 141,
+   "skinned": true,
+   "outline": [
+    [
+     -24.9543,
+     6.0635
+    ],
+    [
+     8.5556,
+     0.3113
+    ],
+    [
+     12.9543,
+     25.9365
+    ],
+    [
+     -20.5556,
+     31.6887
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 12,
+   "open": false,
+   "angle": 0.17,
+   "centre": [
+    -6,
+    16
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 4.2,
+   "dead": 0.2,
+   "tag": "hall"
+  },
+  {
+   "index": 142,
+   "skinned": true,
+   "outline": [
+    [
+     38.9749,
+     -7.9896
+    ],
+    [
+     46.0104,
+     -15.0251
+    ],
+    [
+     46.0104,
+     -24.9749
+    ],
+    [
+     38.9749,
+     -32.0104
+    ],
+    [
+     29.0251,
+     -32.0104
+    ],
+    [
+     21.9896,
+     -24.9749
+    ],
+    [
+     21.9896,
+     -15.0251
+    ],
+    [
+     29.0251,
+     -7.9896
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 10,
+   "open": false,
+   "angle": 0.39269908169872414,
+   "centre": [
+    34,
+    -20
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.4,
+   "dead": 0.12,
+   "tag": "rotunda"
+  },
+  {
+   "index": 143,
+   "skinned": true,
+   "outline": [
+    [
+     -38.5481,
+     6.8949
+    ],
+    [
+     -35.5587,
+     -17.1689
+    ],
+    [
+     -57.8932,
+     -7.726
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 4.4,
+   "open": false,
+   "angle": 0.4,
+   "centre": [
+    -44,
+    -6
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 144,
+   "skinned": true,
+   "outline": [
+    [
+     34.3895,
+     21.9966
+    ],
+    [
+     55.2727,
+     28.9171
+    ],
+    [
+     49.6105,
+     46.0034
+    ],
+    [
+     28.7273,
+     39.0829
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": null,
+   "ceil": 5.4,
+   "open": false,
+   "angle": -0.32,
+   "centre": [
+    42,
+    34
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 3.6,
+   "dead": 0.25,
+   "tag": null
+  },
+  {
+   "index": 145,
+   "skinned": true,
+   "outline": [
+    [
+     -60.2059,
+     37.8691
+    ],
+    [
+     -43.6991,
+     26.5762
+    ],
+    [
+     -35.7941,
+     38.1309
+    ],
+    [
+     -52.3009,
+     49.4238
+    ]
+   ],
+   "floor": 1.8,
+   "ramp": null,
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.6,
+   "centre": [
+    -48,
+    38
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 146,
+   "skinned": true,
+   "outline": [
+    [
+     -1.8535,
+     -46.0565
+    ],
+    [
+     16.0565,
+     -47.8535
+    ],
+    [
+     17.8535,
+     -29.9435
+    ],
+    [
+     -0.0565,
+     -28.1465
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    8,
+    -38
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3,
+   "dead": 0.12,
+   "tag": "holes"
+  },
+  {
+   "index": 147,
+   "skinned": true,
+   "outline": [
+    [
+     -40.1593,
+     -55.0069
+    ],
+    [
+     -14.2424,
+     -52.9291
+    ],
+    [
+     -15.8407,
+     -32.9931
+    ],
+    [
+     -41.7576,
+     -35.0709
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 6.5,
+   "open": false,
+   "angle": -0.08,
+   "centre": [
+    -28,
+    -44
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.4,
+   "dead": 0.45,
+   "tag": null
+  },
+  {
+   "index": 148,
+   "skinned": true,
+   "outline": [
+    [
+     52.6519,
+     -0.0013
+    ],
+    [
+     56.3815,
+     -4.7013
+    ],
+    [
+     67.3481,
+     4.0013
+    ],
+    [
+     63.6185,
+     8.7013
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 18,
+   "open": false,
+   "angle": 0.9,
+   "centre": [
+    60,
+    2
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 149,
+   "skinned": true,
+   "outline": [
+    [
+     -4,
+     64
+    ],
+    [
+     4,
+     64
+    ],
+    [
+     4,
+     76
+    ],
+    [
+     -4,
+     76
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    0,
+    70
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.6,
+   "dead": 0.12,
+   "tag": "arrival"
+  },
+  {
+   "index": 150,
+   "skinned": true,
+   "outline": [
+    [
+     40,
+     -20
+    ],
+    [
+     39.9261,
+     -19.0614
+    ],
+    [
+     39.7063,
+     -18.1459
+    ],
+    [
+     39.346,
+     -17.2761
+    ],
+    [
+     38.8541,
+     -16.4733
+    ],
+    [
+     38.2426,
+     -15.7574
+    ],
+    [
+     37.5267,
+     -15.1459
+    ],
+    [
+     36.7239,
+     -14.654
+    ],
+    [
+     35.8541,
+     -14.2937
+    ],
+    [
+     34.9386,
+     -14.0739
+    ],
+    [
+     34,
+     -14
+    ],
+    [
+     33.0614,
+     -14.0739
+    ],
+    [
+     32.1459,
+     -14.2937
+    ],
+    [
+     31.2761,
+     -14.654
+    ],
+    [
+     30.4733,
+     -15.1459
+    ],
+    [
+     29.7574,
+     -15.7574
+    ],
+    [
+     29.1459,
+     -16.4733
+    ],
+    [
+     28.654,
+     -17.2761
+    ],
+    [
+     28.2937,
+     -18.1459
+    ],
+    [
+     28.0739,
+     -19.0614
+    ],
+    [
+     28,
+     -20
+    ],
+    [
+     28.0739,
+     -20.9386
+    ],
+    [
+     28.2937,
+     -21.8541
+    ],
+    [
+     28.654,
+     -22.7239
+    ],
+    [
+     29.1459,
+     -23.5267
+    ],
+    [
+     29.7574,
+     -24.2426
+    ],
+    [
+     30.4733,
+     -24.8541
+    ],
+    [
+     31.2761,
+     -25.346
+    ],
+    [
+     32.1459,
+     -25.7063
+    ],
+    [
+     33.0614,
+     -25.9261
+    ],
+    [
+     34,
+     -26
+    ],
+    [
+     34.9386,
+     -25.9261
+    ],
+    [
+     35.8541,
+     -25.7063
+    ],
+    [
+     36.7239,
+     -25.346
+    ],
+    [
+     37.5267,
+     -24.8541
+    ],
+    [
+     38.2426,
+     -24.2426
+    ],
+    [
+     38.8541,
+     -23.5267
+    ],
+    [
+     39.346,
+     -22.7239
+    ],
+    [
+     39.7063,
+     -21.8541
+    ],
+    [
+     39.9261,
+     -20.9386
+    ]
+   ],
+   "floor": -3.2,
+   "ramp": null,
+   "ceil": 10,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    34,
+    -20
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 151,
+   "skinned": true,
+   "outline": [
+    [
+     36.2,
+     -20
+    ],
+    [
+     36.1729,
+     -19.6558
+    ],
+    [
+     36.0923,
+     -19.3202
+    ],
+    [
+     35.9602,
+     -19.0012
+    ],
+    [
+     35.7798,
+     -18.7069
+    ],
+    [
+     35.5556,
+     -18.4444
+    ],
+    [
+     35.2931,
+     -18.2202
+    ],
+    [
+     34.9988,
+     -18.0398
+    ],
+    [
+     34.6798,
+     -17.9077
+    ],
+    [
+     34.3442,
+     -17.8271
+    ],
+    [
+     34,
+     -17.8
+    ],
+    [
+     33.6558,
+     -17.8271
+    ],
+    [
+     33.3202,
+     -17.9077
+    ],
+    [
+     33.0012,
+     -18.0398
+    ],
+    [
+     32.7069,
+     -18.2202
+    ],
+    [
+     32.4444,
+     -18.4444
+    ],
+    [
+     32.2202,
+     -18.7069
+    ],
+    [
+     32.0398,
+     -19.0012
+    ],
+    [
+     31.9077,
+     -19.3202
+    ],
+    [
+     31.8271,
+     -19.6558
+    ],
+    [
+     31.8,
+     -20
+    ],
+    [
+     31.8271,
+     -20.3442
+    ],
+    [
+     31.9077,
+     -20.6798
+    ],
+    [
+     32.0398,
+     -20.9988
+    ],
+    [
+     32.2202,
+     -21.2931
+    ],
+    [
+     32.4444,
+     -21.5556
+    ],
+    [
+     32.7069,
+     -21.7798
+    ],
+    [
+     33.0012,
+     -21.9602
+    ],
+    [
+     33.3202,
+     -22.0923
+    ],
+    [
+     33.6558,
+     -22.1729
+    ],
+    [
+     34,
+     -22.2
+    ],
+    [
+     34.3442,
+     -22.1729
+    ],
+    [
+     34.6798,
+     -22.0923
+    ],
+    [
+     34.9988,
+     -21.9602
+    ],
+    [
+     35.2931,
+     -21.7798
+    ],
+    [
+     35.5556,
+     -21.5556
+    ],
+    [
+     35.7798,
+     -21.2931
+    ],
+    [
+     35.9602,
+     -20.9988
+    ],
+    [
+     36.0923,
+     -20.6798
+    ],
+    [
+     36.1729,
+     -20.3442
+    ]
+   ],
+   "floor": -42,
+   "ramp": null,
+   "ceil": 10,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    34,
+    -20
+   ],
+   "mat": "void",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": "well"
+  },
+  {
+   "index": 152,
+   "skinned": true,
+   "outline": [
+    [
+     1.7594,
+     -43.1025
+    ],
+    [
+     3.9484,
+     -43.3221
+    ],
+    [
+     4.1681,
+     -41.1331
+    ],
+    [
+     1.9791,
+     -40.9135
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    2.9637,
+    -42.1178
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 153,
+   "skinned": true,
+   "outline": [
+    [
+     2.2187,
+     -38.5255
+    ],
+    [
+     4.4077,
+     -38.7451
+    ],
+    [
+     4.6273,
+     -36.5561
+    ],
+    [
+     2.4383,
+     -36.3364
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    3.423,
+    -37.5408
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 154,
+   "skinned": true,
+   "outline": [
+    [
+     2.6779,
+     -33.9484
+    ],
+    [
+     4.8669,
+     -34.1681
+    ],
+    [
+     5.0865,
+     -31.9791
+    ],
+    [
+     2.8975,
+     -31.7594
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    3.8822,
+    -32.9637
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 155,
+   "skinned": true,
+   "outline": [
+    [
+     6.3364,
+     -43.5617
+    ],
+    [
+     8.5255,
+     -43.7813
+    ],
+    [
+     8.7451,
+     -41.5923
+    ],
+    [
+     6.5561,
+     -41.3727
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    7.5408,
+    -42.577
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 156,
+   "skinned": true,
+   "outline": [
+    [
+     6.7957,
+     -38.9847
+    ],
+    [
+     8.9847,
+     -39.2043
+    ],
+    [
+     9.2043,
+     -37.0153
+    ],
+    [
+     7.0153,
+     -36.7957
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    8,
+    -38
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 157,
+   "skinned": true,
+   "outline": [
+    [
+     7.2549,
+     -34.4077
+    ],
+    [
+     9.4439,
+     -34.6273
+    ],
+    [
+     9.6636,
+     -32.4383
+    ],
+    [
+     7.4745,
+     -32.2187
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    8.4592,
+    -33.423
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 158,
+   "skinned": true,
+   "outline": [
+    [
+     10.9135,
+     -44.0209
+    ],
+    [
+     13.1025,
+     -44.2406
+    ],
+    [
+     13.3221,
+     -42.0516
+    ],
+    [
+     11.1331,
+     -41.8319
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    12.1178,
+    -43.0363
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 159,
+   "skinned": true,
+   "outline": [
+    [
+     11.3727,
+     -39.4439
+    ],
+    [
+     13.5617,
+     -39.6636
+    ],
+    [
+     13.7813,
+     -37.4745
+    ],
+    [
+     11.5923,
+     -37.2549
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    12.577,
+    -38.4592
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 160,
+   "skinned": true,
+   "outline": [
+    [
+     11.8319,
+     -34.8669
+    ],
+    [
+     14.0209,
+     -35.0865
+    ],
+    [
+     14.2406,
+     -32.8975
+    ],
+    [
+     12.0516,
+     -32.6779
+    ]
+   ],
+   "floor": -6,
+   "ramp": null,
+   "ceil": 3.3,
+   "open": false,
+   "angle": 0.1,
+   "centre": [
+    13.0363,
+    -33.8822
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 161,
+   "skinned": true,
+   "outline": [
+    [
+     -0.65,
+     75.2
+    ],
+    [
+     0.65,
+     75.2
+    ],
+    [
+     0.65,
+     77.6
+    ],
+    [
+     -0.65,
+     77.6
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.25,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    0,
+    76.4
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 162,
+   "skinned": true,
+   "outline": [
+    [
+     -68.5,
+     -77
+    ],
+    [
+     -63.5,
+     -77
+    ],
+    [
+     -63.5,
+     -63.4
+    ],
+    [
+     -68.5,
+     -63.4
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 6,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -66,
+    -70.2
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 163,
+   "skinned": true,
+   "outline": [
+    [
+     -68.5,
+     -74.4
+    ],
+    [
+     -63.5,
+     -74.4
+    ],
+    [
+     -63.5,
+     -67.4
+    ],
+    [
+     -68.5,
+     -67.4
+    ]
+   ],
+   "floor": -40,
+   "ramp": null,
+   "ceil": 6,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -66,
+    -70.9
+   ],
+   "mat": "void",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 164,
+   "skinned": true,
+   "outline": [
+    [
+     -68.5,
+     -67.4
+    ],
+    [
+     -63.5,
+     -67.4
+    ],
+    [
+     -63.5,
+     -63.4
+    ],
+    [
+     -68.5,
+     -63.4
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 6,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -66,
+    -65.4
+   ],
+   "mat": "stain",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.2,
+   "dead": 0.5,
+   "tag": null
+  },
+  {
+   "index": 165,
+   "skinned": true,
+   "outline": [
+    [
+     19.8,
+     -77
+    ],
+    [
+     24.2,
+     -77
+    ],
+    [
+     24.2,
+     -71
+    ],
+    [
+     19.8,
+     -71
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    22,
+    -74
+   ],
+   "mat": "tile",
+   "wall": "tile",
+   "ceilMat": "tile",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 166,
+   "skinned": true,
+   "outline": [
+    [
+     23.15,
+     -76.7
+    ],
+    [
+     20.85,
+     -76.7
+    ],
+    [
+     20.85,
+     -78.3
+    ],
+    [
+     23.15,
+     -78.3
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.4499999999999997,
+   "open": false,
+   "angle": 3.141592653589793,
+   "centre": [
+    22,
+    -77.5
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 167,
+   "skinned": true,
+   "outline": [
+    [
+     71,
+     -12.2
+    ],
+    [
+     77,
+     -12.2
+    ],
+    [
+     77,
+     -7.8
+    ],
+    [
+     71,
+     -7.8
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    74,
+    -10
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 168,
+   "skinned": true,
+   "outline": [
+    [
+     76.7,
+     -9.1
+    ],
+    [
+     76.7,
+     -10.9
+    ],
+    [
+     78.3,
+     -10.9
+    ],
+    [
+     78.3,
+     -9.1
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.3499999999999996,
+   "open": false,
+   "angle": 1.5707963267948966,
+   "centre": [
+    77.5,
+    -10
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 169,
+   "skinned": true,
+   "outline": [
+    [
+     71,
+     47.8
+    ],
+    [
+     77,
+     47.8
+    ],
+    [
+     77,
+     52.2
+    ],
+    [
+     71,
+     52.2
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    74,
+    50
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 170,
+   "skinned": true,
+   "outline": [
+    [
+     76.7,
+     51.05
+    ],
+    [
+     76.7,
+     48.95
+    ],
+    [
+     78.3,
+     48.95
+    ],
+    [
+     78.3,
+     51.05
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.3499999999999996,
+   "open": false,
+   "angle": 1.5707963267948966,
+   "centre": [
+    77.5,
+    50
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 171,
+   "skinned": true,
+   "outline": [
+    [
+     -77,
+     43.8
+    ],
+    [
+     -71,
+     43.8
+    ],
+    [
+     -71,
+     48.2
+    ],
+    [
+     -77,
+     48.2
+    ]
+   ],
+   "floor": 1.8,
+   "ramp": null,
+   "ceil": 4.8,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -74,
+    46
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 172,
+   "skinned": true,
+   "outline": [
+    [
+     -75.9042,
+     44.9119
+    ],
+    [
+     -47.0369,
+     36.0296
+    ],
+    [
+     -46.0958,
+     39.0881
+    ],
+    [
+     -74.9631,
+     47.9704
+    ]
+   ],
+   "floor": 1.8,
+   "ramp": null,
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.2984989315861793,
+   "centre": [
+    -61,
+    42
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 173,
+   "skinned": true,
+   "outline": [
+    [
+     -76.7,
+     44.65
+    ],
+    [
+     -76.7,
+     47.35
+    ],
+    [
+     -78.3,
+     47.35
+    ],
+    [
+     -78.3,
+     44.65
+    ]
+   ],
+   "floor": 1.8,
+   "ramp": null,
+   "ceil": 4.6499999999999995,
+   "open": false,
+   "angle": 4.71238898038469,
+   "centre": [
+    -77.5,
+    46
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 174,
+   "skinned": true,
+   "outline": [
+    [
+     -77,
+     -26.2
+    ],
+    [
+     -71,
+     -26.2
+    ],
+    [
+     -71,
+     -21.8
+    ],
+    [
+     -77,
+     -21.8
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    -74,
+    -24
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 175,
+   "skinned": true,
+   "outline": [
+    [
+     -76.7,
+     -24.6
+    ],
+    [
+     -76.7,
+     -23.4
+    ],
+    [
+     -78.3,
+     -23.4
+    ],
+    [
+     -78.3,
+     -24.6
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.15,
+   "open": false,
+   "angle": 4.71238898038469,
+   "centre": [
+    -77.5,
+    -24
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 176,
+   "skinned": true,
+   "outline": [
+    [
+     47.8,
+     71
+    ],
+    [
+     52.2,
+     71
+    ],
+    [
+     52.2,
+     77
+    ],
+    [
+     47.8,
+     77
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    50,
+    74
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 177,
+   "skinned": true,
+   "outline": [
+    [
+     49.45,
+     76.7
+    ],
+    [
+     50.55,
+     76.7
+    ],
+    [
+     50.55,
+     78.3
+    ],
+    [
+     49.45,
+     78.3
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.05,
+   "open": false,
+   "angle": 6.283185307179586,
+   "centre": [
+    50,
+    77.5
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 178,
+   "skinned": true,
+   "outline": [
+    [
+     -41.4373,
+     47.1291
+    ],
+    [
+     -47.0866,
+     41.4648
+    ],
+    [
+     -44.5377,
+     38.9226
+    ],
+    [
+     -38.8883,
+     44.5869
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -40.16278997203306,
+    "az": 45.85800491836033,
+    "bx": -45.81214438869821,
+    "bz": 40.19366076613,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": 2.3548695718464248,
+   "centre": [
+    -42.9875,
+    43.0258
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 179,
+   "skinned": true,
+   "outline": [
+    [
+     -60.7558,
+     43.6593
+    ],
+    [
+     -53.9227,
+     39.4988
+    ],
+    [
+     -52.0505,
+     42.5737
+    ],
+    [
+     -58.8836,
+     46.7341
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -59.81966549623487,
+    "az": 45.196707914009764,
+    "bx": -52.986623730103396,
+    "bz": 41.036234356552285,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.5469202532822589,
+   "centre": [
+    -56.4031,
+    43.1165
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 180,
+   "skinned": true,
+   "outline": [
+    [
+     -39.1631,
+     25.5586
+    ],
+    [
+     -42.994,
+     32.5817
+    ],
+    [
+     -46.1544,
+     30.8578
+    ],
+    [
+     -42.3234,
+     23.8347
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -40.74324854887773,
+    "az": 24.69664382076218,
+    "bx": -44.5742183122146,
+    "bz": 31.719725101254287,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": -2.070164793487004,
+   "centre": [
+    -42.6587,
+    28.2082
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 181,
+   "skinned": true,
+   "outline": [
+    [
+     28.9605,
+     33.0293
+    ],
+    [
+     36.9442,
+     32.5193
+    ],
+    [
+     37.1737,
+     36.112
+    ],
+    [
+     29.19,
+     36.622
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": {
+    "ax": 29.07520919380832,
+    "az": 34.82562826836821,
+    "bx": 37.058936651723414,
+    "bz": 34.31563230982284,
+    "ha": 0,
+    "hb": -2.4
+   },
+   "ceil": 5.4,
+   "open": false,
+   "angle": 0.06379275361413599,
+   "centre": [
+    33.0671,
+    34.5706
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 182,
+   "skinned": true,
+   "outline": [
+    [
+     46.8068,
+     49.3626
+    ],
+    [
+     43.5791,
+     42.0426
+    ],
+    [
+     46.8731,
+     40.5901
+    ],
+    [
+     50.1008,
+     47.9101
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": {
+    "ax": 48.453798088323474,
+    "az": 48.63632158849198,
+    "bx": 45.22610096929207,
+    "bz": 41.3163508708049,
+    "ha": 0,
+    "hb": -2.4
+   },
+   "ceil": 5.4,
+   "open": false,
+   "angle": 1.986093805193042,
+   "centre": [
+    46.8399,
+    44.9763
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 183,
+   "skinned": true,
+   "outline": [
+    [
+     42.276,
+     19.9922
+    ],
+    [
+     43.1473,
+     27.9446
+    ],
+    [
+     39.5687,
+     28.3367
+    ],
+    [
+     38.6974,
+     20.3843
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": {
+    "ax": 40.48672764369685,
+    "az": 20.188280872800902,
+    "bx": 41.35802853354102,
+    "bz": 28.140691498476414,
+    "ha": 0,
+    "hb": -2.4
+   },
+   "ceil": 5.4,
+   "open": false,
+   "angle": -1.4616672385837992,
+   "centre": [
+    40.9224,
+    24.1645
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 184,
+   "skinned": true,
+   "outline": [
+    [
+     28.1705,
+     35.2173
+    ],
+    [
+     35.9815,
+     33.4885
+    ],
+    [
+     36.7594,
+     37.0035
+    ],
+    [
+     28.9485,
+     38.7322
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": {
+    "ax": 28.55949154362896,
+    "az": 36.974781575688326,
+    "bx": 36.37046177050674,
+    "bz": 35.24598311582412,
+    "ha": 0,
+    "hb": -2.4
+   },
+   "ceil": 5.4,
+   "open": false,
+   "angle": 0.21781811312889832,
+   "centre": [
+    32.465,
+    36.1104
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 185,
+   "skinned": true,
+   "outline": [
+    [
+     53.0957,
+     45.1158
+    ],
+    [
+     46.8323,
+     40.1388
+    ],
+    [
+     49.0719,
+     37.3203
+    ],
+    [
+     55.3353,
+     42.2973
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": {
+    "ax": 54.21548783578615,
+    "az": 43.70651504516343,
+    "bx": 47.95209473072845,
+    "bz": 38.729577551933716,
+    "ha": 0,
+    "hb": -2.4
+   },
+   "ceil": 5.4,
+   "open": false,
+   "angle": 2.4701486421647183,
+   "centre": [
+    51.0838,
+    41.218
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 186,
+   "skinned": true,
+   "outline": [
+    [
+     -57.4932,
+     30.8275
+    ],
+    [
+     -50.4541,
+     34.629
+    ],
+    [
+     -52.1647,
+     37.7966
+    ],
+    [
+     -59.2038,
+     33.9951
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -58.348516037592034,
+    "az": 32.41131780232724,
+    "bx": -51.30941037122413,
+    "bz": 36.21276376639239,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": -0.49516943904393657,
+   "centre": [
+    -54.829,
+    34.312
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 187,
+   "skinned": true,
+   "outline": [
+    [
+     -44.958,
+     48.8011
+    ],
+    [
+     -48.3339,
+     41.5483
+    ],
+    [
+     -45.0701,
+     40.0291
+    ],
+    [
+     -41.6943,
+     47.282
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -43.32614966919531,
+    "az": 48.0415346389346,
+    "bx": -46.701996181999554,
+    "bz": 40.78869655153823,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": 2.006425409387119,
+   "centre": [
+    -45.0141,
+    44.4151
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 188,
+   "skinned": true,
+   "outline": [
+    [
+     -60.7558,
+     43.6593
+    ],
+    [
+     -53.9227,
+     39.4988
+    ],
+    [
+     -52.0505,
+     42.5737
+    ],
+    [
+     -58.8836,
+     46.7341
+    ]
+   ],
+   "floor": 0,
+   "ramp": {
+    "ax": -59.81966549623487,
+    "az": 45.196707914009764,
+    "bx": -52.986623730103396,
+    "bz": 41.036234356552285,
+    "ha": 0,
+    "hb": 1.8
+   },
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.5469202532822589,
+   "centre": [
+    -56.4031,
+    43.1165
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  }
+ ],
+ "solids": [
+  {
+   "outline": [
+    [
+     -58.8951,
+     17.4015
+    ],
+    [
+     -62.4252,
+     13.2531
+    ],
+    [
+     -62.2348,
+     13.0911
+    ],
+    [
+     -58.7047,
+     17.2395
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -58.3692,
+     22.6121
+    ],
+    [
+     -61.3671,
+     19.089
+    ],
+    [
+     -61.1767,
+     18.927
+    ],
+    [
+     -58.1788,
+     22.45
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     15.5145,
+     -53.9899
+    ],
+    [
+     12.0185,
+     -54.8182
+    ],
+    [
+     12.0762,
+     -55.0615
+    ],
+    [
+     15.5722,
+     -54.2331
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     22.4216,
+     -57.1893
+    ],
+    [
+     17.0489,
+     -54.9802
+    ],
+    [
+     16.9538,
+     -55.2115
+    ],
+    [
+     22.3265,
+     -57.4205
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     58.3205,
+     -19.4853
+    ],
+    [
+     58.3504,
+     -23.838
+    ],
+    [
+     58.6004,
+     -23.8363
+    ],
+    [
+     58.5705,
+     -19.4836
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     57.9009,
+     -15.1501
+    ],
+    [
+     57.9306,
+     -19.4623
+    ],
+    [
+     58.1806,
+     -19.4606
+    ],
+    [
+     58.1509,
+     -15.1484
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -23.7975,
+     -29.443
+    ],
+    [
+     -27.3078,
+     -27.4562
+    ],
+    [
+     -27.4309,
+     -27.6738
+    ],
+    [
+     -23.9206,
+     -29.6605
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -24.1214,
+     -24.2571
+    ],
+    [
+     -26.0075,
+     -32.1659
+    ],
+    [
+     -25.7643,
+     -32.2239
+    ],
+    [
+     -23.8782,
+     -24.3151
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -6.9059,
+     -29.4147
+    ],
+    [
+     -7.1614,
+     -33.9227
+    ],
+    [
+     -6.9118,
+     -33.9369
+    ],
+    [
+     -6.6563,
+     -29.4288
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -8.3224,
+     -29.108
+    ],
+    [
+     -5.1976,
+     -29.285
+    ],
+    [
+     -5.1835,
+     -29.0354
+    ],
+    [
+     -8.3082,
+     -28.8584
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     44.7651,
+     -68.2247
+    ],
+    [
+     50.2932,
+     -68.211
+    ],
+    [
+     50.2926,
+     -67.961
+    ],
+    [
+     44.7644,
+     -67.9747
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -31.8462,
+     54.2146
+    ],
+    [
+     -27.6977,
+     51.1848
+    ],
+    [
+     -27.5503,
+     51.3867
+    ],
+    [
+     -31.6988,
+     54.4165
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     42.8544,
+     64.2308
+    ],
+    [
+     46.2723,
+     64.2249
+    ],
+    [
+     46.2728,
+     64.4749
+    ],
+    [
+     42.8548,
+     64.4808
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     45.2055,
+     64.3155
+    ],
+    [
+     45.1988,
+     60.4206
+    ],
+    [
+     45.4488,
+     60.4202
+    ],
+    [
+     45.4555,
+     64.3151
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -68.7693,
+     44.1392
+    ],
+    [
+     -65.5273,
+     44.2565
+    ],
+    [
+     -65.5364,
+     44.5063
+    ],
+    [
+     -68.7784,
+     44.389
+    ]
+   ],
+   "h": null,
+   "base": 1.8,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -65.0653,
+     56.2587
+    ],
+    [
+     -64.9129,
+     52.0475
+    ],
+    [
+     -64.6631,
+     52.0565
+    ],
+    [
+     -64.8155,
+     56.2677
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     63.7392,
+     55.4403
+    ],
+    [
+     67.0541,
+     50.2672
+    ],
+    [
+     67.2646,
+     50.4021
+    ],
+    [
+     63.9497,
+     55.5752
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -15.1354,
+     11.6091
+    ],
+    [
+     -15.1806,
+     11.8656
+    ],
+    [
+     -15.3108,
+     12.0912
+    ],
+    [
+     -15.5104,
+     12.2587
+    ],
+    [
+     -15.7551,
+     12.3477
+    ],
+    [
+     -16.0156,
+     12.3477
+    ],
+    [
+     -16.2604,
+     12.2587
+    ],
+    [
+     -16.4599,
+     12.0912
+    ],
+    [
+     -16.5901,
+     11.8656
+    ],
+    [
+     -16.6354,
+     11.6091
+    ],
+    [
+     -16.5901,
+     11.3526
+    ],
+    [
+     -16.4599,
+     11.127
+    ],
+    [
+     -16.2604,
+     10.9596
+    ],
+    [
+     -16.0156,
+     10.8705
+    ],
+    [
+     -15.7551,
+     10.8705
+    ],
+    [
+     -15.5104,
+     10.9596
+    ],
+    [
+     -15.3108,
+     11.127
+    ],
+    [
+     -15.1806,
+     11.3526
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -13.1052,
+     23.4361
+    ],
+    [
+     -13.1504,
+     23.6927
+    ],
+    [
+     -13.2806,
+     23.9182
+    ],
+    [
+     -13.4802,
+     24.0857
+    ],
+    [
+     -13.7249,
+     24.1748
+    ],
+    [
+     -13.9854,
+     24.1748
+    ],
+    [
+     -14.2302,
+     24.0857
+    ],
+    [
+     -14.4297,
+     23.9182
+    ],
+    [
+     -14.5599,
+     23.6927
+    ],
+    [
+     -14.6052,
+     23.4361
+    ],
+    [
+     -14.5599,
+     23.1796
+    ],
+    [
+     -14.4297,
+     22.9541
+    ],
+    [
+     -14.2302,
+     22.7866
+    ],
+    [
+     -13.9854,
+     22.6975
+    ],
+    [
+     -13.7249,
+     22.6975
+    ],
+    [
+     -13.4802,
+     22.7866
+    ],
+    [
+     -13.2806,
+     22.9541
+    ],
+    [
+     -13.1504,
+     23.1796
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -6.2651,
+     10.0865
+    ],
+    [
+     -6.3103,
+     10.343
+    ],
+    [
+     -6.4406,
+     10.5686
+    ],
+    [
+     -6.6401,
+     10.736
+    ],
+    [
+     -6.8849,
+     10.8251
+    ],
+    [
+     -7.1453,
+     10.8251
+    ],
+    [
+     -7.3901,
+     10.736
+    ],
+    [
+     -7.5896,
+     10.5686
+    ],
+    [
+     -7.7199,
+     10.343
+    ],
+    [
+     -7.7651,
+     10.0865
+    ],
+    [
+     -7.7199,
+     9.83
+    ],
+    [
+     -7.5896,
+     9.6044
+    ],
+    [
+     -7.3901,
+     9.437
+    ],
+    [
+     -7.1453,
+     9.3479
+    ],
+    [
+     -6.8849,
+     9.3479
+    ],
+    [
+     -6.6401,
+     9.437
+    ],
+    [
+     -6.4406,
+     9.6044
+    ],
+    [
+     -6.3103,
+     9.83
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -4.2349,
+     21.9135
+    ],
+    [
+     -4.2801,
+     22.17
+    ],
+    [
+     -4.4104,
+     22.3956
+    ],
+    [
+     -4.6099,
+     22.563
+    ],
+    [
+     -4.8547,
+     22.6521
+    ],
+    [
+     -5.1151,
+     22.6521
+    ],
+    [
+     -5.3599,
+     22.563
+    ],
+    [
+     -5.5594,
+     22.3956
+    ],
+    [
+     -5.6897,
+     22.17
+    ],
+    [
+     -5.7349,
+     21.9135
+    ],
+    [
+     -5.6897,
+     21.657
+    ],
+    [
+     -5.5594,
+     21.4314
+    ],
+    [
+     -5.3599,
+     21.264
+    ],
+    [
+     -5.1151,
+     21.1749
+    ],
+    [
+     -4.8547,
+     21.1749
+    ],
+    [
+     -4.6099,
+     21.264
+    ],
+    [
+     -4.4104,
+     21.4314
+    ],
+    [
+     -4.2801,
+     21.657
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     2.6052,
+     8.5639
+    ],
+    [
+     2.5599,
+     8.8204
+    ],
+    [
+     2.4297,
+     9.0459
+    ],
+    [
+     2.2302,
+     9.2134
+    ],
+    [
+     1.9854,
+     9.3025
+    ],
+    [
+     1.7249,
+     9.3025
+    ],
+    [
+     1.4802,
+     9.2134
+    ],
+    [
+     1.2806,
+     9.0459
+    ],
+    [
+     1.1504,
+     8.8204
+    ],
+    [
+     1.1052,
+     8.5639
+    ],
+    [
+     1.1504,
+     8.3073
+    ],
+    [
+     1.2806,
+     8.0818
+    ],
+    [
+     1.4802,
+     7.9143
+    ],
+    [
+     1.7249,
+     7.8252
+    ],
+    [
+     1.9854,
+     7.8252
+    ],
+    [
+     2.2302,
+     7.9143
+    ],
+    [
+     2.4297,
+     8.0818
+    ],
+    [
+     2.5599,
+     8.3073
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     4.6354,
+     20.3909
+    ],
+    [
+     4.5901,
+     20.6474
+    ],
+    [
+     4.4599,
+     20.873
+    ],
+    [
+     4.2604,
+     21.0404
+    ],
+    [
+     4.0156,
+     21.1295
+    ],
+    [
+     3.7551,
+     21.1295
+    ],
+    [
+     3.5104,
+     21.0404
+    ],
+    [
+     3.3108,
+     20.873
+    ],
+    [
+     3.1806,
+     20.6474
+    ],
+    [
+     3.1354,
+     20.3909
+    ],
+    [
+     3.1806,
+     20.1344
+    ],
+    [
+     3.3108,
+     19.9088
+    ],
+    [
+     3.5104,
+     19.7413
+    ],
+    [
+     3.7551,
+     19.6523
+    ],
+    [
+     4.0156,
+     19.6523
+    ],
+    [
+     4.2604,
+     19.7413
+    ],
+    [
+     4.4599,
+     19.9088
+    ],
+    [
+     4.5901,
+     20.1344
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -37.8206,
+     -52.3198
+    ],
+    [
+     -37.1228,
+     -52.2639
+    ],
+    [
+     -37.1787,
+     -51.5661
+    ],
+    [
+     -37.8765,
+     -51.6221
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -38.5166,
+     -49.6507
+    ],
+    [
+     -37.8189,
+     -49.5948
+    ],
+    [
+     -37.8748,
+     -48.897
+    ],
+    [
+     -38.5726,
+     -48.9529
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -38.9348,
+     -46.8359
+    ],
+    [
+     -38.237,
+     -46.7799
+    ],
+    [
+     -38.293,
+     -46.0822
+    ],
+    [
+     -38.9907,
+     -46.1381
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -38.5172,
+     -43.7119
+    ],
+    [
+     -37.8195,
+     -43.6559
+    ],
+    [
+     -37.8754,
+     -42.9582
+    ],
+    [
+     -38.5732,
+     -43.0141
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -39.2525,
+     -40.6462
+    ],
+    [
+     -38.5547,
+     -40.5902
+    ],
+    [
+     -38.6106,
+     -39.8925
+    ],
+    [
+     -39.3084,
+     -39.9484
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -39.0015,
+     -37.9213
+    ],
+    [
+     -38.3037,
+     -37.8654
+    ],
+    [
+     -38.3597,
+     -37.1676
+    ],
+    [
+     -39.0574,
+     -37.2236
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -35.045,
+     -52.3725
+    ],
+    [
+     -34.3473,
+     -52.3165
+    ],
+    [
+     -34.4032,
+     -51.6188
+    ],
+    [
+     -35.101,
+     -51.6747
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -35.6759,
+     -49.0965
+    ],
+    [
+     -34.9781,
+     -49.0405
+    ],
+    [
+     -35.034,
+     -48.3428
+    ],
+    [
+     -35.7318,
+     -48.3987
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -35.6191,
+     -46.2796
+    ],
+    [
+     -34.9213,
+     -46.2237
+    ],
+    [
+     -34.9773,
+     -45.5259
+    ],
+    [
+     -35.675,
+     -45.5818
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -36.3923,
+     -40.7342
+    ],
+    [
+     -35.6945,
+     -40.6783
+    ],
+    [
+     -35.7505,
+     -39.9805
+    ],
+    [
+     -36.4482,
+     -40.0364
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -36.0222,
+     -37.3621
+    ],
+    [
+     -35.3244,
+     -37.3061
+    ],
+    [
+     -35.3804,
+     -36.6084
+    ],
+    [
+     -36.0781,
+     -36.6643
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -32.5898,
+     -52.583
+    ],
+    [
+     -31.892,
+     -52.5271
+    ],
+    [
+     -31.948,
+     -51.8293
+    ],
+    [
+     -32.6457,
+     -51.8852
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -32.3123,
+     -49.5992
+    ],
+    [
+     -31.6145,
+     -49.5433
+    ],
+    [
+     -31.6705,
+     -48.8455
+    ],
+    [
+     -32.3682,
+     -48.9015
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -32.5441,
+     -46.2283
+    ],
+    [
+     -31.8464,
+     -46.1724
+    ],
+    [
+     -31.9023,
+     -45.4746
+    ],
+    [
+     -32.6001,
+     -45.5306
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -32.6005,
+     -43.4483
+    ],
+    [
+     -31.9028,
+     -43.3923
+    ],
+    [
+     -31.9587,
+     -42.6946
+    ],
+    [
+     -32.6565,
+     -42.7505
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -33.7391,
+     -37.0833
+    ],
+    [
+     -33.0413,
+     -37.0274
+    ],
+    [
+     -33.0972,
+     -36.3296
+    ],
+    [
+     -33.795,
+     -36.3855
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -29.1386,
+     -51.9073
+    ],
+    [
+     -28.4409,
+     -51.8514
+    ],
+    [
+     -28.4968,
+     -51.1536
+    ],
+    [
+     -29.1946,
+     -51.2096
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -29.9428,
+     -43.2377
+    ],
+    [
+     -29.2451,
+     -43.1818
+    ],
+    [
+     -29.301,
+     -42.484
+    ],
+    [
+     -29.9988,
+     -42.5399
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -30.0947,
+     -39.9938
+    ],
+    [
+     -29.397,
+     -39.9378
+    ],
+    [
+     -29.4529,
+     -39.2401
+    ],
+    [
+     -30.1507,
+     -39.296
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -26.8459,
+     -48.53
+    ],
+    [
+     -26.1482,
+     -48.474
+    ],
+    [
+     -26.2041,
+     -47.7763
+    ],
+    [
+     -26.9019,
+     -47.8322
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -26.5777,
+     -45.9464
+    ],
+    [
+     -25.88,
+     -45.8904
+    ],
+    [
+     -25.9359,
+     -45.1927
+    ],
+    [
+     -26.6337,
+     -45.2486
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -26.799,
+     -39.9465
+    ],
+    [
+     -26.1012,
+     -39.8905
+    ],
+    [
+     -26.1571,
+     -39.1928
+    ],
+    [
+     -26.8549,
+     -39.2487
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -27.1955,
+     -36.7282
+    ],
+    [
+     -26.4977,
+     -36.6723
+    ],
+    [
+     -26.5537,
+     -35.9745
+    ],
+    [
+     -27.2514,
+     -36.0305
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -23.5545,
+     -51.61
+    ],
+    [
+     -22.8567,
+     -51.5541
+    ],
+    [
+     -22.9126,
+     -50.8563
+    ],
+    [
+     -23.6104,
+     -50.9122
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -23.8646,
+     -45.6218
+    ],
+    [
+     -23.1669,
+     -45.5659
+    ],
+    [
+     -23.2228,
+     -44.8681
+    ],
+    [
+     -23.9206,
+     -44.9241
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -23.725,
+     -42.5388
+    ],
+    [
+     -23.0273,
+     -42.4829
+    ],
+    [
+     -23.0832,
+     -41.7851
+    ],
+    [
+     -23.781,
+     -41.841
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -24.4498,
+     -36.657
+    ],
+    [
+     -23.752,
+     -36.6011
+    ],
+    [
+     -23.808,
+     -35.9033
+    ],
+    [
+     -24.5057,
+     -35.9593
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -20.6236,
+     -51.0619
+    ],
+    [
+     -19.9259,
+     -51.0059
+    ],
+    [
+     -19.9818,
+     -50.3082
+    ],
+    [
+     -20.6796,
+     -50.3641
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -20.93,
+     -42.2021
+    ],
+    [
+     -20.2322,
+     -42.1462
+    ],
+    [
+     -20.2882,
+     -41.4484
+    ],
+    [
+     -20.9859,
+     -41.5044
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -21.4838,
+     -39.1062
+    ],
+    [
+     -20.786,
+     -39.0503
+    ],
+    [
+     -20.842,
+     -38.3525
+    ],
+    [
+     -21.5397,
+     -38.4085
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -21.3474,
+     -36.1819
+    ],
+    [
+     -20.6497,
+     -36.1259
+    ],
+    [
+     -20.7056,
+     -35.4282
+    ],
+    [
+     -21.4034,
+     -35.4841
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -17.3151,
+     -50.9479
+    ],
+    [
+     -16.6173,
+     -50.892
+    ],
+    [
+     -16.6732,
+     -50.1942
+    ],
+    [
+     -17.371,
+     -50.2502
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -17.3709,
+     -45.3825
+    ],
+    [
+     -16.6732,
+     -45.3265
+    ],
+    [
+     -16.7291,
+     -44.6288
+    ],
+    [
+     -17.4269,
+     -44.6847
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -18.129,
+     -41.9111
+    ],
+    [
+     -17.4312,
+     -41.8551
+    ],
+    [
+     -17.4872,
+     -41.1574
+    ],
+    [
+     -18.1849,
+     -41.2133
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     -18.5346,
+     -39.3076
+    ],
+    [
+     -17.8368,
+     -39.2517
+    ],
+    [
+     -17.8928,
+     -38.5539
+    ],
+    [
+     -18.5905,
+     -38.6098
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": "wallpaper",
+   "tag": null
+  },
+  {
+   "outline": [
+    [
+     9.6353,
+     55.8744
+    ],
+    [
+     9.7281,
+     56.2635
+    ],
+    [
+     9.339,
+     56.3563
+    ],
+    [
+     9.2462,
+     55.9672
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": "pillar"
+  },
+  {
+   "outline": [
+    [
+     4.9662,
+     56.9879
+    ],
+    [
+     5.059,
+     57.377
+    ],
+    [
+     4.6699,
+     57.4697
+    ],
+    [
+     4.5771,
+     57.0807
+    ]
+   ],
+   "h": null,
+   "base": 0,
+   "wall": null,
+   "tag": "pillar"
+  }
+ ]
+}

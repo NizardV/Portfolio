@@ -249,8 +249,9 @@ for (const e of EXITS) {
 }
 
 /* ---------- the place ---------- */
-// order matters: later shapes win where they overlap (corridors < rooms < ramps and pits < vestibules)
-const allShapes: Shape[] = [...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules];
+// order matters: later shapes win where they overlap (corridors < rooms < pits < vestibules < ramps). Ramps come last:
+// a ramp always owns its footprint (a flat passage placed after one cut a cliff into the stage's ramp)
+const allShapes: Shape[] = [...corridors, ...fillers, ...LANDMARKS, ...features, ...vestibules, ...ramps];
 
 /**
  * A connector (ramp, feature, vestibule) that lies mostly inside a taller room takes that room's ceiling: placed after
@@ -278,9 +279,9 @@ for (let k = corridors.length + fillers.length + LANDMARKS.length; k < allShapes
 /**
  * Slice 0, the first stretch rebuilt for realism (zone sheet: https://claude.ai/artifact/XX4DDwunTTo4mYESZPvp2H): the
  * arrival room, its slanted corridor, the stained room, the long corridor, the pentagon and the heptagon. Their walls,
- * floors and ceilings come from a Blender model (tools/blender/greybox.py → public/hub/models/skins/slice0.glb), not from
- * the kit; collisions still come from here. Indices into the seeded list, checked against the arrival room's tag: if the
- * generator ever changes, the slice falls back to the kit instead of skinning the wrong rooms.
+ * floors and ceilings come with the rest of the Lobby from its Blender model (see below); this is where its memories are,
+ * and its pillars. Indices into the seeded list, checked against the arrival room's tag: if the generator ever changes,
+ * the slice's memories and pillars are left out instead of landing in the wrong rooms.
  */
 export const SLICE0 = [149, 0, 133, 98, 137, 123];
 export const SLICE0_READY = allShapes[149]?.tag === "arrival";
@@ -292,8 +293,14 @@ export const SLICE0_READY = allShapes[149]?.tag === "arrival";
 export type Memory = { id: string; kind: "trace" | "objet" | "evenement" | "change"; x: number; y: number; z: number; ry: number };
 export const SLICE0_MEMORIES: Memory[] = [];
 
+/**
+ * The whole Lobby is drawn by its Blender model (tools/blender/skin.py → public/hub/models/skins/lobby.glb), built from
+ * this very plan: exact straight walls, clean joints between rooms, ceiling tiles and their lights on each room's grid,
+ * baseboards. The kit only lays the railings; collisions come from here, as before.
+ */
+for (let k = 0; k < allShapes.length; k++) allShapes[k] = { ...allShapes[k], skin: "lobby" };
+
 if (SLICE0_READY) {
-  for (const i of SLICE0) allShapes[i] = { ...allShapes[i], skin: "slice0" };
   // no random partitions in the slice: what stands there is placed on purpose, on the tile grid
   for (let k = solids.length - 1; k >= 0; k--) {
     const so = solids[k];

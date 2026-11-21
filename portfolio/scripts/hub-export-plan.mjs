@@ -1,7 +1,7 @@
 /**
  * Exports what Blender needs to draw a skin (Shape.skin) from the game's own plan: the skinned rooms and every room
  * around them (exact outlines, floor and ceiling heights, the order that decides who owns an overlap), the solids standing
- * in them, and each room's 60 cm tile grid. tools/blender/greybox.py reads it.
+ * in them, and each room's 60 cm tile grid. tools/blender/skin.py reads it.
  * Usage, from portfolio/: node scripts/hub-export-plan.mjs <PLACE> <skin>      e.g. LOBBY slice0
  * Output: tools/blender/plans/<skin>.json
  */
@@ -26,6 +26,11 @@ const box = skinned.map(([s]) => sdf.geomBounds(s)).reduce((a, b) => [Math.min(a
 const near = (b) => b[0] < box[2] + 2 && b[2] > box[0] - 2 && b[1] < box[3] + 2 && b[3] > box[1] - 2;
 const round = (pts) => pts.map(([x, z]) => [+x.toFixed(4), +z.toFixed(4)]);
 const centre = (s) => (s.kind === "capsule" ? [(s.ax + s.bx) / 2, (s.az + s.bz) / 2] : [s.x, s.z]);
+// the ceiling's look, as archi/build.ts picks it
+const ceilingKey = (s) => {
+  if (s.ceilMat) return s.ceilMat;
+  return { tile: "tile", concrete: "concrete", marble: "plaster" }[s.mat] ?? "ceiling";
+};
 const floorOf = (f) => {
   if (f === undefined) return 0;
   return typeof f === "number" ? f : Math.min(f.ha, f.hb);
@@ -39,17 +44,24 @@ const rooms = sp.shapes
     skinned: s.skin === skin,
     outline: round(build.solidOutline(s)),
     floor: floorOf(s.floor),
-    ramp: typeof s.floor === "object",
+    ramp: typeof s.floor === "object" ? s.floor : null,
     ceil: s.open ? floorOf(s.floor) + 8 : s.ceil,
     open: !!s.open,
     angle: "a" in s && s.a ? s.a : 0,
     centre: centre(s).map((v) => +v.toFixed(4)),
     mat: s.mat ?? "carpet",
+    wall: s.wall ?? "wallpaper",
+    ceilMat: ceilingKey(s),
+    lights: s.lights ?? 0,
+    dead: s.dead ?? 0.12,
     tag: s.tag ?? null,
   }));
 const solids = sp.solids
   .filter((so) => !so.ghost && near(sdf.geomBounds(so)))
-  .map((so) => ({ outline: round(build.solidOutline(so)), h: so.h ?? null, tag: so.tag ?? null }));
+  .map((so) => {
+    const [x0, z0, x1, z1] = sdf.geomBounds(so);
+    return { outline: round(build.solidOutline(so)), h: so.h ?? null, base: sp.ground((x0 + x1) / 2, (z0 + z1) / 2), wall: so.mat ?? null, tag: so.tag ?? null };
+  });
 
 const out = path.join(process.cwd(), "tools/blender/plans", `${skin}.json`);
 fs.mkdirSync(path.dirname(out), { recursive: true });

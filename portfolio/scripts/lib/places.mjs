@@ -58,9 +58,9 @@ export async function loadPlaces() {
 
 /**
  * The triangles of a .glb, in world space, as one BufferGeometry (position + index only). Enough for rays: no textures
- * are decoded, so it works without a browser.
+ * are decoded, so it works without a browser. skip: node names left out (a skin's "trims": baseboards and beams).
  */
-export function readGlb(file, THREE, mergeGeometries) {
+export function readGlb(file, THREE, mergeGeometries, { skip = [] } = {}) {
   const buf = fs.readFileSync(file);
   const jsonLen = buf.readUInt32LE(12);
   const gltf = JSON.parse(buf.subarray(20, 20 + jsonLen).toString("utf8"));
@@ -81,6 +81,7 @@ export function readGlb(file, THREE, mergeGeometries) {
   const parts = [];
   const visit = (n, parent) => {
     const node = gltf.nodes[n];
+    if (skip.includes(node.name)) return;
     const m = new THREE.Matrix4();
     if (node.matrix) m.fromArray(node.matrix);
     else m.compose(new THREE.Vector3(...(node.translation ?? [0, 0, 0])), new THREE.Quaternion(...(node.rotation ?? [0, 0, 0, 1])), new THREE.Vector3(...(node.scale ?? [1, 1, 1])));

@@ -7,7 +7,7 @@ import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
 import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
-import Skin from "../../archi/Skin";
+import { useSkin } from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
 
@@ -325,17 +325,16 @@ function MemoryMarkers() {
 
 function Lobby() {
   const built = use(lobbyBuilt(!usePreview())); // urgent when standing in it, not through a doorway
+  // drawn by its Blender model; the kit adds the railings, and lights the tiles the model lit
+  const skin = useSkin("lobby", LOBBY_PALETTE);
+  const lit = useMemo(() => ({ ...built, panels: [...built.panels, ...skin.panels] }), [built, skin.panels]);
   return (
     <>
       <Atmosphere background={FOG} fog={FOG} density={0.042} />
       <hemisphereLight args={["#fff2c4", "#3a3016", 0.38]} />
-      <Architecture built={built} palette={LOBBY_PALETTE} flicker={0.06} />
-      {SLICE0_READY && (
-        <>
-          <Skin name="slice0" />
-          <MemoryMarkers />
-        </>
-      )}
+      <Architecture built={lit} palette={LOBBY_PALETTE} flicker={0.06} />
+      <primitive object={skin.model} />
+      {SLICE0_READY && <MemoryMarkers />}
       <Gallery />
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}
