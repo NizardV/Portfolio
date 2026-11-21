@@ -10,7 +10,7 @@ import path from "path";
 import { loadPlaces } from "./lib/places.mjs";
 
 const [placeName, skin] = process.argv.slice(2);
-if (!placeName || !skin) {
+if (!placeName || !skin || !/^[a-z0-9_-]+$/.test(skin)) {
   console.error("usage: node scripts/hub-export-plan.mjs <PLACE> <skin>");
   process.exit(1);
 }
@@ -26,7 +26,10 @@ const box = skinned.map(([s]) => sdf.geomBounds(s)).reduce((a, b) => [Math.min(a
 const near = (b) => b[0] < box[2] + 2 && b[2] > box[0] - 2 && b[1] < box[3] + 2 && b[3] > box[1] - 2;
 const round = (pts) => pts.map(([x, z]) => [+x.toFixed(4), +z.toFixed(4)]);
 const centre = (s) => (s.kind === "capsule" ? [(s.ax + s.bx) / 2, (s.az + s.bz) / 2] : [s.x, s.z]);
-const floorOf = (f) => (f === undefined ? 0 : typeof f === "number" ? f : Math.min(f.ha, f.hb));
+const floorOf = (f) => {
+  if (f === undefined) return 0;
+  return typeof f === "number" ? f : Math.min(f.ha, f.hb);
+};
 
 const rooms = sp.shapes
   .map((s, index) => ({ s, index }))

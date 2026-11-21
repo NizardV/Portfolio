@@ -49,7 +49,10 @@ const at = (() => {
     return { id: `A${String(k + 1).padStart(2, "0")}`, x, z, yaw: (yaw * Math.PI) / 180, pitch: (Number(pitch) * Math.PI) / 180, label: `vue demandée ${k + 1}` };
   });
 })();
-const OUT = path.join(os.tmpdir(), "hub-tour", only ? `${zoneId}-recheck` : at ? `${zoneId}-at` : zoneId);
+let outName = zoneId;
+if (only) outName = `${zoneId}-recheck`;
+else if (at) outName = `${zoneId}-at`;
+const OUT = path.join(os.tmpdir(), "hub-tour", outName);
 const SHOT = { w: 960, h: 540 };
 // next itself, not `pnpm build` / `pnpm exec`: those reinstall node_modules when the local pnpm is not the repo's
 const NEXT = path.join(ROOT, "node_modules/next/dist/bin/next");

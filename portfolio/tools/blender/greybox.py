@@ -14,6 +14,7 @@ Axes: game (x, height, z) is Blender (x, -y, z) here; the glTF export (+Y up) tu
 import json
 import math
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -110,6 +111,9 @@ def in_volume(rooms, solids, x, y, z):
 
 
 def build(skin):
+    # a skin name is a plain identifier: it names files, and must never reach outside plans/ or skins/
+    if not re.fullmatch(r"[a-z0-9_-]+", skin):
+        raise SystemExit(f"invalid skin name: {skin!r}")
     here = os.path.dirname(__file__)
     with open(os.path.join(here, "plans", f"{skin}.json"), encoding="utf-8") as f:
         plan = json.load(f)
