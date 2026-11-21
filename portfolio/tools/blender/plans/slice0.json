@@ -26,7 +26,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.7002639653743246,
+   "ceil": 2.75,
    "open": false,
    "angle": 1.0782498314628148,
    "centre": [
@@ -59,7 +59,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.081734541861806,
+   "ceil": 2.75,
    "open": false,
    "angle": 2.96699768351285,
    "centre": [
@@ -92,7 +92,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.9417570640682245,
+   "ceil": 2.75,
    "open": false,
    "angle": 3.114760879542487,
    "centre": [
@@ -125,7 +125,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.7845478165079838,
+   "ceil": 2.75,
    "open": false,
    "angle": -1.4483486163293682,
    "centre": [
@@ -158,7 +158,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.0686016863095573,
+   "ceil": 2.75,
    "open": false,
    "angle": -1.9683739118916448,
    "centre": [
@@ -191,7 +191,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.916948036046233,
+   "ceil": 2.75,
    "open": false,
    "angle": -0.8093002247206794,
    "centre": [
@@ -224,7 +224,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.916948036046233,
+   "ceil": 2.75,
    "open": false,
    "angle": 0.06379275361413599,
    "centre": [
@@ -257,7 +257,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.7715932680875994,
+   "ceil": 2.75,
    "open": false,
    "angle": 1.6799254150059941,
    "centre": [
@@ -290,7 +290,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.7715932680875994,
+   "ceil": 2.75,
    "open": false,
    "angle": 2.3424301234997835,
    "centre": [
@@ -323,7 +323,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.065947143791709,
+   "ceil": 2.75,
    "open": false,
    "angle": -2.923774540460895,
    "centre": [
@@ -356,7 +356,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.065947143791709,
+   "ceil": 2.75,
    "open": false,
    "angle": 2.178267069354352,
    "centre": [
@@ -389,7 +389,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.7667134895571506,
+   "ceil": 2.75,
    "open": false,
    "angle": 1.8384334667275462,
    "centre": [
@@ -422,7 +422,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.858582781266887,
+   "ceil": 2.75,
    "open": false,
    "angle": -1.669876559474027,
    "centre": [
@@ -455,7 +455,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.842846092558466,
+   "ceil": 2.75,
    "open": false,
    "angle": -1.7821617515953427,
    "centre": [
@@ -488,7 +488,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.0859405137831346,
+   "ceil": 2.75,
    "open": false,
    "angle": 0.9070314778237626,
    "centre": [
@@ -521,7 +521,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.5750868258299304,
+   "ceil": 2.75,
    "open": false,
    "angle": -0.04621655526570975,
    "centre": [
@@ -566,7 +566,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 3.264266607025638,
+   "ceil": 2.75,
    "open": false,
    "angle": 2.7096618292853236,
    "centre": [
@@ -599,7 +599,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.9763495858525855,
+   "ceil": 2.75,
    "open": false,
    "angle": -1.3366879969575558,
    "centre": [
@@ -636,7 +636,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.9690011910395695,
+   "ceil": 2.75,
    "open": false,
    "angle": 0.381061642896384,
    "centre": [
@@ -735,7 +735,7 @@
    ],
    "floor": 0,
    "ramp": false,
-   "ceil": 2.8,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [

@@ -5,6 +5,21 @@ Référence commune au constructeur (avant de livrer) et à l'agent `hub-critic`
 le rêve ; une anomalie bien posée le renforce. La question à se poser devant chaque bizarrerie : « un joueur
 croira-t-il que c'est fait exprès ? »
 
+## Règle d'or : la corruption touche le *quoi*, jamais le *comment* (2026-11-21)
+
+- Le **quoi** (le plan, la logique) peut être fou : pièce plus grande que son bâtiment, couloir qui boucle, estrade au
+  milieu de nulle part. Le **comment** (la construction) est toujours propre, comme dans un vrai bâtiment : c'est ce qui
+  fait les Backrooms de Kane Pixels.
+- **Une étrangeté voulue est déclarée** dans les données du plan, avec un nom (`repeat`, `decale`, `papier-tourne`,
+  `trop-haut`…), entière, rare (1 ou 2 par pièce), au service de l'histoire, et si possible elle disparaît quand le
+  souvenir revient. **Tout ce qui est bizarre et non déclaré est un bug.**
+- Un « accident heureux » repéré en jeu peut être **promu** : on le déclare, puis on le construit proprement.
+- Contrôles automatiques de construction (`hub:audit`) : *hanging* (pan dont le bas ne repose sur rien), *floating*
+  (plafond abaissé qui pend au-dessus d'un sol libre), *rail* (garde-corps dans un mur), *skewed* (plafonnier hors de la
+  grille des dalles de sa pièce). Aucun n'est jamais voulu.
+- **Avant de montrer une preview** : ces contrôles à zéro (hors étrangetés déclarées), critique sans bloquant ni
+  important. L'utilisateur juge l'ambiance, il ne fait pas la recette.
+
 ## A. Bugs (toujours à corriger)
 - Objet qui flotte, s'enfonce dans le sol ou traverse un mur sans intention lisible.
 - Objet qu'on traverse en marchant (pas de collision) ou mur invisible qui bloque.

@@ -1,4 +1,4 @@
-import { geomDist, Space, type Shape, type Solid } from "./archi/sdf";
+import { geomBounds, geomDist, Space, type Shape, type Solid } from "./archi/sdf";
 import { back, lazyBuilt, throat } from "./places/common";
 import type { Interactable } from "./zones";
 
@@ -33,6 +33,13 @@ export type Exit = {
   text?: string;
 };
 
+/**
+ * The ceiling of every ordinary room and corridor: low and the same everywhere, as on Level 0. Only landmarks rise above
+ * it. (Each room used to draw its own height: wherever two of them overlap, and they always do, a soffit hung in the
+ * middle of a room, the boxes floating over open floor that hub:audit now calls « floating » / « hanging ».)
+ */
+export const STD_CEIL = 2.75;
+
 /* ---------- landmarks ---------- */
 type Room = Shape & { cx: number; cz: number };
 const room = (s: Shape): Room => ({ ...s, cx: "x" in s ? s.x : (s.ax + s.bx) / 2, cz: "z" in s ? s.z : (s.az + s.bz) / 2 });
@@ -50,7 +57,7 @@ export const STAGE = room({ kind: "box", x: -48, z: 38, w: 20, d: 14, a: 0.6, fl
 export const HOLES_ROOM = room({ kind: "box", x: 8, z: -38, w: 18, d: 18, a: 0.1, ceil: 3.3, lights: 3, tag: "holes" });
 const FOREST = room({ kind: "box", x: -28, z: -44, w: 26, d: 20, a: -0.08, ceil: 6.5, lights: 3.4, dead: 0.45, mat: "stain" });
 const SHAFT = room({ kind: "box", x: 60, z: 2, w: 6, d: 14, a: 0.9, ceil: 18, lights: 2.4 });
-const ARRIVAL_ROOM = room({ kind: "box", x: 0, z: 70, w: 8, d: 12, ceil: 2.8, lights: 2.6, tag: "arrival" });
+const ARRIVAL_ROOM = room({ kind: "box", x: 0, z: 70, w: 8, d: 12, ceil: STD_CEIL, lights: 2.6, tag: "arrival" });
 const LANDMARKS: Room[] = [HALL, ROTUNDA, TRIANGLE, PLAZA, STAGE, HOLES_ROOM, FOREST, SHAFT, ARRIVAL_ROOM];
 
 /* ---------- seeded filler rooms ---------- */
@@ -63,7 +70,10 @@ for (let tries = 0; fillers.length < 34 && tries < 900; tries++) {
   if (all.some((r) => geomDist(r, x, z) < size * 0.35)) continue; // overlaps are fine, swallowing is not
   const t = rnd();
   const tall = rnd() < 0.14;
-  const ceil = tall ? range(5, 8) : range(2.55, 3.4);
+  // still drawn, unused: the seeded layout must not move (each draw shifts every later one)
+  if (tall) range(5, 8);
+  else range(2.55, 3.4);
+  const ceil = STD_CEIL;
   const base = { ceil, lights: range(2.6, 3.4), dead: range(0.08, 0.3), mat: (rnd() < 0.3 ? "stain" : "carpet") as Shape["mat"] };
   const skew = rnd() < 0.35 ? range(-Math.PI, Math.PI) : range(-0.06, 0.06); // most rooms almost straight, some badly askew
   if (t < 0.55) fillers.push(room({ kind: "box", x, z, w: size, d: size * range(0.6, 1.4), a: skew, ...base }));
@@ -82,7 +92,8 @@ const corridors: Shape[] = [];
 const ramps: Shape[] = [];
 function corridor(ax: number, az: number, bx: number, bz: number, opts: { w?: number; ceil?: number; bend?: boolean } = {}) {
   const w = opts.w ?? range(2.3, 3.6);
-  const ceil = opts.ceil ?? range(2.55, 3.1);
+  if (opts.ceil === undefined) range(2.55, 3.1); // still drawn, unused (see STD_CEIL)
+  const ceil = opts.ceil ?? STD_CEIL;
   const pts: [number, number][] = [[ax, az]];
   if (opts.bend ?? rnd() < 0.45) {
     const mx = (ax + bx) / 2;
@@ -240,6 +251,29 @@ for (const e of EXITS) {
 /* ---------- the place ---------- */
 // order matters: later shapes win where they overlap (corridors < rooms < ramps and pits < vestibules)
 const allShapes: Shape[] = [...corridors, ...fillers, ...LANDMARKS, ...ramps, ...features, ...vestibules];
+
+/**
+ * A connector (ramp, feature, vestibule) that lies mostly inside a taller room takes that room's ceiling: placed after
+ * it, it would own the ceiling there and hang a slab in the middle of the room (the passages over the stage, the hotel's
+ * landing). Door throats lie outside the rooms: they keep their height, a lintel in the wall.
+ */
+for (let k = corridors.length + fillers.length + LANDMARKS.length; k < allShapes.length; k++) {
+  const s = allShapes[k];
+  if (s.open) continue;
+  const [x0, z0, x1, z1] = geomBounds(s);
+  let inside = 0;
+  let under = 0;
+  let top = s.ceil;
+  for (let x = x0 + 0.25; x < x1; x += 0.5) for (let z = z0 + 0.25; z < z1; z += 0.5) {
+    if (geomDist(s, x, z) >= 0) continue;
+    inside++;
+    const higher = allShapes.slice(0, k).filter((o) => !o.open && o.ceil > s.ceil + 0.05 && geomDist(o, x, z) < 0);
+    if (!higher.length) continue;
+    under++;
+    top = Math.max(top, ...higher.map((o) => o.ceil));
+  }
+  if (inside && under / inside > 0.5) allShapes[k] = { ...s, ceil: top };
+}
 
 /**
  * Slice 0, the first stretch rebuilt for realism (zone sheet: https://claude.ai/artifact/XX4DDwunTTo4mYESZPvp2H): the

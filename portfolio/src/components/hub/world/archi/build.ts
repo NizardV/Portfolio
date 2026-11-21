@@ -7,7 +7,7 @@ import { floorAt, geomBounds, geomDist, type Geom, type Shape, type Space, type 
 /** world-metre size of one texture repeat, per material */
 export const TILE: Record<string, number> = {
   wallpaper: 2, tile: 0.9, concrete: 3, plaster: 3, panel: 1.2, sky: 7, lawn: 5,
-  carpet: 3, stain: 3, wood: 2.4, marble: 2.5, void: 3, ceiling: 1.2, trim: 1,
+  carpet: 3, stain: 3, wood: 2.4, marble: 2.5, void: 3, ceiling: 0.6, trim: 1, // ceiling: one 60 cm tile
 };
 
 const STEP = 0.4; // contour resolution, metres
@@ -119,11 +119,24 @@ function around(space: Space, i: number, x: number, z: number, d: number, out: A
  * rounded to whole tiles, kept 30 cm off the walls. One per room is dead, as on the zone sheet.
  */
 export const TILE_GRID = 0.6;
-function tilePanels(space: Space, i: number): Panel[] {
-  const s = space.shapes[i];
-  const a = "a" in s && s.a ? s.a : 0;
+/** the way a shape's walls run: its own angle, or a capsule's axis */
+function tileAngle(s: Shape): number {
+  if (s.kind === "capsule") return Math.atan2(-(s.bz - s.az), s.bx - s.ax);
+  return "a" in s && s.a ? s.a : 0;
+}
+
+/** a shape's tile grid: cos and sin of its angle, and its centre (the origin) */
+function tileFrame(s: Shape): [number, number, number, number] {
+  const a = tileAngle(s);
   const cx = s.kind === "capsule" ? (s.ax + s.bx) / 2 : s.x;
   const cz = s.kind === "capsule" ? (s.az + s.bz) / 2 : s.z;
+  return [Math.cos(a), Math.sin(a), cx, cz];
+}
+
+function tilePanels(space: Space, i: number): Panel[] {
+  const s = space.shapes[i];
+  const a = tileAngle(s);
+  const [, , cx, cz] = tileFrame(s);
   const [x0, z0, x1, z1] = geomBounds(s);
   const reach = Math.hypot(x1 - x0, z1 - z0) / 2;
   const step = Math.max(2, Math.round((s.lights ?? 3) / TILE_GRID)) * TILE_GRID;
@@ -444,6 +457,9 @@ function* buildSteps(space: Space): Steps<Built> {
     const [loops, floorLoops, ceilLoops] = yield* contourSetSteps(fields, 3, x0 - STEP * 2, z0 - STEP * 2, x1 + STEP * 2, z1 + STEP * 2, STEP);
     if (!loops.length) continue;
     /** ramp is where a sloping floor starts (0) and stops (1): the height bends there, so triangles are cut along it */
+    // a ceiling's tiles run along the room's own walls, from its centre: the grid its lights are laid on (tilePanels)
+    const [gc, gs, gx, gz] = tileFrame(s);
+    const alongRoom = ([x, z]: Pt): [number, number] => [(x - gx) * gc - (z - gz) * gs, (x - gx) * gs + (z - gz) * gc];
     const surface = (outline: Pt[][], b: Builder, y: (x: number, z: number) => number, ny: number, tile: number, ramp?: (x: number, z: number) => number) => {
       const outers = outline.filter((l) => loopArea(l) < 0);
       const holes = outline.filter((l) => loopArea(l) >= 0);
@@ -453,7 +469,10 @@ function* buildSteps(space: Space): Steps<Built> {
         if (geomDist(s, x, z) > 0.005) return 0.008;
         return space.laterDist(i, x, z) < -0.005 ? 0.004 : 0;
       };
-      const vert = ([x, z]: Pt) => b.vert(x, y(x, z) - ny * back(x, z), z, 0, ny, 0, x / tile, z / tile);
+      const vert = ([x, z]: Pt) => {
+        const [u, v] = ny < 0 ? alongRoom([x, z]) : [x, z];
+        return b.vert(x, y(x, z) - ny * back(x, z), z, 0, ny, 0, u / tile, v / tile);
+      };
       // facing up (floors) or down (ceilings)
       const face = (p: Pt, q: Pt, r: Pt, ip: number, iq: number, ir: number) => {
         const up = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]) < 0;
@@ -551,25 +570,7 @@ function* buildSteps(space: Space): Steps<Built> {
     }
 
     /* ---- ceiling lights, aligned with the shape ---- */
-    if (s.skin && s.lights && !s.open) panels.push(...tilePanels(space, i));
-    else if (s.lights && !s.open) {
-      const a = "a" in s && s.a ? s.a : s.kind === "capsule" ? Math.atan2(-(s.bz - s.az), s.bx - s.ax) : 0;
-      const spacing = s.lights;
-      const cx = s.kind === "capsule" ? (s.ax + s.bx) / 2 : s.x;
-      const cz = s.kind === "capsule" ? (s.az + s.bz) / 2 : s.z;
-      const reach = Math.hypot(x1 - x0, z1 - z0) / 2;
-      const c = Math.cos(a);
-      const sn = Math.sin(a);
-      let seed = (i + 1) * 9301;
-      const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-      for (let u = -reach; u <= reach; u += spacing) for (let v = -reach; v <= reach; v += spacing) {
-        const x = cx + u * c + v * sn;
-        const z = cz - u * sn + v * c;
-        if (space.ownerIndex(x, z) !== i || !space.fits(x, z, 0.7)) continue;
-        const big = s.ceil > 6;
-        panels.push({ x, y: s.ceil - 0.02, z, a, size: big ? [1.6, 1.6] : [1.2, 0.6], dead: rnd() < (s.dead ?? 0.12) });
-      }
-    }
+    if (s.lights && !s.open) panels.push(...tilePanels(space, i));
   }
 
   const flat = [...flats.geometries()];
