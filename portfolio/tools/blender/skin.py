@@ -131,9 +131,21 @@ def inset(outline, d):
     return out
 
 
+# one tile grid for the whole place (2026-11-22, the user's call): every ceiling runs the same way from the same origin,
+# like a real office floor; no seams where two rooms meet, a room set askew gets its tiles cut along its walls.
+# SKIN_GRID=room goes back to each room's own grid (its angle, from its centre).
+GLOBAL_GRID = os.environ.get("SKIN_GRID", "global") == "global"
+
+
 def frame(r):
-    """A room's tile grid: cos, sin of its angle, and its centre (the origin). Same as archi/build.ts tileFrame."""
+    """A room's tile grid: cos, sin of its angle, and its origin. The place's single grid, or the room's own."""
+    if GLOBAL_GRID:
+        return 1.0, 0.0, 0.0, 0.0
     return math.cos(r["angle"]), math.sin(r["angle"]), r["centre"][0], r["centre"][1]
+
+
+def grid_angle(r):
+    return 0.0 if GLOBAL_GRID else r["angle"]
 
 
 # ---------------------------------------------------------------- volumes
@@ -293,7 +305,9 @@ def grid_fits(heading, angle):
 
 def same_grid(a, b):
     """Do two rooms lay their ceiling tiles on one grid (same angle mod 90°, origins a whole number of tiles apart)?"""
-    m = (a["angle"] - b["angle"]) % (math.pi / 2)
+    if GLOBAL_GRID:
+        return True
+    m = (grid_angle(a) - grid_angle(b)) % (math.pi / 2)
     if min(m, math.pi / 2 - m) > math.radians(0.5):
         return False
     cos_a, sin_a, cx, cz = frame(a)
@@ -505,7 +519,9 @@ def lights(plan):
         big = not low and (r["ceil"] > 3.6 or area > 150)
         size = 2 * GRID if big else GRID
         # a 1.2 m fitting every 3.6 m at least (every 2.4 m, a quarter of a hall's ceiling was light: burnt white)
-        step = step or max(6 if big else 3, round(r["lights"] / GRID)) * GRID
+        # one rhythm for the whole place, so rows of lights run on from room to room: a tube every 4 tiles (2.4 m), a 1.2 m
+        # fitting every 8 tiles (4.8 m, every other row of the tubes' lattice)
+        step = step or (8 if big else 4) * GRID
         cos_a, sin_a, cx, cz = frame(r)
         reach = math.hypot(x1 - x0, z1 - z0) / 2
         half = size / 2 + margin
@@ -530,7 +546,7 @@ def lights(plan):
             # never two dead in a row (only every other light may die, twice as often): a corridor whose 3 tubes all
             # drew "dead" went black
             dead = count % 2 == 1 and (math.sin(r["index"] * 12.9898 + count * 78.233) * 43758.5453) % 1 < 2 * min(0.15, r["dead"])
-            panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(r["angle"], 5), size, dead])
+            panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(grid_angle(r), 5), size, dead])
             taken.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
             count += 1
             if limit and count >= limit:

@@ -42,6 +42,12 @@ marching squares : arêtes droites, raccords nets, plafonniers dans les dalles.
   `Skin.tsx`) ; lissée (flou gaussien limité aux pixels cuits). Côté jeu : `MeshBasicMaterial` texture × lumière cuite,
   les lampes mobiles (`Architecture`) n'éclairent plus que les objets (intensité de la palette baissée en conséquence).
   Les lampes mobiles près du plafond crament les dalles : ne pas revenir à l'éclairage dynamique des murs.
+- **Une seule grille de dalles par lieu** (2026-11-22, choix de l'utilisateur) : même sens, même origine partout
+  (`skin.py` `GLOBAL_GRID`, `SKIN_GRID=room` pour revenir aux grilles par pièce) ; une pièce de biais a ses dalles
+  coupées le long de ses murs ; pas de poutres. Néons sur un même rythme : un tube toutes les 4 dalles, un 2 × 2 toutes
+  les 8 dans les grandes salles ; on retire un néon qui tomberait sur un pilier ou à moins de 30 cm d'un mur.
+- **Murets posés sur le plan** (`archi/murets.ts`) : le jeu en tire la collision, `skin.py` les dessine depuis
+  l'export (`murets`). Murs côte à côte à quelques cm alignés (`lobby.ts alignWalls`, audit `jog`).
 - **Balcons, pas de fentes** (2026-11-22, choix de l'utilisateur) : un niveau surélevé ou en contrebas est entouré d'un
   hall au sol 0 sous son plafond haut (`lobby.ts` : `ring`, `walk-hall`, posés avant l'estrade/la place, hors `ROOMS`) ;
   ses bords sont fermés par des **murets** (1 m, 15 cm, enduit uni teinté comme le mur, tablette ; `skin.py murets()`),
