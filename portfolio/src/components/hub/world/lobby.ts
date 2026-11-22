@@ -283,6 +283,11 @@ const allShapes: Shape[] = [...corridors, ...fillers, ...PLACED, ...features, ..
  * it, it would own the ceiling there and hang a slab in the middle of the room (the passages over the stage, the hotel's
  * landing). Door throats lie outside the rooms: they keep their height, a lintel in the wall.
  */
+const gridOf = (o: Shape) => {
+  if (o.grid) return o.grid;
+  if (o.kind === "capsule") return { a: Math.atan2(-(o.bz - o.az), o.bx - o.ax), x: (o.ax + o.bx) / 2, z: (o.az + o.bz) / 2 };
+  return { a: "a" in o && o.a ? o.a : 0, x: o.x, z: o.z };
+};
 for (let k = corridors.length + fillers.length + PLACED.length; k < allShapes.length; k++) {
   const s = allShapes[k];
   if (s.open) continue;
@@ -290,15 +295,20 @@ for (let k = corridors.length + fillers.length + PLACED.length; k < allShapes.le
   let inside = 0;
   let under = 0;
   let top = s.ceil;
+  let host: Shape | null = null;
   for (let x = x0 + 0.25; x < x1; x += 0.5) for (let z = z0 + 0.25; z < z1; z += 0.5) {
     if (geomDist(s, x, z) >= 0) continue;
     inside++;
     const higher = allShapes.slice(0, k).filter((o) => !o.open && o.ceil > s.ceil + 0.05 && geomDist(o, x, z) < 0);
     if (!higher.length) continue;
     under++;
-    top = Math.max(top, ...higher.map((o) => o.ceil));
+    for (const o of higher) if (o.ceil >= top) {
+      top = o.ceil;
+      host = o;
+    }
   }
-  if (inside && under / inside > 0.5) allShapes[k] = { ...s, ceil: top };
+  // and its tile grid: one ceiling, one grid, no seam (a ramp under the plaza traced its outline in beams)
+  if (inside && under / inside > 0.5) allShapes[k] = { ...s, ceil: top, ...(host ? { grid: gridOf(host) } : {}) };
 }
 
 /**

@@ -26,6 +26,12 @@ const box = skinned.map(([s]) => sdf.geomBounds(s)).reduce((a, b) => [Math.min(a
 const near = (b) => b[0] < box[2] + 2 && b[2] > box[0] - 2 && b[1] < box[3] + 2 && b[3] > box[1] - 2;
 const round = (pts) => pts.map(([x, z]) => [+x.toFixed(4), +z.toFixed(4)]);
 const centre = (s) => (s.kind === "capsule" ? [(s.ax + s.bx) / 2, (s.az + s.bz) / 2] : [s.x, s.z]);
+// the tile grid (archi/build.ts tileFrame): the shape's own, or the one it follows (s.grid)
+const gridAngle = (s) => {
+  if (s.grid) return s.grid.a;
+  return "a" in s && s.a ? s.a : 0;
+};
+const gridCentre = (s) => (s.grid ? [s.grid.x, s.grid.z] : centre(s));
 // the ceiling's look, as archi/build.ts picks it
 const ceilingKey = (s) => {
   if (s.ceilMat) return s.ceilMat;
@@ -47,8 +53,8 @@ const rooms = sp.shapes
     ramp: typeof s.floor === "object" ? s.floor : null,
     ceil: s.open ? floorOf(s.floor) + 8 : s.ceil,
     open: !!s.open,
-    angle: "a" in s && s.a ? s.a : 0,
-    centre: centre(s).map((v) => +v.toFixed(4)),
+    angle: gridAngle(s),
+    centre: gridCentre(s).map((v) => +v.toFixed(4)),
     mat: s.mat ?? "carpet",
     wall: s.wall ?? "wallpaper",
     ceilMat: ceilingKey(s),

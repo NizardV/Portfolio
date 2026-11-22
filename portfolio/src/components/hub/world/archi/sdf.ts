@@ -39,6 +39,8 @@ export type Shape = Geom & {
    * floor, ceiling or soffits of its own here, ceiling lights on a 60 cm tile grid. Collisions are unchanged.
    */
   skin?: string;
+  /** the ceiling tile grid this shape follows, when not its own (a ramp under a hall's ceiling: one grid, no seam) */
+  grid?: { a: number; x: number; z: number };
   /** no ceiling at all (open sky or a void above) */
   open?: boolean;
   /** walking speed here, as a share of normal (a ball pit: 0.45) */

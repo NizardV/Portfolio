@@ -290,6 +290,20 @@ def grid_fits(heading, angle):
     return False
 
 
+def same_grid(a, b):
+    """Do two rooms lay their ceiling tiles on one grid (same angle mod 90°, origins a whole number of tiles apart)?"""
+    m = (a["angle"] - b["angle"]) % (math.pi / 2)
+    if min(m, math.pi / 2 - m) > math.radians(0.5):
+        return False
+    cos_a, sin_a, cx, cz = frame(a)
+    dx, dz = b["centre"][0] - cx, b["centre"][1] - cz
+    for v in (dx * cos_a - dz * sin_a, dx * sin_a + dz * cos_a):
+        r = v / GRID - round(v / GRID)
+        if abs(r) * GRID > 0.01:
+            return False
+    return True
+
+
 MURET_H, MURET_T = 1.0, 0.15
 
 
@@ -412,6 +426,8 @@ def trims(plan, bm, own, slots):
         heading = math.atan2(d.y, d.x)  # Blender y = -game z: angles mirror, so compare the absolute misfit mod 90°
         if not any(grid_fits(heading, plan.rooms_by_index[f[own]]["angle"]) for f in faces):
             continue
+        if same_grid(plan.rooms_by_index[faces[0][own]], plan.rooms_by_index[faces[1][own]]):
+            continue  # one grid running on (a ramp under its hall): the tiles just go on, no beam
         side = Vector((-d.y, d.x, 0)).normalized() * 0.06
         drop = up * 0.08
         for s in (side, -side):

@@ -121,6 +121,7 @@ function around(space: Space, i: number, x: number, z: number, d: number, out: A
 export const TILE_GRID = 0.6;
 /** the way a shape's walls run: its own angle, or a capsule's axis */
 function tileAngle(s: Shape): number {
+  if (s.grid) return s.grid.a;
   if (s.kind === "capsule") return Math.atan2(-(s.bz - s.az), s.bx - s.ax);
   return "a" in s && s.a ? s.a : 0;
 }
@@ -128,6 +129,7 @@ function tileAngle(s: Shape): number {
 /** a shape's tile grid: cos and sin of its angle, and its centre (the origin) */
 function tileFrame(s: Shape): [number, number, number, number] {
   const a = tileAngle(s);
+  if (s.grid) return [Math.cos(a), Math.sin(a), s.grid.x, s.grid.z];
   const cx = s.kind === "capsule" ? (s.ax + s.bx) / 2 : s.x;
   const cz = s.kind === "capsule" ? (s.az + s.bz) / 2 : s.z;
   return [Math.cos(a), Math.sin(a), cx, cz];

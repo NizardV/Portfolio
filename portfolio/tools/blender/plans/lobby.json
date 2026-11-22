@@ -7332,10 +7332,10 @@
    "ramp": null,
    "ceil": 5.6,
    "open": false,
-   "angle": 0.2984989315861793,
+   "angle": 0.6,
    "centre": [
-    -61,
-    42
+    -48,
+    38
    ],
    "mat": "carpet",
    "wall": "wallpaper",
