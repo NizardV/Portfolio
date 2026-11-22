@@ -158,12 +158,13 @@ function audit(sp, spawn) {
  *   floating  a lowered ceiling over open floor, ending in the open on the other side: a box hanging mid-room
  *   rail      a railing running into a wall
  *   skewed    ceiling lights off or askew to the 60 cm ceiling tiles as drawn (see tileCheck)
+ *   lamp      a ceiling light over a pillar or a partition reaching the ceiling
  */
 function construction(sp, built, mesh, ray, found) {
-  for (const k of ["hanging", "floating", "rail", "skewed"]) found[k] = new Map();
+  for (const k of ["hanging", "floating", "rail", "skewed", "lamp"]) found[k] = new Map();
   const note = (kind, x, z, what) => {
     const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
-    const e = found[kind].get(k) ?? { n: 0, what };
+    const e = found[kind].get(k) ?? { n: 0, what: `${what} (first at ${x.toFixed(2)}, ${z.toFixed(2)})` };
     e.n++;
     found[kind].set(k, e);
   };
@@ -191,6 +192,10 @@ function construction(sp, built, mesh, ray, found) {
       if (Math.abs(n.y) > 0.3) continue;
       // the bottom edge: the middle of the two lowest corners
       const [p, q] = [a, b, c].sort((u, v) => u.y - v.y);
+      // a bottom edge runs more along the floor than up the wall (a ramp side slopes, never this steeply); else the
+      // triangle only touches its bottom at one corner, and its neighbour carries the real bottom edge (the halves of
+      // a wall quad: the diagonal from a floor corner to a ceiling corner is no bottom edge, its middle hangs mid-wall)
+      if (Math.abs(q.y - p.y) > Math.hypot(q.x - p.x, q.z - p.z)) continue;
       const mx = (p.x + q.x) / 2;
       const mz = (p.z + q.z) / 2;
       const yb = (p.y + q.y) / 2; // the middle of the bottom edge, where the floor is measured (a ramp's side slopes)
@@ -260,6 +265,23 @@ function tileCheck(sp, built, note) {
   const [pa, pb, pc] = [0, 0, 0].map(() => new THREE.Vector3());
   const [ua, ub, uc] = [0, 0, 0].map(() => new THREE.Vector2());
   const frac = (v) => v - Math.floor(v);
+  // lamp: a ceiling light over a pillar or a partition that reaches the ceiling (a light half inside a solid)
+  const solids = sp.solids.filter((so) => !so.ghost);
+  for (const p of panels) {
+    const c = Math.cos(p.a);
+    const s = Math.sin(p.a);
+    let blocked = false;
+    for (let i = -2; i <= 2 && !blocked; i++) {
+      for (let j = -2; j <= 2 && !blocked; j++) {
+        const u = (i / 4) * p.size[0];
+        const v = (j / 4) * p.size[1];
+        const x = p.x + u * c + v * s;
+        const z = p.z - u * s + v * c;
+        blocked = solids.some((so) => sdf.geomDist(so, x, z) < 0 && (so.h == null || sp.ground(x, z) + so.h > p.y - 0.1));
+      }
+    }
+    if (blocked) note("lamp", p.x, p.z, "a ceiling light over a pillar or a partition");
+  }
   for (const p of panels) {
     ray.ray.origin.set(p.x, p.y - 0.1, p.z);
     const hit = ray.intersectObject(mesh)[0];
@@ -364,8 +386,8 @@ for (const [name, { space, spawn }] of Object.entries(places)) {
   const { spots: n, rays, found } = audit(space, spawn);
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
   console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
-  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}`);
-  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed"]) {
+  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}`);
+  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp"]) {
     for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
   }
 }

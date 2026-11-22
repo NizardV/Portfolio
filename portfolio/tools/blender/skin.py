@@ -324,6 +324,56 @@ def trims(plan, bm, own, slots):
 
 
 # ---------------------------------------------------------------- lights in the tiles
+def square_hits(poly, half):
+    """Does the polygon (u, v points) overlap the square [-half, half]²? A vertex inside, a square corner inside, or an
+    edge crossing the square (Liang-Barsky): a thin partition crossing a light has no vertex inside it."""
+    if any(abs(u) < half and abs(v) < half for u, v in poly):
+        return True
+    if any(inside(cu, cv, poly) for cu in (-half, half) for cv in (-half, half)):
+        return True
+    for (u0, v0), (u1, v1) in zip(poly, poly[1:] + poly[:1]):
+        t0, t1 = 0.0, 1.0
+        du, dv = u1 - u0, v1 - v0
+        ok = True
+        for p_, q_ in ((-du, u0 + half), (du, half - u0), (-dv, v0 + half), (dv, half - v0)):
+            if p_ == 0:
+                if q_ < 0:
+                    ok = False
+                    break
+                continue
+            t = q_ / p_
+            if p_ < 0:
+                t0 = max(t0, t)
+            else:
+                t1 = min(t1, t)
+            if t0 > t1:
+                ok = False
+                break
+        if ok:
+            return True
+    return False
+
+
+def over_solid(plan, r, pu, pv, half):
+    """A light (centre pu, pv on room r's grid, half-size with its margin) over a solid that reaches the ceiling."""
+    cos_a, sin_a, cx, cz = frame(r)
+    x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
+    reach = half * 1.5
+    for so in plan.solids:
+        b = so["box"]
+        if b[0] > x + reach or b[2] < x - reach or b[1] > z + reach or b[3] < z - reach:
+            continue
+        if so["h"] is not None and so["base"] + so["h"] < r["ceil"] - 0.1:
+            continue  # a low partition: the light is above it
+        poly = []
+        for sx, sz in so["outline"]:
+            dx, dz = sx - cx, sz - cz
+            poly.append((dx * cos_a - dz * sin_a - pu, dx * sin_a + dz * cos_a - pv))
+        if square_hits(poly, half):
+            return True
+    return False
+
+
 def lights(plan):
     """One lit tile (60 cm), or 2 x 2 tiles in big rooms, every `lights` metres on each room's grid, 30 cm clear of
     walls, beams and other rooms' ceilings. [x, y, z, angle, size, dead] for the game."""
@@ -348,7 +398,9 @@ def lights(plan):
             v = first
             while v <= reach:
                 pu, pv = (u, v) if big else (u + GRID / 2, v + GRID / 2)
-                corners = [(pu + du, pv + dv) for du in (-half, half) for dv in (-half, half)]
+                # a grid over the whole footprint, not its corners only: a 50 cm pillar fits between the corners
+                grid = [-half + k * half / 2 for k in range(5)]
+                corners = [(pu + du, pv + dv) for du in grid for dv in grid]
                 ok = True
                 for cu, cv in corners:
                     x, z = cx + cu * cos_a + cv * sin_a, cz - cu * sin_a + cv * cos_a
@@ -356,6 +408,8 @@ def lights(plan):
                     if o is not r or plan.ceiling(x, z) != r["ceil"] or not plan.in_volume(x, r["ceil"] - 0.05, z):
                         ok = False
                         break
+                if ok and over_solid(plan, r, pu, pv, half):
+                    ok = False
                 if ok:
                     x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
                     dead = (math.sin(r["index"] * 12.9898 + k * 78.233) * 43758.5453) % 1 < min(0.15, r["dead"])

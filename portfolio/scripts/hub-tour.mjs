@@ -15,6 +15,7 @@
  *   --workers N  tabs shooting in parallel (default 3 dense, 2 otherwise)
  *   --soft  render with SwiftShader instead of the graphics card (slow; for machines without a GPU)
  *   --only  re-shoot just these views of the last full tour (same spots), into <tmp>/hub-tour/<zone>-recheck/
+ *   --look  "x,z,h;…" look at these points (e.g. hub:audit findings) from free floor nearby, into <tmp>/hub-tour/<zone>-at/
  *   --at    shoot these spots only: "x,z,yaw°;x,z,yaw°;…" (yaw 0 = towards -z), into <tmp>/hub-tour/<zone>-at/
  *   zone = meadow, lobby, bureaux, bassins, canaux, rouge, commerce, hotel, jeux, collines, lotissement
  * Every view is also measured: blown-out (white) share, largest pure-black blob (a hole onto the void), and z-fighting
@@ -47,6 +48,15 @@ const only = (() => {
   return i >= 0 && args[i + 1] ? new Set(args[i + 1].split(",")) : null;
 })();
 const previous = only ? JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "hub-tour", zoneId, "report.json"), "utf8")) : null;
+// --look "x,z,height;…": look at these points (an audit's findings) from free floor 1.5–4 m away, with a clear line
+const looks = (() => {
+  const i = args.indexOf("--look");
+  if (i < 0 || !args[i + 1]) return null;
+  return args[i + 1].split(";").filter(Boolean).map((spot, k) => {
+    const [x, z, y = "1.5"] = spot.split(",").map(Number);
+    return { x, z, y: Number(y), label: `point ${k + 1} (${x}, ${z}, h ${y})` };
+  });
+})();
 const at = (() => {
   const i = args.indexOf("--at");
   if (i < 0 || !args[i + 1]) return null;
@@ -67,7 +77,7 @@ const WORKERS = opt("workers", dense ? 3 : 2);
 const LIMITS = { blown: 0.04, voidBlob: 0.015, zfight: 0.0005 };
 let outName = zoneId;
 if (only) outName = `${zoneId}-recheck`;
-else if (at) outName = `${zoneId}-at`;
+else if (at || looks) outName = `${zoneId}-at`;
 else if (dense) outName = `${zoneId}-dense`;
 const OUT = path.join(os.tmpdir(), "hub-tour", outName);
 const SHOT = { w: 960, h: 540 };
@@ -169,7 +179,7 @@ try {
 
   const page = await openWorld();
   const audit = await page.evaluate(auditProps);
-  const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: audit.flags.slice(0, 6), dense });
+  const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: looks ? looks.map((l) => ({ ...l, kind: l.label })) : audit.flags.slice(0, 6), dense, onlyFlags: !!looks });
   if (previous) plan.views = previous.views.filter((v) => only.has(v.id)).map(({ id, x, z, yaw, pitch, label }) => ({ id, x, z, yaw, pitch, label }));
   if (at) plan.views = at;
 
@@ -486,7 +496,7 @@ async function measure({ a, b }) {
 }
 
 /** Where to look from: spawn, interactables, doorways, far corners, flagged objects (or, dense, a grid of spots). */
-function planViews({ samples, flags, dense }) {
+function planViews({ samples, flags, dense, onlyFlags }) {
   const { zone, ground } = window.__hub;
   const sp = zone.space;
   const st = 1;
@@ -540,6 +550,15 @@ function planViews({ samples, flags, dense }) {
   const facing = (x, z, tx, tz) => Math.atan2(-(tx - x), -(tz - z));
 
   const views = [];
+  if (onlyFlags) {
+    for (const f of flags) {
+      const spot = near(f.x, f.z, 1.5, 4);
+      if (!spot) continue;
+      const eye = ground(spot.x, spot.z) + 1.65;
+      views.push({ x: spot.x, z: spot.z, yaw: facing(spot.x, spot.z, f.x, f.z), pitch: Math.atan2(f.y - eye, Math.hypot(f.x - spot.x, f.z - spot.z)), label: f.kind });
+    }
+    return { views, reachable: cells.length * st * st, interior: interior * st * st, cells: [...seen.keys()] };
+  }
   if (dense) {
     // one spot per dense×dense square of walkable floor: its most open cell, 8 directions, then up and down
     const squares = new Map();
