@@ -51,6 +51,8 @@ Non vérifiable ici : son, sensations de déplacement, appareils faibles
 Puis seulement : lien de preview + ce qu'il faut regarder (l'ambiance).
 
 ## Pièges connus
+- L'agent `hub-critic` n'est chargé que si la session s'ouvre dans le dépôt `Portfolio/` ; sinon (espace de travail
+  parent), lancer un agent `general-purpose` en lecture seule qui lit `.claude/agents/hub-critic.md` et le suit.
 - Un vieux `next start` de l'utilisateur occupe parfois :3100 → toujours `--port 3101` ; ne pas tuer le sien.
 - `pnpm` local 11 ≠ repo 10 : le script appelle `node_modules/.bin`/`next` directement, ne pas lancer `pnpm build`.
 - Attendre la fin d'une commande en arrière-plan : la notification arrive seule ; grep `Error:` et pas « errors ».

@@ -77,7 +77,7 @@ function audit(sp, spawn) {
   const found = { void: new Map(), phantom: new Map(), invisible: new Map() };
   const note = (kind, x, z, what) => {
     const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
-    const e = found[kind].get(k) ?? { n: 0, what };
+    const e = found[kind].get(k) ?? { n: 0, what: `${what} (first at ${x.toFixed(2)}, ${z.toFixed(2)})` };
     e.n++;
     found[kind].set(k, e);
   };
