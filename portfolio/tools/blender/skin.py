@@ -313,13 +313,18 @@ def murets(plan, out, slots):
     in a skin). Only where the higher side has head room (a slot under a low ceiling is a construction fault). The outline
     is walked as one loop, so a muret turns corners and follows a round pit (whose sides are a few cm each)."""
     uv = out.loops.layers.uv.verify()
-    seen = set()
+    seen = {}  # 1 m cells -> points already walled, from outlines done before
+
+    def walled(x, z):
+        cx, cz = math.floor(x), math.floor(z)
+        return any(math.hypot(x - px, z - pz) < 0.2 for i in (-1, 0, 1) for j in (-1, 0, 1) for px, pz in seen.get((cx + i, cz + j), ()))
+
     for r in plan.rooms:
         if not r["skinned"] or r["open"]:
             continue
         pts = r["outline"]
         samples = []
-        mine = set()
+        mine = []
         t = 0.0
         for k in range(len(pts)):
             (px, pz), (qx, qz) = pts[k], pts[(k + 1) % len(pts)]
@@ -341,16 +346,16 @@ def murets(plan, out, slots):
                     fa, fb = floor_at(a, x + nx * 0.1, z + nz * 0.1), floor_at(b, x - nx * 0.1, z - nz * 0.1)
                     hi, side = (a, 1) if fa > fb else (b, -1)
                     lo = min(fa, fb)
-                    # a boundary already walled from another outline lying on it (counted once this outline is done:
-                    # on a slanted edge, two samples 25 cm apart can round to the same key)
-                    key = (round(x * 4), round(z * 4))
+                    # a boundary already walled from another outline lying on or by it (within 20 cm: two outlines a few
+                    # cm apart walled it twice, the faces flickering); counted once this outline is done
                     # over 45 cm it is no step the player walks down (STEP_MAX): it gets a low wall
-                    if abs(fa - fb) > 0.45 and key not in seen and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
+                    if abs(fa - fb) > 0.45 and not walled(x, z) and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
                         mark = (hi["index"], side)
-                        mine.add(key)
+                        mine.append((x, z))
                 samples.append((t + d, x, z, mark, nx, nz, lo))
             t += length
-        seen |= mine
+        for x, z in mine:
+            seen.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
         if not samples:
             continue
         # a loop: start the walk on an unwalled sample, so a muret all around (a pit) is one run
@@ -361,18 +366,23 @@ def murets(plan, out, slots):
             continue
         order = samples[start:] + samples[:start]
         run = []
+        joined = False  # the run began where another muret ends (no overhang there)
         for smp in order + [(None, None, None, None, None, None, None)]:
             if run and (smp[3] is None or smp[3] != run[-1][3]):
+                handover = smp[3] is not None  # another muret takes over here: end exactly where it starts
+                if handover:
+                    run.append((smp[0] + (t if smp[0] < run[-1][0] else 0),) + smp[1:3] + (run[-1][3],) + smp[4:])
                 if len(run) > 1 and sum(math.hypot(p[1] - q[1], p[2] - q[2]) for p, q in zip(run, run[1:])) >= 0.8:  # no stub
-                    wall_run(out, uv, plan, run, slots)
+                    wall_run(out, uv, plan, run, slots, ends=(not joined, not handover))
                 run = []
+                joined = handover
             if smp[3] is not None:
                 if run and smp[0] < run[-1][0]:  # wrapped past the loop's end
                     smp = (smp[0] + t,) + smp[1:]
                 run.append(smp)
 
 
-def wall_run(out, uv, plan, run, slots, closed=False):
+def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
     """One muret along samples (t, x, z, (room, side), nx, nz, lower floor): the face toward the drop, plain render from
     the lower floor up (a balcony edge reads as one built front, not a papered riser under a band of render), a nosing at
     the slab, the face toward the room, its top, its ends."""
@@ -381,12 +391,13 @@ def wall_run(out, uv, plan, run, slots, closed=False):
     hi = plan.rooms_by_index[run[0][3][0]]
     side = run[0][3][1]
     if not closed:
-        # 15 cm on past both ends (the wall's thickness): two murets meeting at a corner close it, no slit
+        # 15 cm on past a free end (the wall's thickness): two murets meeting at a corner close it, no slit; never where
+        # another muret carries on in line (both faces on one plane: they flickered)
         def past(a, b):
             dx, dz = a[1] - b[1], a[2] - b[2]
             d = math.hypot(dx, dz) or 1.0
             return (a[0] + (MURET_T if a[0] >= b[0] else -MURET_T), a[1] + dx / d * MURET_T, a[2] + dz / d * MURET_T) + a[3:]
-        run = [past(run[0], run[1])] + run + [past(run[-1], run[-2])]
+        run = ([past(run[0], run[1])] if ends[0] else []) + run + ([past(run[-1], run[-2])] if ends[1] else [])
     wall, cap = slots(f"muret:{hi['wall']}"), slots("trim")
     up = Vector((0, 0, 1))
 
@@ -405,7 +416,7 @@ def wall_run(out, uv, plan, run, slots, closed=False):
         out_dir = Vector((-s0[4] * side, s0[5] * side, 0))
         in_dir = -out_dir
         # toward the drop: from the lower floor to the top, 3 mm proud of the riser so it covers it
-        quad(out, at(s0, -0.01, lo0), at(s1, -0.01, lo1), at(s1, -0.01, f1 + MURET_H), at(s0, -0.01, f0 + MURET_H), out_dir, wall, uv,
+        quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,
              [(t0, lo0), (t1, lo1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
         # toward the room
         quad(out, at(s0, MURET_T, f0), at(s1, MURET_T, f1), at(s1, MURET_T, f1 + MURET_H), at(s0, MURET_T, f0 + MURET_H), in_dir, wall, uv,
@@ -416,17 +427,17 @@ def wall_run(out, uv, plan, run, slots, closed=False):
         # the slab's nosing: 16 cm high, 2.5 cm proud, at the upper floor
         quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.028, f1), at(s0, -0.028, f0), out_dir, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.16), (t0, 0.16)])
-        quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.01, f1), at(s0, -0.01, f0), up, cap, uv,
+        quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.003, f1), at(s0, -0.003, f0), up, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
-        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.01, f1 - 0.16), at(s0, -0.01, f0 - 0.16), -up, cap, uv,
+        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.003, f1 - 0.16), at(s0, -0.003, f0 - 0.16), -up, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
     if closed:
         return
-    for s, sign in ((run[0], -1), (run[-1], 1)):
+    for s, sign in [e for e, keep in zip(((run[0], -1), (run[-1], 1)), ends) if keep]:  # no end face inside a joint
         f = floor_of(s)
         tx, tz = run[-1][1] - run[0][1], run[-1][2] - run[0][2]
         n = Vector((tx * sign, -tz * sign, 0)).normalized()
-        quad(out, at(s, -0.01, f), at(s, MURET_T, f), at(s, MURET_T, f + MURET_H), at(s, -0.01, f + MURET_H), n, wall, uv,
+        quad(out, at(s, -0.003, f), at(s, MURET_T, f), at(s, MURET_T, f + MURET_H), at(s, -0.003, f + MURET_H), n, wall, uv,
              [(0, f), (MURET_T, f), (MURET_T, f + MURET_H), (0, f + MURET_H)])
 
 
