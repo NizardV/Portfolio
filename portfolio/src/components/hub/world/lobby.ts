@@ -260,7 +260,13 @@ for (const e of EXITS) {
     const walk = { x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, a: Math.atan2(-(target.cz - vz), target.cx - vx) };
     vestibules.push({ kind: "box", ...walk, d: 3.2, floor: 1.8, ceil: 4, lights: 3 });
     // the walkway is a balcony too: a hall at floor level under the stage height all along it, built before the stage
-    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", ...walk, w: walk.w + 4, d: 3.2 + 8, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
+    // from the middle of the door's vestibule to the stage: turned towards the stage, a hall reaching the door stuck its
+    // corners out past the door's wall, which then stood alone, paper-thin
+    const span = Math.hypot(target.cx - vx, target.cz - vz);
+    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: span, d: 3.2 + 8, a: walk.a, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
+    // and around the door's landing, square to the door: up to the door's plane, never past it
+    const along = Math.abs(fx) > 0.5;
+    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", x: vx, z: vz, w: along ? 6 : 12.4, d: along ? 12.4 : 6, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
   }
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
@@ -343,6 +349,15 @@ if (SLICE0_READY) {
     // the blank frame of the arrival room, on its west wall: it shows the house once the Polaroid is found
     { id: "cadre", kind: "change", x: LOBBY_ARRIVAL.x - 3.97, y: 1.6, z: 68, ry: Math.PI / 2 },
   );
+}
+
+// the random partitions of the old rooms that the balcony halls now cover: a 3 m partition standing alone in a 5.6 m
+// hall read as a stray slab (pillars and placed pieces have a tag and stay)
+const HALLS = allShapes.filter((s) => s.tag === "stage-hall" || s.tag === "plaza-hall" || s.tag === "walk-hall");
+for (let k = solids.length - 1; k >= 0; k--) {
+  const so = solids[k];
+  if (so.tag || so.kind !== "box") continue;
+  if (HALLS.some((h) => geomDist(h, so.x, so.z) < 0)) solids.splice(k, 1);
 }
 
 export const LOBBY_SPACE = new Space(allShapes, solids);
