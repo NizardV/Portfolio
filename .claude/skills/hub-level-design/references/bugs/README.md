@@ -8,7 +8,8 @@ symptôme à l'image, et le contrôle automatique qui le couvre désormais (skil
 | --- | --- | --- |
 | `seam-void` | fente de vide (noir ou brouillard) au raccord sol/mur/plafond entre deux pièces | audit `void`, `floor`, `ceiling` ; dense `voidBlob` |
 | `phantom-wall` | pan de mur debout au milieu d'une salle, ou mur qu'on traverse | audit `phantom` |
-| `invisible-wall` | on bute sur rien | audit `invisible` |
+| `invisible-wall` | on bute sur rien ; bord de balcon ou de fosse sans muret | audit `invisible`, `ledge` |
+| `dark-room` | pièce ou couloir entièrement noir (néons tous morts, aucun néon posé) | audit `unlit` |
 | `hanging` | pan de mur ou retombée dont le bas ne repose sur rien | audit `hanging` |
 | `ceiling-caisson` | plafond qui descend en caisson dans un seuil / une porte | audit `ceiling` (plus haut plafond gagne) |
 | `ramp-cliff` | marche ou falaise au milieu d'une rampe | audit `floor` |

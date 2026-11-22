@@ -553,18 +553,20 @@ def lights(plan):
         step = step or max(6 if big else 3, round(r["lights"] / GRID)) * GRID
         cos_a, sin_a, cx, cz = frame(r)
         reach = math.hypot(x1 - x0, z1 - z0) / 2
-        first = -math.floor(reach / step) * step
         half = size / 2 + margin
+        # around the room itself, on its grid (a room following another's grid lies away from that grid's origin)
+        mx, mz = (x0 + x1) / 2 - cx, (z0 + z1) / 2 - cz
+        uc, vc = mx * cos_a - mz * sin_a, mx * sin_a + mz * cos_a
         spots = []
-        u = first
-        while u <= reach:
-            v = first
-            while v <= reach:
+        u = math.floor((uc - reach) / step) * step
+        while u <= uc + reach:
+            v = math.floor((vc - reach) / step) * step
+            while v <= vc + reach:
                 spots.append((u, v) if big else (u + GRID / 2, v + GRID / 2))
                 v += step
             u += step
         if limit:
-            spots.sort(key=lambda s: s[0] * s[0] + s[1] * s[1])  # the fallback: nearest the middle first
+            spots.sort(key=lambda s: (s[0] - uc) ** 2 + (s[1] - vc) ** 2)  # the fallback: nearest the middle first
         count = 0
         for pu, pv in spots:
             x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
