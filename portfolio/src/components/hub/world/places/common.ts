@@ -10,10 +10,12 @@ export const forward = (yaw: number): [number, number] => [-Math.sin(yaw), -Math
  * A short passage on the far side of a doorway (behind the anchor, against its yaw): arriving through a doorway
  * leaves you a few centimetres past its plane, and this keeps that spot inside the place.
  */
-export function throat(a: Anchor, w: number, h: number, len = 1.6): Shape {
+export function throat(a: Anchor, w: number, h: number, len = 1.6, near = 0.3): Shape {
   const [fx, fz] = forward(a.yaw);
-  // starts 0.3 m on the near side so it always overlaps the room it opens from (no seam on the doorway line)
-  const mid = len / 2 - 0.3;
+  // starts `near` m on the near side so it always overlaps the room it opens from (no seam on the doorway line, in the
+  // kit); a place drawn by its Blender model needs none: 0.3 m in front of the door, the throat owned a strip of the
+  // room, its low ceiling and its wallpaper above the door frame (a papered hood in a tiled room)
+  const mid = len / 2 - near;
   return { kind: "box", x: a.x - fx * mid, z: a.z - fz * mid, w, d: len, a: a.yaw, floor: a.y, ceil: a.y + h, lights: 0 };
 }
 

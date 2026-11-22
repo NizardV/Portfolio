@@ -19,7 +19,7 @@ import numpy as np
 
 import lib
 
-SCALE = 4.0  # keep in step with LIGHTMAP_SCALE in archi/Skin.tsx
+SCALE = 6.0  # keep in step with LIGHTMAP_SCALE in archi/Skin.tsx
 SIZE = int(os.environ.get("BAKE_SIZE", "2048"))  # ~10 cm a texel over the Lobby: light is smooth
 SAMPLES = int(os.environ.get("BAKE_SAMPLES", "256"))
 WATTS = float(os.environ.get("BAKE_WATTS", "35"))

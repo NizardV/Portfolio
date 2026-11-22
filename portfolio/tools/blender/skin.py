@@ -308,82 +308,125 @@ MURET_H, MURET_T = 1.0, 0.15
 
 
 def murets(plan, out, slots):
-    """Low walls (1 m, 15 cm thick, the room's wallpaper, a capping board) along every drop over 60 cm between skinned
-    rooms, on the higher side, following a ramp's slope: balconies, not railings (the kit lays no railings in a skin).
-    Only where the higher side has head room (a slot under a low ceiling is a construction fault, not a balcony)."""
-    from mathutils import Vector
-
+    """Low walls (1 m, 15 cm thick, plain render in the wall's colour, a capping board) along every drop over 60 cm
+    between skinned rooms, on the higher side, following a ramp's slope: balconies, not railings (the kit lays no railings
+    in a skin). Only where the higher side has head room (a slot under a low ceiling is a construction fault). The outline
+    is walked as one loop, so a muret turns corners and follows a round pit (whose sides are a few cm each)."""
     uv = out.loops.layers.uv.verify()
-    cap = slots("trim")
-    up = Vector((0, 0, 1))
     seen = set()
     for r in plan.rooms:
         if not r["skinned"] or r["open"]:
             continue
         pts = r["outline"]
+        samples = []
+        mine = set()
+        t = 0.0
         for k in range(len(pts)):
             (px, pz), (qx, qz) = pts[k], pts[(k + 1) % len(pts)]
             length = math.hypot(qx - px, qz - pz)
-            if length < 0.3:
+            if length < 1e-4:
                 continue
             tx, tz = (qx - px) / length, (qz - pz) / length
             nx, nz = -tz, tx  # one side; the higher side is chosen per sample
-            samples = []
-            mine = set()
-            steps = max(1, round(length / 0.25))
-            for i in range(steps + 1):
-                t = length * i / steps
-                x, z = px + tx * t, pz + tz * t
-                a, b = plan.owner(x + nx * 0.1, z + nz * 0.1), plan.owner(x - nx * 0.1, z - nz * 0.1)
+            steps = max(1, math.ceil(length / 0.25))
+            for i in range(steps):
+                d = length * i / steps
+                x, z = px + tx * d, pz + tz * d
                 mark = None
+                a, b = plan.owner(x + nx * 0.1, z + nz * 0.1), plan.owner(x - nx * 0.1, z - nz * 0.1)
+                lo = 0.0
                 # only along the edge that really parts the two rooms: this room owns one side (a corridor crossing a
                 # balcony edge would claim bits of it, in pieces and askew)
                 if a is not None and b is not None and a is not b and r in (a, b) and a["skinned"] and b["skinned"] and not a["open"] and not b["open"]:
                     fa, fb = floor_at(a, x + nx * 0.1, z + nz * 0.1), floor_at(b, x - nx * 0.1, z - nz * 0.1)
                     hi, side = (a, 1) if fa > fb else (b, -1)
-                    # a boundary already walled from another outline lying on it; points of this edge only count once
-                    # it is done (on a slanted edge, two samples 25 cm apart can round to the same key)
+                    lo = min(fa, fb)
+                    # a boundary already walled from another outline lying on it (counted once this outline is done:
+                    # on a slanted edge, two samples 25 cm apart can round to the same key)
                     key = (round(x * 4), round(z * 4))
-                    if abs(fa - fb) > 0.6 and key not in seen and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
-                        mark = (hi, side)
+                    # over 45 cm it is no step the player walks down (STEP_MAX): it gets a low wall
+                    if abs(fa - fb) > 0.45 and key not in seen and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
+                        mark = (hi["index"], side)
                         mine.add(key)
-                samples.append((t, x, z, mark))
-            seen |= mine
-            # runs of consecutive samples with the same higher room and side
-            run = []
-            for smp in samples + [(None, None, None, None)]:
-                if run and (smp[3] is None or smp[3] != run[-1][3]):
-                    if run[-1][0] - run[0][0] >= 0.8:  # no stub: a drop over 60 cm for a few steps by a ramp
-                        wall_run(out, uv, run, nx, nz, slots, cap, up)
-                    run = []
-                if smp[3] is not None:
-                    run.append(smp)
+                samples.append((t + d, x, z, mark, nx, nz, lo))
+            t += length
+        seen |= mine
+        if not samples:
+            continue
+        # a loop: start the walk on an unwalled sample, so a muret all around (a pit) is one run
+        start = next((i for i, s in enumerate(samples) if s[3] is None), None)
+        if start is None:
+            ring = samples + [samples[0][:0] + (t,) + samples[0][1:]]
+            wall_run(out, uv, plan, ring, slots, closed=True)
+            continue
+        order = samples[start:] + samples[:start]
+        run = []
+        for smp in order + [(None, None, None, None, None, None, None)]:
+            if run and (smp[3] is None or smp[3] != run[-1][3]):
+                if len(run) > 1 and sum(math.hypot(p[1] - q[1], p[2] - q[2]) for p, q in zip(run, run[1:])) >= 0.8:  # no stub
+                    wall_run(out, uv, plan, run, slots)
+                run = []
+            if smp[3] is not None:
+                if run and smp[0] < run[-1][0]:  # wrapped past the loop's end
+                    smp = (smp[0] + t,) + smp[1:]
+                run.append(smp)
 
 
-def wall_run(out, uv, run, nx, nz, slots, cap, up):
-    """One muret along samples (t, x, z, (room, side)) of an edge: faces toward the drop, toward the room, its top, its ends."""
+def wall_run(out, uv, plan, run, slots, closed=False):
+    """One muret along samples (t, x, z, (room, side), nx, nz, lower floor): the face toward the drop, plain render from
+    the lower floor up (a balcony edge reads as one built front, not a papered riser under a band of render), a nosing at
+    the slab, the face toward the room, its top, its ends."""
     from mathutils import Vector
 
-    hi, side = run[0][3]
-    wall = slots(f"muret:{hi['wall']}")  # plain render in the wall's colour (archi/Skin.tsx), no wallpaper pattern
-    ox, oz = nx * side, nz * side  # into the higher room
-    def at(x, z, inset, h):
-        return Vector((x + ox * inset, -(z + oz * inset), h))
-    toward_drop = Vector((-ox, oz, 0))
-    toward_room = Vector((ox, -oz, 0))
-    for (t0, x0, z0, _), (t1, x1, z1, _) in zip(run, run[1:]):
-        f0, f1 = floor_at(hi, x0 + ox * 0.1, z0 + oz * 0.1), floor_at(hi, x1 + ox * 0.1, z1 + oz * 0.1)
-        span = t1 - t0
-        for inset, facing in ((0.002, toward_drop), (MURET_T, toward_room)):
-            quad(out, at(x0, z0, inset, f0), at(x1, z1, inset, f1), at(x1, z1, inset, f1 + MURET_H), at(x0, z0, inset, f0 + MURET_H), facing, wall, uv,
-                 [(t0, f0), (t1, f1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
-        quad(out, at(x0, z0, -0.01, f0 + MURET_H), at(x1, z1, -0.01, f1 + MURET_H), at(x1, z1, MURET_T + 0.01, f1 + MURET_H), at(x0, z0, MURET_T + 0.01, f0 + MURET_H), up, cap, uv,
-             [(0, 0), (span, 0), (span, MURET_T), (0, MURET_T)])
-    for (t, x, z, _), sign in ((run[0], -1), (run[-1], 1)):
-        f = floor_at(hi, x + ox * 0.1, z + oz * 0.1)
-        tx, tz = (run[-1][1] - run[0][1]), (run[-1][2] - run[0][2])
+    hi = plan.rooms_by_index[run[0][3][0]]
+    side = run[0][3][1]
+    if not closed:
+        # 15 cm on past both ends (the wall's thickness): two murets meeting at a corner close it, no slit
+        def past(a, b):
+            dx, dz = a[1] - b[1], a[2] - b[2]
+            d = math.hypot(dx, dz) or 1.0
+            return (a[0] + (MURET_T if a[0] >= b[0] else -MURET_T), a[1] + dx / d * MURET_T, a[2] + dz / d * MURET_T) + a[3:]
+        run = [past(run[0], run[1])] + run + [past(run[-1], run[-2])]
+    wall, cap = slots(f"muret:{hi['wall']}"), slots("trim")
+    up = Vector((0, 0, 1))
+
+    def at(s, inset, h):
+        _, x, z, _, nx, nz, _ = s
+        return Vector((x + nx * side * inset, -(z + nz * side * inset), h))
+
+    def floor_of(s):
+        _, x, z, _, nx, nz, _ = s
+        return floor_at(hi, x + nx * side * 0.1, z + nz * side * 0.1)
+
+    for s0, s1 in zip(run, run[1:]):
+        f0, f1 = floor_of(s0), floor_of(s1)
+        lo0, lo1 = s0[6], s1[6]
+        t0, t1 = s0[0], s1[0]
+        out_dir = Vector((-s0[4] * side, s0[5] * side, 0))
+        in_dir = -out_dir
+        # toward the drop: from the lower floor to the top, 3 mm proud of the riser so it covers it
+        quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,
+             [(t0, lo0), (t1, lo1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
+        # toward the room
+        quad(out, at(s0, MURET_T, f0), at(s1, MURET_T, f1), at(s1, MURET_T, f1 + MURET_H), at(s0, MURET_T, f0 + MURET_H), in_dir, wall, uv,
+             [(t0, f0), (t1, f1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
+        # the capping board
+        quad(out, at(s0, -0.013, f0 + MURET_H), at(s1, -0.013, f1 + MURET_H), at(s1, MURET_T + 0.01, f1 + MURET_H), at(s0, MURET_T + 0.01, f0 + MURET_H), up, cap, uv,
+             [(t0, 0), (t1, 0), (t1, MURET_T), (t0, MURET_T)])
+        # the slab's nosing: 16 cm high, 2.5 cm proud, at the upper floor
+        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.028, f1), at(s0, -0.028, f0), out_dir, cap, uv,
+             [(t0, 0), (t1, 0), (t1, 0.16), (t0, 0.16)])
+        quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.003, f1), at(s0, -0.003, f0), up, cap, uv,
+             [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
+        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.003, f1 - 0.16), at(s0, -0.003, f0 - 0.16), -up, cap, uv,
+             [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
+    if closed:
+        return
+    for s, sign in ((run[0], -1), (run[-1], 1)):
+        f = floor_of(s)
+        tx, tz = run[-1][1] - run[0][1], run[-1][2] - run[0][2]
         n = Vector((tx * sign, -tz * sign, 0)).normalized()
-        quad(out, at(x, z, 0.002, f), at(x, z, MURET_T, f), at(x, z, MURET_T, f + MURET_H), at(x, z, 0.002, f + MURET_H), n, wall, uv,
+        quad(out, at(s, -0.003, f), at(s, MURET_T, f), at(s, MURET_T, f + MURET_H), at(s, -0.003, f + MURET_H), n, wall, uv,
              [(0, f), (MURET_T, f), (MURET_T, f + MURET_H), (0, f + MURET_H)])
 
 
@@ -489,49 +532,73 @@ def over_solid(plan, r, pu, pv, half):
 
 def lights(plan):
     """One lit tile (60 cm), or 2 x 2 tiles in big rooms, every `lights` metres on each room's grid, 30 cm clear of
-    walls, beams and other rooms' ceilings. [x, y, z, angle, size, dead] for the game."""
+    walls, beams and other rooms' ceilings. Never two in the same spot (a room and the feature sharing its grid both laid
+    one there: twice the light). A room that would get none (narrow, eaten by its neighbours) gets one, 15 cm clear.
+    [x, y, z, angle, size, dead] for the game."""
     panels = []
-    for r in plan.rooms:
-        if not r["skinned"] or r["open"] or not r["lights"]:
-            continue
+    taken = {}
+
+    def free(x, z):
+        cell = (math.floor(x), math.floor(z))
+        return all(math.hypot(x - px, z - pz) >= 0.9 for i in (-1, 0, 1) for j in (-1, 0, 1) for px, pz in taken.get((cell[0] + i, cell[1] + j), ()))
+
+    def place(r, margin, step=None, limit=None):
         x0, z0, x1, z1 = r["box"]
         area = (x1 - x0) * (z1 - z0)
         # a low ceiling (< 2.75 m - its floor) never takes the big fittings: 1.2 m of light 50 cm over the head fills the view
         low = r["ceil"] - r["floor"] < 2.7
         big = not low and (r["ceil"] > 3.6 or area > 150)
         size = 2 * GRID if big else GRID
-        step = max(4 if big else 3, round(r["lights"] / GRID)) * GRID
+        step = step or max(4 if big else 3, round(r["lights"] / GRID)) * GRID
         cos_a, sin_a, cx, cz = frame(r)
         reach = math.hypot(x1 - x0, z1 - z0) / 2
         first = -math.floor(reach / step) * step
-        half = size / 2 + 0.3
-        k = 0
+        half = size / 2 + margin
+        spots = []
         u = first
         while u <= reach:
             v = first
             while v <= reach:
-                pu, pv = (u, v) if big else (u + GRID / 2, v + GRID / 2)
-                # a grid over the whole footprint, not its corners only: a 50 cm pillar fits between the corners
-                grid = [-half + k * half / 2 for k in range(5)]
-                corners = [(pu + du, pv + dv) for du in grid for dv in grid]
-                ok = True
-                for cu, cv in corners:
-                    x, z = cx + cu * cos_a + cv * sin_a, cz - cu * sin_a + cv * cos_a
-                    o = plan.owner(x, z)
-                    if o is not r or plan.ceiling(x, z) != r["ceil"] or not plan.in_volume(x, r["ceil"] - 0.05, z):
-                        ok = False
-                        break
-                if ok and over_solid(plan, r, pu, pv, half):
-                    ok = False
-                if ok:
-                    x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
-                    # never two dead in a row (only every other light may die, twice as often): a corridor whose 3 tubes
-                    # all drew "dead" went black
-                    dead = k % 2 == 1 and (math.sin(r["index"] * 12.9898 + k * 78.233) * 43758.5453) % 1 < 2 * min(0.15, r["dead"])
-                    panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(r["angle"], 5), size, dead])
-                    k += 1
+                spots.append((u, v) if big else (u + GRID / 2, v + GRID / 2))
                 v += step
             u += step
+        if limit:
+            spots.sort(key=lambda s: s[0] * s[0] + s[1] * s[1])  # the fallback: nearest the middle first
+        count = 0
+        for pu, pv in spots:
+            x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
+            if not free(x, z) or not fits(r, pu, pv, half) or over_solid(plan, r, pu, pv, half):
+                continue
+            # never two dead in a row (only every other light may die, twice as often): a corridor whose 3 tubes all
+            # drew "dead" went black
+            dead = count % 2 == 1 and (math.sin(r["index"] * 12.9898 + count * 78.233) * 43758.5453) % 1 < 2 * min(0.15, r["dead"])
+            panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(r["angle"], 5), size, dead])
+            taken.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
+            count += 1
+            if limit and count >= limit:
+                break
+        return count
+
+    def fits(r, pu, pv, half):
+        cos_a, sin_a, cx, cz = frame(r)
+        # a grid over the whole footprint, not its corners only: a 50 cm pillar fits between the corners
+        grid = [-half + i * half / 2 for i in range(5)]
+        for du in grid:
+            for dv in grid:
+                cu, cv = pu + du, pv + dv
+                x, z = cx + cu * cos_a + cv * sin_a, cz - cu * sin_a + cv * cos_a
+                o = plan.owner(x, z)
+                # a feature under the same ceiling on the same grid (the holes of the holes room) carries lights too
+                shared = o is not None and o is not r and not o["open"] and o["ceil"] == r["ceil"] and same_grid(o, r)
+                if (o is not r and not shared) or plan.ceiling(x, z) != r["ceil"] or not plan.in_volume(x, r["ceil"] - 0.05, z):
+                    return False
+        return True
+
+    for r in plan.rooms:
+        if not r["skinned"] or r["open"] or not r["lights"]:
+            continue
+        if not place(r, 0.3):
+            place(r, 0.15, step=GRID, limit=1)
     return panels
 
 
@@ -562,6 +629,8 @@ def build(skin):
     own = classify(plan, bm, slots)
     extra = trims(plan, bm, own, slots)
     murets(plan, extra, slots)
+    # one piece per run: welded quads make one lightmap island each (25 cm islands baked as bands of light)
+    bmesh.ops.remove_doubles(extra, verts=extra.verts, dist=0.0005)
     bm.to_mesh(me)
     bm.free()
     space.name = "skin"

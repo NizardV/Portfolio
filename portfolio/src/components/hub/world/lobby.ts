@@ -272,7 +272,7 @@ for (const e of EXITS) {
   }
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
-  if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05));
+  if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05, 1.6, 0.02));
 }
 
 /* ---------- the place ---------- */
@@ -298,9 +298,16 @@ for (let k = corridors.length + fillers.length + PLACED.length; k < allShapes.le
   let under = 0;
   let top = s.ceil;
   let host: Shape | null = null;
+  let flush = 0;
+  let flushHost: Shape | null = null;
   for (let x = x0 + 0.25; x < x1; x += 0.5) for (let z = z0 + 0.25; z < z1; z += 0.5) {
     if (geomDist(s, x, z) >= 0) continue;
     inside++;
+    const level = allShapes.slice(0, k).find((o) => !o.open && Math.abs(o.ceil - s.ceil) < 0.05 && geomDist(o, x, z) < 0);
+    if (level) {
+      flush++;
+      flushHost = level;
+    }
     const higher = allShapes.slice(0, k).filter((o) => !o.open && o.ceil > s.ceil + 0.05 && geomDist(o, x, z) < 0);
     if (!higher.length) continue;
     under++;
@@ -311,6 +318,8 @@ for (let k = corridors.length + fillers.length + PLACED.length; k < allShapes.le
   }
   // and its tile grid: one ceiling, one grid, no seam (a ramp under the plaza traced its outline in beams)
   if (inside && under / inside > 0.5) allShapes[k] = { ...s, ceil: top, ...(host ? { grid: gridOf(host) } : {}) };
+  // under a room's ceiling at the same height (the pits of the holes room): its grid, so its lights run on above
+  else if (inside && flushHost && flush / inside > 0.5) allShapes[k] = { ...s, grid: gridOf(flushHost) };
 }
 
 /**

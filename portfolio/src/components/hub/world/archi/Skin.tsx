@@ -16,7 +16,7 @@ export const preloadSkin = (name: string) => {
   useLoader.preload(TextureLoader, skinLightUrl(name));
 };
 /** the lightmap stores light / LIGHTMAP_SCALE (bake.py SCALE); a basic material divides it by π */
-const LIGHTMAP_SCALE = 4;
+const LIGHTMAP_SCALE = 6;
 const EXPOSURE = 1;
 const LIGHT = LIGHTMAP_SCALE * Math.PI * EXPOSURE;
 

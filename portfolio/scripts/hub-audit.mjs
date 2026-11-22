@@ -164,9 +164,11 @@ function audit(sp, spawn) {
  *   rail      a railing running into a wall
  *   skewed    ceiling lights off or askew to the 60 cm ceiling tiles as drawn (see tileCheck)
  *   lamp      a ceiling light over a pillar or a partition reaching the ceiling
+ *   unlit     a skinned room that asks for lights (lights > 0) and owns over 20 m² of floor, without a single light
+ *   ledge     a balcony edge (a drop over 50 cm with head room above) with no low wall: the player stops at nothing
  */
 function construction(sp, built, mesh, ray, found) {
-  for (const k of ["hanging", "floating", "rail", "skewed", "lamp"]) found[k] = new Map();
+  for (const k of ["hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge"]) found[k] = new Map();
   const note = (kind, x, z, what) => {
     const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
     const e = found[kind].get(k) ?? { n: 0, what: `${what} (first at ${x.toFixed(2)}, ${z.toFixed(2)})` };
@@ -239,6 +241,7 @@ function construction(sp, built, mesh, ray, found) {
     }
   }
   tileCheck(sp, built, note);
+  skinChecks(sp, note);
 }
 
 /**
@@ -393,8 +396,78 @@ for (const [name, { space, spawn }] of Object.entries(places)) {
   const { spots: n, rays, found } = audit(space, spawn);
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
   console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
-  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}`);
-  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp"]) {
+  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}, unlit ${total(found.unlit)}, ledge ${total(found.ledge)}`);
+  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge"]) {
     for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
+  }
+}
+
+/** unlit and ledge, for places drawn by their Blender model (their lights and low walls come from the model). */
+function skinChecks(sp, note) {
+  const names = [...new Set(sp.shapes.map((s) => s.skin).filter(Boolean))];
+  if (!names.length) return;
+  const panels = [];
+  const walls = [];
+  for (const n of names) {
+    const raw = readGlbExtras(skinFile(n)).skin?.panels;
+    if (raw) panels.push(...JSON.parse(raw));
+    const g = readGlb(skinFile(n), THREE, mergeGeometries, { material: (m) => m.startsWith("muret:") });
+    if (g) walls.push(g);
+  }
+  // unlit: count the floor each skinned room owns (1 m cells) and the lights it holds
+  const owned = new Map();
+  const [x0, z0, x1, z1] = sp.bounds;
+  for (let x = Math.ceil(x0); x < x1; x++) {
+    for (let z = Math.ceil(z0); z < z1; z++) {
+      const i = sp.ownerIndex(x, z);
+      if (i >= 0) owned.set(i, (owned.get(i) ?? 0) + 1);
+    }
+  }
+  const lit = new Set(panels.map(([x, , z]) => sp.ownerIndex(x, z)));
+  sp.shapes.forEach((s, i) => {
+    if (!s.skin || s.open || !(s.lights > 0) || (owned.get(i) ?? 0) < 20 || lit.has(i)) return;
+    const [bx0, bz0, bx1, bz1] = sdf.geomBounds(s);
+    note("unlit", (bx0 + bx1) / 2, (bz0 + bz1) / 2, `room #${i} (${owned.get(i)} m²) has no ceiling light`);
+  });
+  // ledge: along every outline, where the floor drops over 60 cm with head room on the high side, a low wall stands
+  if (!walls.length) return;
+  const mesh = new THREE.Mesh(mergeGeometries(walls), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+  const ray = new THREE.Raycaster();
+  const from = new THREE.Vector3();
+  const to = new THREE.Vector3();
+  for (const s of sp.shapes) {
+    if (!s.skin || s.open) continue;
+    const o = build.solidOutline(s);
+    for (let k = 0; k < o.length; k++) {
+      const [px, pz] = o[k];
+      const [qx, qz] = o[(k + 1) % o.length];
+      const len = Math.hypot(qx - px, qz - pz);
+      if (len < 1e-4) continue;
+      const [nx, nz] = [-(qz - pz) / len, (qx - px) / len];
+      for (let t = 0.25; t < len; t += 0.5) {
+        const x = px + ((qx - px) * t) / len;
+        const z = pz + ((qz - pz) * t) / len;
+        const a = sp.ownerIndex(x + nx * 0.3, z + nz * 0.3);
+        const b = sp.ownerIndex(x - nx * 0.3, z - nz * 0.3);
+        if (a < 0 || b < 0 || a === b) continue;
+        const ga = sp.ground(x + nx * 0.3, z + nz * 0.3);
+        const gb = sp.ground(x - nx * 0.3, z - nz * 0.3);
+        if (Math.abs(ga - gb) <= 0.5) continue; // a drop the player cannot just step down (STEP_MAX 0.45)
+        const sign = ga > gb ? 1 : -1;
+        const hi = Math.max(ga, gb);
+        if (sp.ceiling(x + sign * nx * 0.3, z + sign * nz * 0.3) - hi < 2) continue;
+        // from 50 cm inside the high side, at hip height, toward the edge and 40 cm past it
+        // three rays 20 cm apart along the edge: one alone can slip through the corner between two low walls
+        to.set(-sign * nx, 0, -sign * nz);
+        ray.far = 0.9;
+        const [tx, tz] = [(qx - px) / len, (qz - pz) / len];
+        const guarded = [-0.2, 0, 0.2].some((d) => {
+          from.set(x + sign * nx * 0.5 + tx * d, hi + 0.5, z + sign * nz * 0.5 + tz * d);
+          ray.set(from, to);
+          return ray.intersectObject(mesh).length > 0;
+        });
+        if (!guarded) note("ledge", x, z, `a ${Math.abs(ga - gb).toFixed(1)} m drop with no low wall`);
+      }
+    }
   }
 }
