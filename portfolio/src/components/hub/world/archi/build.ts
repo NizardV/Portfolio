@@ -556,7 +556,8 @@ function* buildSteps(space: Space): Steps<Built> {
           const sign = ha[0] < ha[1] ? 1 : -1;
           if (!s.skin) strip(walls.get(o.wall ?? wall), ax, az, bx, bz, [Math.min(...ha), Math.max(...ha)], [Math.min(...hb), Math.max(...hb)], nx * sign, nz * sign, 0, len / tile, tile, false);
           const drop = Math.max(Math.abs(ha[0] - ha[1]), Math.abs(hb[0] - hb[1]));
-          if (drop > 0.6 && !own && s.rails !== false && o.rails !== false && !s.drop && !o.drop) {
+          // a skinned room closes its drops with low walls from its model (skin.py murets), not railings
+          if (drop > 0.6 && !own && s.rails !== false && o.rails !== false && !s.drop && !o.drop && !s.skin && !o.skin) {
             // the railing stands on the higher floor, all along (it may slope, on a ramp)
             const topA = Math.max(...ha);
             const topB = Math.max(...hb);

@@ -59,6 +59,18 @@ const FOREST = room({ kind: "box", x: -28, z: -44, w: 26, d: 20, a: -0.08, ceil:
 const SHAFT = room({ kind: "box", x: 60, z: 2, w: 6, d: 14, a: 0.9, ceil: 18, lights: 2.4 });
 const ARRIVAL_ROOM = room({ kind: "box", x: 0, z: 70, w: 8, d: 12, ceil: STD_CEIL, lights: 2.6, tag: "arrival" });
 const LANDMARKS: Room[] = [HALL, ROTUNDA, TRIANGLE, PLAZA, STAGE, HOLES_ROOM, FOREST, SHAFT, ARRIVAL_ROOM];
+/**
+ * Balconies (2026-11-22): around the stage and the sunken plaza, a hall at floor level under their high ceiling, so every
+ * corridor that reaches them opens under a tall space instead of a 1 m slot between a raised floor and a 2.75 m ceiling.
+ * The level change is then a balcony edge, closed by a low wall (tools/blender/skin.py, murets). Placed before the stage
+ * and the plaza, which keep their own footprint; not in ROOMS (the seeded layout must not move).
+ */
+const ring = (r: Room, margin: number, tag: string): Room =>
+  r.kind === "box" ? room({ kind: "box", x: r.x, z: r.z, w: r.w + margin * 2, d: r.d + margin * 2, a: r.a, ceil: r.ceil, lights: 3.2, dead: 0.15, tag }) : r;
+const STAGE_HALL = ring(STAGE, 5, "stage-hall");
+const PLAZA_HALL = ring(PLAZA, 4, "plaza-hall");
+/** in building order: the arrival room keeps its place (SLICE0 below counts on it) */
+const PLACED: Room[] = [HALL, ROTUNDA, TRIANGLE, HOLES_ROOM, FOREST, SHAFT, STAGE_HALL, PLAZA_HALL, ARRIVAL_ROOM, PLAZA, STAGE];
 
 /* ---------- seeded filler rooms ---------- */
 const fillers: Room[] = [];
@@ -125,7 +137,9 @@ function rampInto(r: Room, pts: [number, number][]) {
   const dx = (r.cx - fx) / len;
   const dz = (r.cz - fz) / len;
   const h = typeof r.floor === "number" ? r.floor : 0;
-  ramps.push({ kind: "box", x: bx, z: bz, w: 8, d: 3.6, a: Math.atan2(-dz, dx), ceil: Math.max(3, r.ceil), lights: 0, mat: r.mat, wall: r.wall,
+  // one way up per side: a second ramp within 5 m of another one squeezed a paper-thin wall between the two
+  if (ramps.some((o) => o.kind === "box" && Math.hypot(o.x - bx, o.z - bz) < 5)) return;
+  ramps.push({ kind: "box", x: bx, z: bz, w: 8, d: 3.6, a: Math.atan2(-dz, dx), ceil: Math.max(3, r.ceil), lights: 2.4, dead: 0.1, mat: r.mat, wall: r.wall,
     floor: { ax: bx - dx * 4, az: bz - dz * 4, bx: bx + dx * 4, bz: bz + dz * 4, ha: 0, hb: h } });
 }
 const raised = (r: Room) => typeof r.floor === "number" && r.floor !== 0;
@@ -242,7 +256,12 @@ for (const e of EXITS) {
   const level = ROOMS.filter((r) => !raised(r));
   const nearest = level.reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b), level[0]);
   const target = isStage ? STAGE : nearest;
-  if (isStage) vestibules.push({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, d: 3.2, a: Math.atan2(-(target.cz - vz), target.cx - vx), floor: 1.8, ceil: 4, lights: 3 });
+  if (isStage) {
+    const walk = { x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: Math.hypot(target.cx - vx, target.cz - vz) + 3, a: Math.atan2(-(target.cz - vz), target.cx - vx) };
+    vestibules.push({ kind: "box", ...walk, d: 3.2, floor: 1.8, ceil: 4, lights: 3 });
+    // the walkway is a balcony too: a hall at floor level under the stage height all along it, built before the stage
+    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", ...walk, w: walk.w + 4, d: 3.2 + 8, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
+  }
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
   if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05));
@@ -251,14 +270,14 @@ for (const e of EXITS) {
 /* ---------- the place ---------- */
 // order matters: later shapes win where they overlap (corridors < rooms < pits < vestibules < ramps). Ramps come last:
 // a ramp always owns its footprint (a flat passage placed after one cut a cliff into the stage's ramp)
-const allShapes: Shape[] = [...corridors, ...fillers, ...LANDMARKS, ...features, ...vestibules, ...ramps];
+const allShapes: Shape[] = [...corridors, ...fillers, ...PLACED, ...features, ...vestibules, ...ramps];
 
 /**
  * A connector (ramp, feature, vestibule) that lies mostly inside a taller room takes that room's ceiling: placed after
  * it, it would own the ceiling there and hang a slab in the middle of the room (the passages over the stage, the hotel's
  * landing). Door throats lie outside the rooms: they keep their height, a lintel in the wall.
  */
-for (let k = corridors.length + fillers.length + LANDMARKS.length; k < allShapes.length; k++) {
+for (let k = corridors.length + fillers.length + PLACED.length; k < allShapes.length; k++) {
   const s = allShapes[k];
   if (s.open) continue;
   const [x0, z0, x1, z1] = geomBounds(s);

@@ -281,6 +281,98 @@ def quad(bm, a, b, c, d, facing, slot, uv, us):
         loop[uv].uv = (u, v)
 
 
+def grid_fits(heading, angle):
+    """Does a Blender-space direction run along a room's tile grid (its angle in game space, z mirrored)?"""
+    for a in (angle, -angle):
+        m = (heading - a) % (math.pi / 2)
+        if min(m, math.pi / 2 - m) < math.radians(2):
+            return True
+    return False
+
+
+MURET_H, MURET_T = 1.0, 0.15
+
+
+def murets(plan, out, slots):
+    """Low walls (1 m, 15 cm thick, the room's wallpaper, a capping board) along every drop over 60 cm between skinned
+    rooms, on the higher side, following a ramp's slope: balconies, not railings (the kit lays no railings in a skin).
+    Only where the higher side has head room (a slot under a low ceiling is a construction fault, not a balcony)."""
+    from mathutils import Vector
+
+    uv = out.loops.layers.uv.verify()
+    cap = slots("trim")
+    up = Vector((0, 0, 1))
+    seen = set()
+    for r in plan.rooms:
+        if not r["skinned"] or r["open"]:
+            continue
+        pts = r["outline"]
+        for k in range(len(pts)):
+            (px, pz), (qx, qz) = pts[k], pts[(k + 1) % len(pts)]
+            length = math.hypot(qx - px, qz - pz)
+            if length < 0.3:
+                continue
+            tx, tz = (qx - px) / length, (qz - pz) / length
+            nx, nz = -tz, tx  # one side; the higher side is chosen per sample
+            samples = []
+            mine = set()
+            steps = max(1, round(length / 0.25))
+            for i in range(steps + 1):
+                t = length * i / steps
+                x, z = px + tx * t, pz + tz * t
+                a, b = plan.owner(x + nx * 0.1, z + nz * 0.1), plan.owner(x - nx * 0.1, z - nz * 0.1)
+                mark = None
+                # only along the edge that really parts the two rooms: this room owns one side (a corridor crossing a
+                # balcony edge would claim bits of it, in pieces and askew)
+                if a is not None and b is not None and a is not b and r in (a, b) and a["skinned"] and b["skinned"] and not a["open"] and not b["open"]:
+                    fa, fb = floor_at(a, x + nx * 0.1, z + nz * 0.1), floor_at(b, x - nx * 0.1, z - nz * 0.1)
+                    hi, side = (a, 1) if fa > fb else (b, -1)
+                    # a boundary already walled from another outline lying on it; points of this edge only count once
+                    # it is done (on a slanted edge, two samples 25 cm apart can round to the same key)
+                    key = (round(x * 4), round(z * 4))
+                    if abs(fa - fb) > 0.6 and key not in seen and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
+                        mark = (hi, side)
+                        mine.add(key)
+                samples.append((t, x, z, mark))
+            seen |= mine
+            # runs of consecutive samples with the same higher room and side
+            run = []
+            for smp in samples + [(None, None, None, None)]:
+                if run and (smp[3] is None or smp[3] != run[-1][3]):
+                    if len(run) > 1:
+                        wall_run(out, uv, run, nx, nz, slots, cap, up)
+                    run = []
+                if smp[3] is not None:
+                    run.append(smp)
+
+
+def wall_run(out, uv, run, nx, nz, slots, cap, up):
+    """One muret along samples (t, x, z, (room, side)) of an edge: faces toward the drop, toward the room, its top, its ends."""
+    from mathutils import Vector
+
+    hi, side = run[0][3]
+    wall = slots(f"muret:{hi['wall']}")  # plain render in the wall's colour (archi/Skin.tsx), no wallpaper pattern
+    ox, oz = nx * side, nz * side  # into the higher room
+    def at(x, z, inset, h):
+        return Vector((x + ox * inset, -(z + oz * inset), h))
+    toward_drop = Vector((-ox, oz, 0))
+    toward_room = Vector((ox, -oz, 0))
+    for (t0, x0, z0, _), (t1, x1, z1, _) in zip(run, run[1:]):
+        f0, f1 = floor_at(hi, x0 + ox * 0.1, z0 + oz * 0.1), floor_at(hi, x1 + ox * 0.1, z1 + oz * 0.1)
+        span = t1 - t0
+        for inset, facing in ((0.002, toward_drop), (MURET_T, toward_room)):
+            quad(out, at(x0, z0, inset, f0), at(x1, z1, inset, f1), at(x1, z1, inset, f1 + MURET_H), at(x0, z0, inset, f0 + MURET_H), facing, wall, uv,
+                 [(t0, f0), (t1, f1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
+        quad(out, at(x0, z0, -0.01, f0 + MURET_H), at(x1, z1, -0.01, f1 + MURET_H), at(x1, z1, MURET_T + 0.01, f1 + MURET_H), at(x0, z0, MURET_T + 0.01, f0 + MURET_H), up, cap, uv,
+             [(0, 0), (span, 0), (span, MURET_T), (0, MURET_T)])
+    for (t, x, z, _), sign in ((run[0], -1), (run[-1], 1)):
+        f = floor_at(hi, x + ox * 0.1, z + oz * 0.1)
+        tx, tz = (run[-1][1] - run[0][1]), (run[-1][2] - run[0][2])
+        n = Vector((tx * sign, -tz * sign, 0)).normalized()
+        quad(out, at(x, z, 0.002, f), at(x, z, MURET_T, f), at(x, z, MURET_T, f + MURET_H), at(x, z, 0.002, f + MURET_H), n, wall, uv,
+             [(0, f), (MURET_T, f), (MURET_T, f + MURET_H), (0, f + MURET_H)])
+
+
 def trims(plan, bm, own, slots):
     """Baseboards along wall feet, beams along ceiling seams: a separate mesh, same materials."""
     from mathutils import Vector
@@ -314,6 +406,11 @@ def trims(plan, bm, own, slots):
         d = (b - a)
         span = d.length
         if span < 0.02:
+            continue
+        # a beam runs along the tiles of one of the two ceilings: a seam across both grids (rooms askew, overlapping) drew
+        # zigzags of beams through the middle of the rooms; there the tiles simply meet
+        heading = math.atan2(d.y, d.x)  # Blender y = -game z: angles mirror, so compare the absolute misfit mod 90°
+        if not any(grid_fits(heading, plan.rooms_by_index[f[own]]["angle"]) for f in faces):
             continue
         side = Vector((-d.y, d.x, 0)).normalized() * 0.06
         drop = up * 0.08
@@ -446,6 +543,7 @@ def build(skin):
     bm.normal_update()
     own = classify(plan, bm, slots)
     extra = trims(plan, bm, own, slots)
+    murets(plan, extra, slots)
     bm.to_mesh(me)
     bm.free()
     space.name = "skin"

@@ -122,7 +122,10 @@ function audit(sp, spawn) {
             const pz = h.z + dir.z * t;
             return h.y > sp.ground(px, pz) + 0.05 && h.y < sp.ceiling(px, pz) - 0.05;
           };
-          if (through && inside(-0.3) && inside(0.3)) note("phantom", h.x, h.z, `seen from ${x.toFixed(1)},${z.toFixed(1)} yaw ${yawd}`);
+          // the side of a ramp (or a riser) is no wall in the open: the floor rises behind it within 60 cm
+          let riser = false;
+          for (let t = -0.6; t <= 0.6001 && !riser; t += 0.1) riser = h.y < sp.ground(h.x + dir.x * t, h.z + dir.z * t) + 0.1;
+          if (through && !riser && inside(-0.3) && inside(0.3)) note("phantom", h.x, h.z, `seen from ${x.toFixed(1)},${z.toFixed(1)} yaw ${yawd}`);
         }
         // stopped well before what is seen (corner grazes of a few cm do not count)
         if (pd === 0) {

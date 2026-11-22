@@ -42,6 +42,11 @@ marching squares : arêtes droites, raccords nets, plafonniers dans les dalles.
   `Skin.tsx`) ; lissée (flou gaussien limité aux pixels cuits). Côté jeu : `MeshBasicMaterial` texture × lumière cuite,
   les lampes mobiles (`Architecture`) n'éclairent plus que les objets (intensité de la palette baissée en conséquence).
   Les lampes mobiles près du plafond crament les dalles : ne pas revenir à l'éclairage dynamique des murs.
+- **Balcons, pas de fentes** (2026-11-22, choix de l'utilisateur) : un niveau surélevé ou en contrebas est entouré d'un
+  hall au sol 0 sous son plafond haut (`lobby.ts` : `ring`, `walk-hall`, posés avant l'estrade/la place, hors `ROOMS`) ;
+  ses bords sont fermés par des **murets** (1 m, 15 cm, enduit uni teinté comme le mur, tablette ; `skin.py murets()`),
+  jamais par des garde-corps métalliques (le kit n'en pose plus dans un skin). Une rampe par côté (pas deux à moins de
+  5 m), éclairée.
 - **Pas de taches répétées dans les textures de base** (moquette, papier peint) : répétées à chaque carreau, elles
   dessinent une grille. L'usure se pose à la main, là où elle a du sens.
 - **Jamais de texture empaquetée dans le .glb** : le chargeur crée des URL `blob:` bloquées par la CSP ; le jeu habille

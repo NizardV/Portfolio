@@ -5840,80 +5840,6 @@
    "skinned": true,
    "outline": [
     [
-     34.3895,
-     21.9966
-    ],
-    [
-     55.2727,
-     28.9171
-    ],
-    [
-     49.6105,
-     46.0034
-    ],
-    [
-     28.7273,
-     39.0829
-    ]
-   ],
-   "floor": -2.4,
-   "ramp": null,
-   "ceil": 5.4,
-   "open": false,
-   "angle": -0.32,
-   "centre": [
-    42,
-    34
-   ],
-   "mat": "concrete",
-   "wall": "concrete",
-   "ceilMat": "concrete",
-   "lights": 3.6,
-   "dead": 0.25,
-   "tag": null
-  },
-  {
-   "index": 145,
-   "skinned": true,
-   "outline": [
-    [
-     -60.2059,
-     37.8691
-    ],
-    [
-     -43.6991,
-     26.5762
-    ],
-    [
-     -35.7941,
-     38.1309
-    ],
-    [
-     -52.3009,
-     49.4238
-    ]
-   ],
-   "floor": 1.8,
-   "ramp": null,
-   "ceil": 5.6,
-   "open": false,
-   "angle": 0.6,
-   "centre": [
-    -48,
-    38
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 3.2,
-   "dead": 0.12,
-   "tag": null
-  },
-  {
-   "index": 146,
-   "skinned": true,
-   "outline": [
-    [
      -1.8535,
      -46.0565
     ],
@@ -5947,7 +5873,7 @@
    "tag": "holes"
   },
   {
-   "index": 147,
+   "index": 145,
    "skinned": true,
    "outline": [
     [
@@ -5984,7 +5910,7 @@
    "tag": null
   },
   {
-   "index": 148,
+   "index": 146,
    "skinned": true,
    "outline": [
     [
@@ -6019,6 +5945,80 @@
    "lights": 2.4,
    "dead": 0.12,
    "tag": null
+  },
+  {
+   "index": 147,
+   "skinned": true,
+   "outline": [
+    [
+     -67.1557,
+     36.5656
+    ],
+    [
+     -42.3957,
+     19.6263
+    ],
+    [
+     -28.8443,
+     39.4344
+    ],
+    [
+     -53.6043,
+     56.3737
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.6,
+   "centre": [
+    -48,
+    38
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.15,
+   "tag": "stage-hall"
+  },
+  {
+   "index": 148,
+   "skinned": true,
+   "outline": [
+    [
+     31.8508,
+     16.9414
+    ],
+    [
+     60.3279,
+     26.3784
+    ],
+    [
+     52.1492,
+     51.0586
+    ],
+    [
+     23.6721,
+     41.6216
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 5.4,
+   "open": false,
+   "angle": -0.32,
+   "centre": [
+    42,
+    34
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.15,
+   "tag": "plaza-hall"
   },
   {
    "index": 149,
@@ -6059,6 +6059,117 @@
   },
   {
    "index": 150,
+   "skinned": true,
+   "outline": [
+    [
+     -78.9921,
+     41.6769
+    ],
+    [
+     -46.3017,
+     31.6183
+    ],
+    [
+     -43.0079,
+     42.3231
+    ],
+    [
+     -75.6983,
+     52.3817
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.2984989315861793,
+   "centre": [
+    -61,
+    42
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.15,
+   "tag": "walk-hall"
+  },
+  {
+   "index": 151,
+   "skinned": true,
+   "outline": [
+    [
+     34.3895,
+     21.9966
+    ],
+    [
+     55.2727,
+     28.9171
+    ],
+    [
+     49.6105,
+     46.0034
+    ],
+    [
+     28.7273,
+     39.0829
+    ]
+   ],
+   "floor": -2.4,
+   "ramp": null,
+   "ceil": 5.4,
+   "open": false,
+   "angle": -0.32,
+   "centre": [
+    42,
+    34
+   ],
+   "mat": "concrete",
+   "wall": "concrete",
+   "ceilMat": "concrete",
+   "lights": 3.6,
+   "dead": 0.25,
+   "tag": null
+  },
+  {
+   "index": 152,
+   "skinned": true,
+   "outline": [
+    [
+     -60.2059,
+     37.8691
+    ],
+    [
+     -43.6991,
+     26.5762
+    ],
+    [
+     -35.7941,
+     38.1309
+    ],
+    [
+     -52.3009,
+     49.4238
+    ]
+   ],
+   "floor": 1.8,
+   "ramp": null,
+   "ceil": 5.6,
+   "open": false,
+   "angle": 0.6,
+   "centre": [
+    -48,
+    38
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 3.2,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 153,
    "skinned": true,
    "outline": [
     [
@@ -6239,7 +6350,7 @@
    "tag": null
   },
   {
-   "index": 151,
+   "index": 154,
    "skinned": true,
    "outline": [
     [
@@ -6420,7 +6531,7 @@
    "tag": "well"
   },
   {
-   "index": 152,
+   "index": 155,
    "skinned": true,
    "outline": [
     [
@@ -6457,7 +6568,7 @@
    "tag": null
   },
   {
-   "index": 153,
+   "index": 156,
    "skinned": true,
    "outline": [
     [
@@ -6494,7 +6605,7 @@
    "tag": null
   },
   {
-   "index": 154,
+   "index": 157,
    "skinned": true,
    "outline": [
     [
@@ -6531,7 +6642,7 @@
    "tag": null
   },
   {
-   "index": 155,
+   "index": 158,
    "skinned": true,
    "outline": [
     [
@@ -6568,7 +6679,7 @@
    "tag": null
   },
   {
-   "index": 156,
+   "index": 159,
    "skinned": true,
    "outline": [
     [
@@ -6605,7 +6716,7 @@
    "tag": null
   },
   {
-   "index": 157,
+   "index": 160,
    "skinned": true,
    "outline": [
     [
@@ -6642,7 +6753,7 @@
    "tag": null
   },
   {
-   "index": 158,
+   "index": 161,
    "skinned": true,
    "outline": [
     [
@@ -6679,7 +6790,7 @@
    "tag": null
   },
   {
-   "index": 159,
+   "index": 162,
    "skinned": true,
    "outline": [
     [
@@ -6716,7 +6827,7 @@
    "tag": null
   },
   {
-   "index": 160,
+   "index": 163,
    "skinned": true,
    "outline": [
     [
@@ -6753,7 +6864,7 @@
    "tag": null
   },
   {
-   "index": 161,
+   "index": 164,
    "skinned": true,
    "outline": [
     [
@@ -6790,7 +6901,7 @@
    "tag": null
   },
   {
-   "index": 162,
+   "index": 165,
    "skinned": true,
    "outline": [
     [
@@ -6827,7 +6938,7 @@
    "tag": null
   },
   {
-   "index": 163,
+   "index": 166,
    "skinned": true,
    "outline": [
     [
@@ -6864,7 +6975,7 @@
    "tag": null
   },
   {
-   "index": 164,
+   "index": 167,
    "skinned": true,
    "outline": [
     [
@@ -6901,7 +7012,7 @@
    "tag": null
   },
   {
-   "index": 165,
+   "index": 168,
    "skinned": true,
    "outline": [
     [
@@ -6938,7 +7049,7 @@
    "tag": null
   },
   {
-   "index": 166,
+   "index": 169,
    "skinned": true,
    "outline": [
     [
@@ -6975,121 +7086,121 @@
    "tag": null
   },
   {
-   "index": 167,
-   "skinned": true,
-   "outline": [
-    [
-     71,
-     -12.2
-    ],
-    [
-     77,
-     -12.2
-    ],
-    [
-     77,
-     -7.8
-    ],
-    [
-     71,
-     -7.8
-    ]
-   ],
-   "floor": 0,
-   "ramp": null,
-   "ceil": 3,
-   "open": false,
-   "angle": 0,
-   "centre": [
-    74,
-    -10
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 2.4,
-   "dead": 0.2,
-   "tag": null
-  },
-  {
-   "index": 168,
-   "skinned": true,
-   "outline": [
-    [
-     76.7,
-     -9.1
-    ],
-    [
-     76.7,
-     -10.9
-    ],
-    [
-     78.3,
-     -10.9
-    ],
-    [
-     78.3,
-     -9.1
-    ]
-   ],
-   "floor": 0,
-   "ramp": null,
-   "ceil": 2.3499999999999996,
-   "open": false,
-   "angle": 1.5707963267948966,
-   "centre": [
-    77.5,
-    -10
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
-   "tag": null
-  },
-  {
-   "index": 169,
-   "skinned": true,
-   "outline": [
-    [
-     71,
-     47.8
-    ],
-    [
-     77,
-     47.8
-    ],
-    [
-     77,
-     52.2
-    ],
-    [
-     71,
-     52.2
-    ]
-   ],
-   "floor": 0,
-   "ramp": null,
-   "ceil": 3,
-   "open": false,
-   "angle": 0,
-   "centre": [
-    74,
-    50
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 2.4,
-   "dead": 0.2,
-   "tag": null
-  },
-  {
    "index": 170,
    "skinned": true,
    "outline": [
     [
+     71,
+     -12.2
+    ],
+    [
+     77,
+     -12.2
+    ],
+    [
+     77,
+     -7.8
+    ],
+    [
+     71,
+     -7.8
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    74,
+    -10
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 171,
+   "skinned": true,
+   "outline": [
+    [
+     76.7,
+     -9.1
+    ],
+    [
+     76.7,
+     -10.9
+    ],
+    [
+     78.3,
+     -10.9
+    ],
+    [
+     78.3,
+     -9.1
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.3499999999999996,
+   "open": false,
+   "angle": 1.5707963267948966,
+   "centre": [
+    77.5,
+    -10
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 0,
+   "dead": 0.12,
+   "tag": null
+  },
+  {
+   "index": 172,
+   "skinned": true,
+   "outline": [
+    [
+     71,
+     47.8
+    ],
+    [
+     77,
+     47.8
+    ],
+    [
+     77,
+     52.2
+    ],
+    [
+     71,
+     52.2
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 3,
+   "open": false,
+   "angle": 0,
+   "centre": [
+    74,
+    50
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.2,
+   "tag": null
+  },
+  {
+   "index": 173,
+   "skinned": true,
+   "outline": [
+    [
      76.7,
      51.05
     ],
@@ -7123,7 +7234,7 @@
    "tag": null
   },
   {
-   "index": 171,
+   "index": 174,
    "skinned": true,
    "outline": [
     [
@@ -7145,7 +7256,7 @@
    ],
    "floor": 1.8,
    "ramp": null,
-   "ceil": 4.8,
+   "ceil": 5.6,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7160,7 +7271,7 @@
    "tag": null
   },
   {
-   "index": 172,
+   "index": 175,
    "skinned": true,
    "outline": [
     [
@@ -7197,7 +7308,7 @@
    "tag": null
   },
   {
-   "index": 173,
+   "index": 176,
    "skinned": true,
    "outline": [
     [
@@ -7219,7 +7330,7 @@
    ],
    "floor": 1.8,
    "ramp": null,
-   "ceil": 4.6499999999999995,
+   "ceil": 5.6,
    "open": false,
    "angle": 4.71238898038469,
    "centre": [
@@ -7234,7 +7345,7 @@
    "tag": null
   },
   {
-   "index": 174,
+   "index": 177,
    "skinned": true,
    "outline": [
     [
@@ -7271,7 +7382,7 @@
    "tag": null
   },
   {
-   "index": 175,
+   "index": 178,
    "skinned": true,
    "outline": [
     [
@@ -7308,7 +7419,7 @@
    "tag": null
   },
   {
-   "index": 176,
+   "index": 179,
    "skinned": true,
    "outline": [
     [
@@ -7345,7 +7456,7 @@
    "tag": null
   },
   {
-   "index": 177,
+   "index": 180,
    "skinned": true,
    "outline": [
     [
@@ -7382,7 +7493,7 @@
    "tag": null
   },
   {
-   "index": 178,
+   "index": 181,
    "skinned": true,
    "outline": [
     [
@@ -7421,12 +7532,12 @@
    "mat": "carpet",
    "wall": "wallpaper",
    "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 179,
+   "index": 182,
    "skinned": true,
    "outline": [
     [
@@ -7465,12 +7576,12 @@
    "mat": "carpet",
    "wall": "wallpaper",
    "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 180,
+   "index": 183,
    "skinned": true,
    "outline": [
     [
@@ -7509,12 +7620,12 @@
    "mat": "carpet",
    "wall": "wallpaper",
    "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 181,
+   "index": 184,
    "skinned": true,
    "outline": [
     [
@@ -7553,12 +7664,12 @@
    "mat": "concrete",
    "wall": "concrete",
    "ceilMat": "concrete",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 182,
+   "index": 185,
    "skinned": true,
    "outline": [
     [
@@ -7597,12 +7708,12 @@
    "mat": "concrete",
    "wall": "concrete",
    "ceilMat": "concrete",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 183,
+   "index": 186,
    "skinned": true,
    "outline": [
     [
@@ -7641,56 +7752,12 @@
    "mat": "concrete",
    "wall": "concrete",
    "ceilMat": "concrete",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 184,
-   "skinned": true,
-   "outline": [
-    [
-     28.1705,
-     35.2173
-    ],
-    [
-     35.9815,
-     33.4885
-    ],
-    [
-     36.7594,
-     37.0035
-    ],
-    [
-     28.9485,
-     38.7322
-    ]
-   ],
-   "floor": -2.4,
-   "ramp": {
-    "ax": 28.55949154362896,
-    "az": 36.974781575688326,
-    "bx": 36.37046177050674,
-    "bz": 35.24598311582412,
-    "ha": 0,
-    "hb": -2.4
-   },
-   "ceil": 5.4,
-   "open": false,
-   "angle": 0.21781811312889832,
-   "centre": [
-    32.465,
-    36.1104
-   ],
-   "mat": "concrete",
-   "wall": "concrete",
-   "ceilMat": "concrete",
-   "lights": 0,
-   "dead": 0.12,
-   "tag": null
-  },
-  {
-   "index": 185,
+   "index": 187,
    "skinned": true,
    "outline": [
     [
@@ -7729,12 +7796,12 @@
    "mat": "concrete",
    "wall": "concrete",
    "ceilMat": "concrete",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   },
   {
-   "index": 186,
+   "index": 188,
    "skinned": true,
    "outline": [
     [
@@ -7773,96 +7840,8 @@
    "mat": "carpet",
    "wall": "wallpaper",
    "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
-   "tag": null
-  },
-  {
-   "index": 187,
-   "skinned": true,
-   "outline": [
-    [
-     -44.958,
-     48.8011
-    ],
-    [
-     -48.3339,
-     41.5483
-    ],
-    [
-     -45.0701,
-     40.0291
-    ],
-    [
-     -41.6943,
-     47.282
-    ]
-   ],
-   "floor": 0,
-   "ramp": {
-    "ax": -43.32614966919531,
-    "az": 48.0415346389346,
-    "bx": -46.701996181999554,
-    "bz": 40.78869655153823,
-    "ha": 0,
-    "hb": 1.8
-   },
-   "ceil": 5.6,
-   "open": false,
-   "angle": 2.006425409387119,
-   "centre": [
-    -45.0141,
-    44.4151
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
-   "tag": null
-  },
-  {
-   "index": 188,
-   "skinned": true,
-   "outline": [
-    [
-     -60.7558,
-     43.6593
-    ],
-    [
-     -53.9227,
-     39.4988
-    ],
-    [
-     -52.0505,
-     42.5737
-    ],
-    [
-     -58.8836,
-     46.7341
-    ]
-   ],
-   "floor": 0,
-   "ramp": {
-    "ax": -59.81966549623487,
-    "az": 45.196707914009764,
-    "bx": -52.986623730103396,
-    "bz": 41.036234356552285,
-    "ha": 0,
-    "hb": 1.8
-   },
-   "ceil": 5.6,
-   "open": false,
-   "angle": 0.5469202532822589,
-   "centre": [
-    -56.4031,
-    43.1165
-   ],
-   "mat": "carpet",
-   "wall": "wallpaper",
-   "ceilMat": "ceiling",
-   "lights": 0,
-   "dead": 0.12,
+   "lights": 2.4,
+   "dead": 0.1,
    "tag": null
   }
  ],
