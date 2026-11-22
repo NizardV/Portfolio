@@ -339,7 +339,7 @@ def murets(plan, out, slots):
             run = []
             for smp in samples + [(None, None, None, None)]:
                 if run and (smp[3] is None or smp[3] != run[-1][3]):
-                    if len(run) > 1:
+                    if run[-1][0] - run[0][0] >= 0.8:  # no stub: a drop over 60 cm for a few steps by a ramp
                         wall_run(out, uv, run, nx, nz, slots, cap, up)
                     run = []
                 if smp[3] is not None:
@@ -509,7 +509,9 @@ def lights(plan):
                     ok = False
                 if ok:
                     x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
-                    dead = (math.sin(r["index"] * 12.9898 + k * 78.233) * 43758.5453) % 1 < min(0.15, r["dead"])
+                    # never two dead in a row (only every other light may die, twice as often): a corridor whose 3 tubes
+                    # all drew "dead" went black
+                    dead = k % 2 == 1 and (math.sin(r["index"] * 12.9898 + k * 78.233) * 43758.5453) % 1 < 2 * min(0.15, r["dead"])
                     panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(r["angle"], 5), size, dead])
                     k += 1
                 v += step
