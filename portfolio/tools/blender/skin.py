@@ -405,7 +405,7 @@ def wall_run(out, uv, plan, run, slots, closed=False):
         out_dir = Vector((-s0[4] * side, s0[5] * side, 0))
         in_dir = -out_dir
         # toward the drop: from the lower floor to the top, 3 mm proud of the riser so it covers it
-        quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,
+        quad(out, at(s0, -0.01, lo0), at(s1, -0.01, lo1), at(s1, -0.01, f1 + MURET_H), at(s0, -0.01, f0 + MURET_H), out_dir, wall, uv,
              [(t0, lo0), (t1, lo1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
         # toward the room
         quad(out, at(s0, MURET_T, f0), at(s1, MURET_T, f1), at(s1, MURET_T, f1 + MURET_H), at(s0, MURET_T, f0 + MURET_H), in_dir, wall, uv,
@@ -416,9 +416,9 @@ def wall_run(out, uv, plan, run, slots, closed=False):
         # the slab's nosing: 16 cm high, 2.5 cm proud, at the upper floor
         quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.028, f1), at(s0, -0.028, f0), out_dir, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.16), (t0, 0.16)])
-        quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.003, f1), at(s0, -0.003, f0), up, cap, uv,
+        quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.01, f1), at(s0, -0.01, f0), up, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
-        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.003, f1 - 0.16), at(s0, -0.003, f0 - 0.16), -up, cap, uv,
+        quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.01, f1 - 0.16), at(s0, -0.01, f0 - 0.16), -up, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.025), (t0, 0.025)])
     if closed:
         return
@@ -426,7 +426,7 @@ def wall_run(out, uv, plan, run, slots, closed=False):
         f = floor_of(s)
         tx, tz = run[-1][1] - run[0][1], run[-1][2] - run[0][2]
         n = Vector((tx * sign, -tz * sign, 0)).normalized()
-        quad(out, at(s, -0.003, f), at(s, MURET_T, f), at(s, MURET_T, f + MURET_H), at(s, -0.003, f + MURET_H), n, wall, uv,
+        quad(out, at(s, -0.01, f), at(s, MURET_T, f), at(s, MURET_T, f + MURET_H), at(s, -0.01, f + MURET_H), n, wall, uv,
              [(0, f), (MURET_T, f), (MURET_T, f + MURET_H), (0, f + MURET_H)])
 
 
@@ -549,7 +549,8 @@ def lights(plan):
         low = r["ceil"] - r["floor"] < 2.7
         big = not low and (r["ceil"] > 3.6 or area > 150)
         size = 2 * GRID if big else GRID
-        step = step or max(4 if big else 3, round(r["lights"] / GRID)) * GRID
+        # a 1.2 m fitting every 3.6 m at least (every 2.4 m, a quarter of a hall's ceiling was light: burnt white)
+        step = step or max(6 if big else 3, round(r["lights"] / GRID)) * GRID
         cos_a, sin_a, cx, cz = frame(r)
         reach = math.hypot(x1 - x0, z1 - z0) / 2
         first = -math.floor(reach / step) * step
