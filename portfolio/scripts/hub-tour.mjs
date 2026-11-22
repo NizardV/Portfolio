@@ -243,6 +243,9 @@ try {
   await Promise.all(
     tabs.map(async (tab) => {
       const lab = await browser.newPage({ viewport: { width: 200, height: 200 } });
+      // warm up once all tabs are open: the first tab shot its first views while the others were still loading the world
+      // (whole frames changing between the two shots of a view, read as 99 % "z-fighting")
+      await tab.evaluate(() => new Promise((r) => setTimeout(r, 2000)));
       while (next < plan.views.length) {
         const i = next++;
         const v = plan.views[i];
