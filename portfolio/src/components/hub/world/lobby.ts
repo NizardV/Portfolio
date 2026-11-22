@@ -345,6 +345,44 @@ export const SLICE0_MEMORIES: Memory[] = [];
  * this very plan: exact straight walls, clean joints between rooms, ceiling tiles and their lights on each room's grid,
  * baseboards. The kit only lays the railings; collisions come from here, as before.
  */
+/**
+ * Walls in line: two rooms whose walls run side by side a few cm apart (corridors overlapping a little askew) left a
+ * jog where one ends, a notch in the wall and its baseboard. The later room's wall moves onto the earlier one's line
+ * (boxes only; 2 to 60 cm; the layout keeps its shape, the building gets straight walls).
+ */
+function alignWalls(shapes: Shape[]) {
+  type Side = { i: number; nx: number; nz: number; c: number; t0: number; t1: number; axis: "w" | "d" };
+  const sidesOf = (s: Shape, i: number): Side[] => {
+    if (s.kind !== "box" || s.open) return [];
+    const a = s.a ?? 0;
+    const [ux, uz, vx, vz] = [Math.cos(a), -Math.sin(a), Math.sin(a), Math.cos(a)];
+    const at = (nx: number, nz: number, half: number, tx: number, tz: number, length: number, axis: "w" | "d"): Side => {
+      const t = s.x * tx + s.z * tz;
+      return { i, nx, nz, c: s.x * nx + s.z * nz + half, t0: t - length / 2, t1: t + length / 2, axis };
+    };
+    return [at(ux, uz, s.w / 2, vx, vz, s.d, "w"), at(-ux, -uz, s.w / 2, vx, vz, s.d, "w"), at(vx, vz, s.d / 2, ux, uz, s.w, "d"), at(-vx, -vz, s.d / 2, ux, uz, s.w, "d")];
+  };
+  let moved = 0;
+  for (let j = 1; j < shapes.length; j++) {
+    for (const B of sidesOf(shapes[j], j)) {
+      for (let i = 0; i < j; i++) {
+        const A = sidesOf(shapes[i], i).find((S) => S.nx * B.nx + S.nz * B.nz > Math.cos(0.03));
+        if (!A) continue;
+        const delta = A.c - B.c;
+        if (Math.abs(delta) < 0.02 || Math.abs(delta) > 0.6) continue;
+        if (A.t0 > B.t1 + 0.3 || B.t0 > A.t1 + 0.3) continue; // not side by side
+        const s = shapes[j];
+        if (s.kind !== "box") continue;
+        shapes[j] = { ...s, x: s.x + (B.nx * delta) / 2, z: s.z + (B.nz * delta) / 2, [B.axis]: s[B.axis] + delta };
+        moved++;
+        break;
+      }
+    }
+  }
+  return moved;
+}
+alignWalls(allShapes);
+
 for (let k = 0; k < allShapes.length; k++) allShapes[k] = { ...allShapes[k], skin: "lobby" };
 
 if (SLICE0_READY) {

@@ -165,10 +165,11 @@ function audit(sp, spawn) {
  *   skewed    ceiling lights off or askew to the 60 cm ceiling tiles as drawn (see tileCheck)
  *   lamp      a ceiling light over a pillar or a partition reaching the ceiling
  *   unlit     a skinned room that asks for lights (lights > 0) and owns over 20 m² of floor, without a single light
+ *   jog       two box rooms whose walls run side by side 2–60 cm apart: a notch where one ends (lobby.ts alignWalls)
  *   ledge     a balcony edge (a drop over 50 cm with head room above) with no low wall: the player stops at nothing
  */
 function construction(sp, built, mesh, ray, found) {
-  for (const k of ["hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge"]) found[k] = new Map();
+  for (const k of ["hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog"]) found[k] = new Map();
   const note = (kind, x, z, what) => {
     const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
     const e = found[kind].get(k) ?? { n: 0, what: `${what} (first at ${x.toFixed(2)}, ${z.toFixed(2)})` };
@@ -242,6 +243,7 @@ function construction(sp, built, mesh, ray, found) {
   }
   tileCheck(sp, built, note);
   skinChecks(sp, note);
+  jogs(sp, note);
 }
 
 /**
@@ -396,8 +398,8 @@ for (const [name, { space, spawn }] of Object.entries(places)) {
   const { spots: n, rays, found } = audit(space, spawn);
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
   console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
-  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}, unlit ${total(found.unlit)}, ledge ${total(found.ledge)}`);
-  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge"]) {
+  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}, unlit ${total(found.unlit)}, ledge ${total(found.ledge)}, jog ${total(found.jog)}`);
+  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog"]) {
     for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
   }
 }
@@ -468,6 +470,29 @@ function skinChecks(sp, note) {
         });
         if (!guarded) note("ledge", x, z, `a ${Math.abs(ga - gb).toFixed(1)} m drop with no low wall`);
       }
+    }
+  }
+}
+
+/** jog: walls side by side a few cm apart (see the doc above). */
+function jogs(sp, note) {
+  const sides = (s, i) => {
+    if (s.kind !== "box" || s.open) return [];
+    const a = s.a ?? 0;
+    const [ux, uz, vx, vz] = [Math.cos(a), -Math.sin(a), Math.sin(a), Math.cos(a)];
+    return [[ux, uz, s.w / 2, vx, vz, s.d / 2], [-ux, -uz, s.w / 2, vx, vz, s.d / 2], [vx, vz, s.d / 2, ux, uz, s.w / 2], [-vx, -vz, s.d / 2, ux, uz, s.w / 2]].map(([nx, nz, off, tx, tz, half]) => {
+      const t = s.x * tx + s.z * tz;
+      return { i, nx, nz, c: s.x * nx + s.z * nz + off, t0: t - half, t1: t + half, x: s.x + nx * off, z: s.z + nz * off };
+    });
+  };
+  const all = sp.shapes.flatMap((s, i) => sides(s, i));
+  for (let p = 0; p < all.length; p++) {
+    for (let q = p + 1; q < all.length; q++) {
+      const [A, B] = [all[p], all[q]];
+      if (A.i === B.i || A.nx * B.nx + A.nz * B.nz < Math.cos(0.03)) continue;
+      const gap = Math.abs(A.c - B.c);
+      if (gap < 0.02 || gap > 0.6 || A.t0 > B.t1 + 0.3 || B.t0 > A.t1 + 0.3) continue;
+      note("jog", B.x, B.z, `walls of #${A.i} and #${B.i} ${Math.round(gap * 100)} cm apart`);
     }
   }
 }
