@@ -401,6 +401,11 @@ def build(skin):
     for m in me.materials:
         trim_me.materials.append(m)
     extra.to_mesh(trim_me)
+    # the glTF export writes V as 1 - v: write 1 - v here so the game reads the UVs computed above (the ceiling tiles
+    # then fall on the room grid, where the lights are; 1 mod 0.6 had moved every tile line by 40 cm)
+    for mesh in (me, trim_me):
+        for d in mesh.uv_layers[0].data:
+            d.uv = (d.uv[0], 1.0 - d.uv[1])
     extra.free()
     trim_obj = bpy.data.objects.new("trims", trim_me)
     bpy.context.scene.collection.objects.link(trim_obj)

@@ -9,7 +9,7 @@
  * Usage, from portfolio/: node scripts/hub-audit.mjs [PLACE]   [--full]  (PLACE = LOBBY, POOLS, CANALS…; all by default)
  */
 import fs from "fs";
-import { loadPlaces, readGlb, skinFile } from "./lib/places.mjs";
+import { loadPlaces, readGlb, readGlbExtras, skinFile } from "./lib/places.mjs";
 
 const { THREE, mergeGeometries, BVH, build, sdf, places } = await loadPlaces();
 const { geomDist } = sdf;
@@ -157,7 +157,7 @@ function audit(sp, spawn) {
  *   hanging   a wall panel whose bottom edge rests on nothing: no floor, no lower ceiling behind, no wall going on below
  *   floating  a lowered ceiling over open floor, ending in the open on the other side: a box hanging mid-room
  *   rail      a railing running into a wall
- *   skewed    ceiling lights askew to the 60 cm ceiling tiles
+ *   skewed    ceiling lights off or askew to the 60 cm ceiling tiles as drawn (see tileCheck)
  */
 function construction(sp, built, mesh, ray, found) {
   for (const k of ["hanging", "floating", "rail", "skewed"]) found[k] = new Map();
@@ -226,15 +226,69 @@ function construction(sp, built, mesh, ray, found) {
       if (sp.dist(x, z) > 0.06) note("rail", x, z, `railing ${sp.dist(x, z).toFixed(2)} m into a wall`);
     }
   }
-  // each room's ceiling tiles run along its own walls (archi/build.ts tileFrame)
-  const tiles = (sh) => (sh.kind === "capsule" ? Math.atan2(-(sh.bz - sh.az), sh.bx - sh.ax) : sh.a ?? 0);
-  for (const p of built.panels) {
-    const o = sp.ownerIndex(p.x, p.z);
-    if (o < 0) continue;
-    const d = p.a - tiles(sp.shapes[o]);
-    const off = Math.abs(((d % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2));
-    const skew = Math.min(off, Math.PI / 2 - off);
-    if (skew > 0.02) note("skewed", p.x, p.z, `${Math.round((skew * 180) / Math.PI)}° off the ceiling tiles`);
+  tileCheck(sp, built, note);
+}
+
+/**
+ * skewed: every ceiling light sits in the ceiling tiles *as drawn*: the texture the game shows above it (its UVs, the
+ * glTF V flip included), not the plan's grid. A 60 cm light fills one tile (its centre at a tile's centre), a 1.2 m one
+ * 2 x 2 tiles (its centre on a tile corner), its edges along the tile lines. Panels as Architecture draws them: a plane
+ * turned by -a about the vertical, so its local x runs along (cos a, -sin a).
+ */
+function tileCheck(sp, built, note) {
+  const TILE = build.TILE.ceiling;
+  const geoms = [...built.ceilings.values()].filter((g) => g.attributes.uv).map((g) => {
+    const c = new THREE.BufferGeometry();
+    c.setAttribute("position", g.attributes.position);
+    // the kit's UVs count tiles (texture repeat 1); a skin's count metres (Skin.tsx repeats 1/TILE): all in metres here
+    const uv = g.attributes.uv.clone();
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) * TILE, uv.getY(k) * TILE);
+    c.setAttribute("uv", uv);
+    if (g.index) c.setIndex(g.index);
+    return c.index ? c : c.setIndex([...Array(c.attributes.position.count).keys()]);
+  });
+  const panels = [...built.panels];
+  for (const n of new Set(sp.shapes.map((s) => s.skin).filter(Boolean))) {
+    const g = readGlb(skinFile(n), THREE, mergeGeometries, { skip: ["trims"], material: (m) => m.startsWith("c:") });
+    if (g) geoms.push(g);
+    const raw = readGlbExtras(skinFile(n)).skin?.panels;
+    if (raw) panels.push(...JSON.parse(raw).map(([x, y, z, a, size, dead]) => ({ x, y, z, a, size: [size, size], dead })));
+  }
+  if (!geoms.length) return;
+  const mesh = new THREE.Mesh(mergeGeometries(geoms));
+  const ray = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0, 0.3);
+  const [pa, pb, pc] = [0, 0, 0].map(() => new THREE.Vector3());
+  const [ua, ub, uc] = [0, 0, 0].map(() => new THREE.Vector2());
+  const frac = (v) => v - Math.floor(v);
+  for (const p of panels) {
+    ray.ray.origin.set(p.x, p.y - 0.1, p.z);
+    const hit = ray.intersectObject(mesh)[0];
+    if (!hit?.uv) continue;
+    // where the light's centre falls in its tile, in metres from where it should be
+    // per axis (the kit's troffers are 1.2 x 0.6): two tiles across → centre on a tile line, one → mid-tile
+    const miss = (v, size) => Math.abs(frac(v / TILE - (size > 1 ? 0 : 0.5) + 0.5) - 0.5) * TILE;
+    const off = Math.hypot(miss(hit.uv.x, p.size[0]), miss(hit.uv.y, p.size[1]));
+    // which way the tiles run there: the direction in which the texture's u grows
+    const { a, b, c } = hit.face;
+    const pos = mesh.geometry.attributes.position;
+    const uv = mesh.geometry.attributes.uv;
+    pa.fromBufferAttribute(pos, a);
+    pb.fromBufferAttribute(pos, b);
+    pc.fromBufferAttribute(pos, c);
+    ua.fromBufferAttribute(uv, a);
+    ub.fromBufferAttribute(uv, b);
+    uc.fromBufferAttribute(uv, c);
+    const [e1x, e1z, e2x, e2z] = [pb.x - pa.x, pb.z - pa.z, pc.x - pa.x, pc.z - pa.z];
+    const [du1, dv1, du2, dv2] = [ub.x - ua.x, ub.y - ua.y, uc.x - ua.x, uc.y - ua.y];
+    const det = du1 * dv2 - du2 * dv1;
+    let skew = 0;
+    if (Math.abs(det) > 1e-9) {
+      const tileDir = Math.atan2((e1z * dv2 - e2z * dv1) / det, (e1x * dv2 - e2x * dv1) / det);
+      const d = tileDir - Math.atan2(-Math.sin(p.a), Math.cos(p.a));
+      const m = Math.abs(((d % (Math.PI / 2)) + Math.PI / 2) % (Math.PI / 2));
+      skew = Math.min(m, Math.PI / 2 - m);
+    }
+    if (off > 0.03 || skew > 0.02) note("skewed", p.x, p.z, `${Math.round(off * 100)} cm off its tile, ${Math.round((skew * 180) / Math.PI)}° off the tile lines`);
   }
 }
 

@@ -12,7 +12,7 @@ symptôme à l'image, et le contrôle automatique qui le couvre désormais (skil
 | `hanging` | pan de mur ou retombée dont le bas ne repose sur rien | audit `hanging` |
 | `ceiling-caisson` | plafond qui descend en caisson dans un seuil / une porte | audit `ceiling` (plus haut plafond gagne) |
 | `ramp-cliff` | marche ou falaise au milieu d'une rampe | audit `floor` |
-| `light-offgrid` | plafonnier à cheval sur deux dalles, de travers, ou rectangle étiré qui ne suit pas les dalles | audit `skewed` |
+| `light-offgrid` | plafonnier à cheval sur deux dalles, de travers, ou rectangle étiré qui ne suit pas les dalles (signalé par l’utilisateur le 2026-11-22 : export glTF qui inverse V → grille décalée de 40 cm ; rotation +a au lieu de −a) | audit `skewed`, mesuré sur la texture affichée (UV du modèle, inversion glTF comprise) |
 | `light-halo` | halo blanc cramé autour d'un plafonnier ou sur un mur proche | dense `blown` |
 | `rail-in-wall` | garde-corps qui rentre dans un mur | audit `rail` |
 | `prop-float` | objet qui flotte ou s'enfonce, ombre décollée | tournée `floating`, `sunk` |

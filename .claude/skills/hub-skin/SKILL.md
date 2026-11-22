@@ -64,5 +64,7 @@ marching squares : arêtes droites, raccords nets, plafonniers dans les dalles.
 | Lumière cuite incohérente, taches partout | Cycles cuit à travers la couche d'UV **active** : c'était celle des textures (en mètres, superposée) | couche `lightmap` active pendant le calcul, la 1re rétablie après |
 | Grille de taches sombres sur un sol | tache dessinée dans la texture de base, répétée à chaque carreau | textures de base sans taches |
 | Plafonniers de travers / à cheval sur 2 dalles | lumières hors de la grille de la pièce | grille de la pièce (origine, angle), compte `skewed` de l'audit |
+| Néons décalés de ~1/3 de dalle partout (pas sur le plan, à l'écran) | l'export glTF écrit V = 1 − v : grille de texture décalée de 1 mod 0,6 = 40 cm | `skin.py` écrit 1 − v avant l'export ; `skewed` mesure sur les UV du modèle |
+| Néons tournés par rapport aux dalles dans une pièce tournée | panneau tourné de +a, dalles de −a (`tileFrame`) | `Architecture` tourne de −a |
 
 Nouveau piège trouvé ? L'ajouter à ce tableau **et** en faire un contrôle (skill `hub-bug-triage`, étape 4).

@@ -59,8 +59,10 @@ export async function loadPlaces() {
 /**
  * The triangles of a .glb, in world space, as one BufferGeometry (position + index only). Enough for rays: no textures
  * are decoded, so it works without a browser. skip: node names left out (a skin's "trims": baseboards and beams).
+ * material: (name) => boolean, keeps only those primitives, with their texture UVs (e.g. a skin's ceilings, "c:…").
+ * The node extras ("panels" on a skin) are in readGlbExtras.
  */
-export function readGlb(file, THREE, mergeGeometries, { skip = [] } = {}) {
+export function readGlb(file, THREE, mergeGeometries, { skip = [], material = null } = {}) {
   const buf = fs.readFileSync(file);
   const jsonLen = buf.readUInt32LE(12);
   const gltf = JSON.parse(buf.subarray(20, 20 + jsonLen).toString("utf8"));
@@ -88,8 +90,11 @@ export function readGlb(file, THREE, mergeGeometries, { skip = [] } = {}) {
     const world = parent.clone().multiply(m);
     if (node.mesh !== undefined) {
       for (const prim of gltf.meshes[node.mesh].primitives) {
+        // material: keep only the primitives whose material name passes, with their texture UVs (as three reads them)
+        if (material && !material(gltf.materials?.[prim.material]?.name ?? "")) continue;
         const g = new THREE.BufferGeometry();
         g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(view(prim.attributes.POSITION)), 3));
+        if (material && prim.attributes.TEXCOORD_0 !== undefined) g.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(view(prim.attributes.TEXCOORD_0)), 2));
         if (prim.indices !== undefined) g.setIndex(new THREE.BufferAttribute(new Uint32Array(view(prim.indices)), 1));
         parts.push(g.applyMatrix4(world));
       }
@@ -98,4 +103,11 @@ export function readGlb(file, THREE, mergeGeometries, { skip = [] } = {}) {
   };
   for (const n of gltf.scenes[gltf.scene ?? 0].nodes) visit(n, new THREE.Matrix4());
   return parts.length ? mergeGeometries(parts.map((g) => (g.index ? g : g.setIndex([...Array(g.attributes.position.count).keys()])))) : null;
+}
+
+/** The extras of a .glb's nodes, by node name (a skin's "skin" node carries its ceiling lights in extras.panels). */
+export function readGlbExtras(file) {
+  const buf = fs.readFileSync(file);
+  const gltf = JSON.parse(buf.subarray(20, 20 + buf.readUInt32LE(12)).toString("utf8"));
+  return Object.fromEntries((gltf.nodes ?? []).filter((n) => n.extras).map((n) => [n.name, n.extras]));
 }
