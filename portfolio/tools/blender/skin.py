@@ -353,6 +353,11 @@ def murets(plan, out, slots):
                         mark = (hi["index"], side)
                         mine.append((x, z))
                 samples.append((t + d, x, z, mark, nx, nz, lo))
+            # the corner itself, still facing this side: the next side starts there facing its own way, so the muret turns
+            # the corner closed (cut from 25 cm before it straight to the next side, it left a slit onto the hole)
+            last = samples[-1]
+            if last[3] is not None:
+                samples.append((t + length, qx, qz, last[3], nx, nz, last[6]))
             t += length
         for x, z in mine:
             seen.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
