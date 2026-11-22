@@ -10,10 +10,16 @@
  *       in-wall      an object whose centre is inside a wall or outside the place
  *   - draw calls / triangles per view, console errors;
  *   - contact sheets (6 views per image) + every view at full size.
- * Usage, from portfolio/:  node scripts/hub-tour.mjs <zone> [--samples N] [--only V03,V52] [--port P] [--no-build] [--keep-server]
+ * Usage, from portfolio/:  node scripts/hub-tour.mjs <zone> [--samples N] [--only V03,V52] [--port P] [--soft] [--no-build] [--keep-server]
+ *   --dense [m]  cover the whole walkable area instead: one spot every m metres (default 6), 8 directions + up + down
+ *   --workers N  tabs shooting in parallel (default 3 dense, 2 otherwise)
+ *   --soft  render with SwiftShader instead of the graphics card (slow; for machines without a GPU)
  *   --only  re-shoot just these views of the last full tour (same spots), into <tmp>/hub-tour/<zone>-recheck/
  *   --at    shoot these spots only: "x,z,yaw°;x,z,yaw°;…" (yaw 0 = towards -z), into <tmp>/hub-tour/<zone>-at/
  *   zone = meadow, lobby, bureaux, bassins, canaux, rouge, commerce, hotel, jeux, collines, lotissement
+ * Every view is also measured: blown-out (white) share, largest pure-black blob (a hole onto the void), and z-fighting
+ * (the same frame shot twice, the near plane nudged and the clock frozen: nothing moves on screen, surfaces fighting for a
+ * pixel swap). Views over the limits are listed in the report and get their own contact sheets.
  * Output: <tmp>/hub-tour/<zone>/ (report.md, report.json, map.png, sheets/, views/). Uses the production build on
  * port 3100 or --port P (rebuilt first if a source file is newer than it, unless --no-build).
  */
@@ -49,9 +55,19 @@ const at = (() => {
     return { id: `A${String(k + 1).padStart(2, "0")}`, x, z, yaw: (yaw * Math.PI) / 180, pitch: (Number(pitch) * Math.PI) / 180, label: `vue demandée ${k + 1}` };
   });
 })();
+const dense = (() => {
+  const i = args.indexOf("--dense");
+  if (i < 0) return 0;
+  const m = Number(args[i + 1]);
+  return m > 0 ? m : 6;
+})();
+const WORKERS = opt("workers", dense ? 3 : 2);
+// limits of the image checks, per view
+const LIMITS = { blown: 0.03, voidBlob: 0.015, zfight: 0.0005 };
 let outName = zoneId;
 if (only) outName = `${zoneId}-recheck`;
 else if (at) outName = `${zoneId}-at`;
+else if (dense) outName = `${zoneId}-dense`;
 const OUT = path.join(os.tmpdir(), "hub-tour", outName);
 const SHOT = { w: 960, h: 540 };
 // next itself, not `pnpm build` / `pnpm exec`: those reinstall node_modules when the local pnpm is not the repo's
@@ -102,82 +118,127 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, "views"), { recursive: true });
 fs.mkdirSync(path.join(OUT, "sheets"), { recursive: true });
 
-const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+// the real graphics card (headless, D3D11 on Windows): fast and true to what the player sees; --soft = SwiftShader
+const SOFT = args.includes("--soft");
+const GL_ARGS = SOFT
+  ? ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+  : [`--use-angle=${process.platform === "win32" ? "d3d11" : "default"}`, "--ignore-gpu-blocklist", "--enable-gpu"];
+const browser = await chromium.launch({ args: GL_ARGS });
 const errors = [];
 try {
-  const page = await browser.newPage({ viewport: { width: SHOT.w, height: SHOT.h }, deviceScaleFactor: 1 });
-  page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => {
-    if (m.type() === "error" && !/Failed to load resource|ERR_|speed-insights/.test(m.text())) errors.push(m.text());
-  });
-  await page.goto(`${BASE}/`);
-  await page.evaluate((zone) => {
-    localStorage.setItem("hub-debug-spawn", JSON.stringify({ zone, x: 0, z: 0, yaw: 0 }));
-    localStorage.setItem("hub-v2-settings", JSON.stringify({ quality: "high", headBob: false }));
-  }, zoneId);
-  await page.goto(`${BASE}/hub`);
-  // only the 3D view in the shots: no hint, menu button, veil or wake-up blur
-  await page.addStyleTag({ content: "body * { visibility: hidden !important } canvas { visibility: visible !important; filter: none !important }" });
-  await page.waitForFunction(() => window.__hub, null, { timeout: 120_000 });
-  const known = await page.evaluate(() => window.__hub.zone.id);
-  if (known !== zoneId) throw new Error(`unknown zone « ${zoneId} » (the world opened « ${known} »)`);
-  await page.evaluate(() => {
-    const s = window.__hub.zone.spawn;
-    window.__hub.teleport(s.x, s.z, s.yaw, 0);
-  });
+  // one tab with the world open on the place, built and settled
+  const openWorld = async () => {
+    const page = await browser.newPage({ viewport: { width: SHOT.w, height: SHOT.h }, deviceScaleFactor: 1 });
+    page.on("pageerror", (e) => errors.push(e.message));
+    page.on("console", (m) => {
+      if (m.type() === "error" && !/Failed to load resource|ERR_|speed-insights/.test(m.text())) errors.push(m.text());
+    });
+    await page.goto(`${BASE}/`);
+    await page.evaluate((zone) => {
+      localStorage.setItem("hub-debug-spawn", JSON.stringify({ zone, x: 0, z: 0, yaw: 0 }));
+      localStorage.setItem("hub-v2-settings", JSON.stringify({ quality: "high", headBob: false }));
+    }, zoneId);
+    await page.goto(`${BASE}/hub`);
+    // only the 3D view in the shots: no hint, menu button, veil or wake-up blur (a CSS filter on the canvas' parent)
+    await page.addStyleTag({ content: "body * { visibility: hidden !important; filter: none !important; transition: none !important } canvas { visibility: visible !important }" });
+    await page.waitForFunction(() => window.__hub, null, { timeout: 120_000 });
+    const known = await page.evaluate(() => window.__hub.zone.id);
+    if (known !== zoneId) throw new Error(`unknown zone « ${zoneId} » (the world opened « ${known} »)`);
+    await page.evaluate(() => {
+      const s = window.__hub.zone.spawn;
+      window.__hub.teleport(s.x, s.z, s.yaw, 0);
+    });
+    // the place is built in slices over many frames: wait until the scene stops growing
+    await page.evaluate(async () => {
+      const count = () => {
+        let n = 0;
+        window.__hub.scene.traverse(() => n++);
+        return n;
+      };
+      let last = -1;
+      for (let calm = 0, i = 0; calm < 3 && i < 90; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        const n = count();
+        calm = n === last ? calm + 1 : 0;
+        last = n;
+      }
+    });
+    return page;
+  };
 
-  // the place is built in slices over many frames: wait until the scene stops growing
-  await page.evaluate(async () => {
-    const count = () => {
-      let n = 0;
-      window.__hub.scene.traverse(() => n++);
-      return n;
-    };
-    let last = -1;
-    for (let calm = 0, i = 0; calm < 3 && i < 90; i++) {
-      await new Promise((r) => setTimeout(r, 1000));
-      const n = count();
-      calm = n === last ? calm + 1 : 0;
-      last = n;
-    }
-  });
-
+  const page = await openWorld();
   const audit = await page.evaluate(auditProps);
-  const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: audit.flags.slice(0, 6) });
+  const plan = await page.evaluate(planViews, { samples: opt("samples", 0), flags: audit.flags.slice(0, 6), dense });
   if (previous) plan.views = previous.views.filter((v) => only.has(v.id)).map(({ id, x, z, yaw, pitch, label }) => ({ id, x, z, yaw, pitch, label }));
   if (at) plan.views = at;
 
   /* ---------- views ---------- */
-  const views = [];
-  for (const [i, v] of plan.views.entries()) {
-    const id = v.id ?? `V${String(i + 1).padStart(2, "0")}`;
-    const perf = await page.evaluate(async (v) => {
-      const h = window.__hub;
-      h.teleport(v.x, v.z, v.yaw, v.pitch);
-      const frames = (n) => new Promise((r) => {
-        const f = () => (--n <= 0 ? r() : requestAnimationFrame(f));
-        requestAnimationFrame(f);
-      });
-      await frames(12); // lights ease towards the new spot, doorways nearby open their windows
-      if (v.label.startsWith("passage")) {
-        // the place behind a doorway is built in slices once you are near, in the portal's own scene (not reachable
-        // from h.scene): give it time
-        await new Promise((r) => setTimeout(r, 6000));
-        await frames(6);
-      }
-      await new Promise((r) => setTimeout(r, 400));
-      h.gl.info.autoReset = false;
-      h.gl.info.reset();
-      await frames(1);
-      const { calls, triangles } = h.gl.info.render;
-      h.gl.info.autoReset = true;
-      return { calls, triangles };
-    }, v);
+  // one view, shot twice (see measure) and measured
+  const shoot = async (tab, lab, v, id) => {
+    const perf = await tab.evaluate(
+      async ({ v, dense }) => {
+        const h = window.__hub;
+        h.teleport(v.x, v.z, v.yaw, v.pitch);
+        const frames = (n) =>
+          new Promise((r) => {
+            const f = () => (--n <= 0 ? r() : requestAnimationFrame(f));
+            requestAnimationFrame(f);
+          });
+        await frames(dense ? 8 : 12); // lights ease towards the new spot, doorways nearby open their windows
+        if (v.label.startsWith("passage")) {
+          // the place behind a doorway is built in slices once you are near, in the portal's own scene (not reachable
+          // from h.scene): give it time
+          await new Promise((r) => setTimeout(r, 6000));
+          await frames(6);
+        }
+        await new Promise((r) => setTimeout(r, dense ? 120 : 400));
+        h.freeze(true);
+        await frames(2);
+        h.gl.info.autoReset = false;
+        h.gl.info.reset();
+        await frames(1);
+        const { calls, triangles } = h.gl.info.render;
+        h.gl.info.autoReset = true;
+        return { calls, triangles };
+      },
+      { v, dense },
+    );
     const file = path.join(OUT, "views", `${id}.png`);
-    await page.locator("canvas").first().screenshot({ path: file, timeout: 180_000 });
-    views.push({ id, ...v, ...perf, file });
-    process.stdout.write(`\r${id}/${plan.views.length}`);
-  }
+    const canvas = tab.locator("canvas").first();
+    const a = await canvas.screenshot({ path: file, timeout: 180_000 });
+    // the same frame with the depth range nudged (near plane +3 %): nothing moves on screen, but surfaces fighting
+    // for a pixel swap; nothing animated in between (clock frozen)
+    const shift = async (k) =>
+      tab.evaluate(async (k) => {
+        const c = window.__hub.camera;
+        c.near *= k;
+        c.updateProjectionMatrix();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      }, k);
+    await shift(1.03);
+    const b = await canvas.screenshot({ timeout: 180_000 });
+    await shift(1 / 1.03);
+    await tab.evaluate(() => window.__hub.freeze(false));
+    const image = await lab.evaluate(measure, { a: a.toString("base64"), b: b.toString("base64") });
+    const over = Object.keys(LIMITS).filter((k) => image[k] > LIMITS[k]);
+    return { id, ...v, ...perf, image, over, file };
+  };
+  // --workers N: N tabs share the views (each opens the world once); the graphics card has room for several
+  const tabs = [page, ...(await Promise.all(Array.from({ length: Math.max(0, Math.min(WORKERS, plan.views.length) - 1) }, openWorld)))];
+  const views = new Array(plan.views.length);
+  let next = 0;
+  let done = 0;
+  await Promise.all(
+    tabs.map(async (tab) => {
+      const lab = await browser.newPage({ viewport: { width: 200, height: 200 } });
+      while (next < plan.views.length) {
+        const i = next++;
+        const v = plan.views[i];
+        views[i] = await shoot(tab, lab, v, v.id ?? `V${String(i + 1).padStart(String(plan.views.length).length > 2 ? 4 : 2, "0")}`);
+        process.stdout.write(`\r${++done}/${plan.views.length}`);
+      }
+    }),
+  );
   process.stdout.write("\n");
 
   /* ---------- map ---------- */
@@ -187,10 +248,11 @@ try {
   /* ---------- contact sheets ---------- */
   const sheet = await browser.newPage({ viewport: { width: 1290, height: 1100 }, deviceScaleFactor: 1 });
   const sheets = [];
-  for (let s = 0; s < views.length; s += 6) {
-    const cells = views.slice(s, s + 6).map((v) => {
+  const onSheets = dense ? views.filter((v) => v.over.length) : views;
+  for (let s = 0; s < onSheets.length; s += 6) {
+    const cells = onSheets.slice(s, s + 6).map((v) => {
       const img = fs.readFileSync(v.file).toString("base64");
-      return `<figure><img src="data:image/png;base64,${img}"><figcaption><b>${v.id}</b> ${escape(v.label)} · (${v.x.toFixed(1)}, ${v.z.toFixed(1)}) · ${deg(v.yaw)}°</figcaption></figure>`;
+      return `<figure><img src="data:image/png;base64,${img}"><figcaption><b>${v.id}</b> ${escape(v.label)}${v.over.length ? ` · ⚠ ${v.over.join(", ")}` : ""} · (${v.x.toFixed(1)}, ${v.z.toFixed(1)}) · ${deg(v.yaw)}°</figcaption></figure>`;
     });
     await sheet.setContent(
       `<style>body{margin:0;background:#111;display:grid;grid-template-columns:640px 640px;gap:6px;padding:2px;font:13px system-ui;color:#eee}
@@ -216,6 +278,13 @@ try {
     audit.flags.length ? "" : "Rien de signalé.",
     ...audit.flags.map((f) => `- **${f.kind}** ${f.what} @ (${f.x}, ${f.y}, ${f.z}) — ${f.detail}`),
     "",
+    "## Images",
+    `Limites par vue : blanc cramé > ${LIMITS.blown * 100} %, trou noir (plus grande tache noire pure) > ${LIMITS.voidBlob * 100} %, scintillement > ${LIMITS.zfight * 100} %`,
+    views.some((v) => v.over.length) ? "" : "Aucune vue au-delà des limites.",
+    ...views
+      .filter((v) => v.over.length)
+      .map((v) => `- **${v.id}** ${v.label} · (${v.x.toFixed(1)}, ${v.z.toFixed(1)}) yaw ${deg(v.yaw)}° pitch ${Math.round((v.pitch * 180) / Math.PI)}° — ${v.over.map((k) => `${k} ${(v.image[k] * 100).toFixed(2)} %`).join(", ")}`),
+    "",
     "## Performance",
     `- pire vue en draw calls : ${maxBy("calls").id} (${maxBy("calls").calls}) · en triangles : ${maxBy("triangles").id} (${Math.round(maxBy("triangles").triangles / 1000)} k)`,
     ...(maxBy("calls").calls > 300 ? ["- ⚠ plus de 300 draw calls : instancier ou fusionner"] : []),
@@ -229,7 +298,7 @@ try {
     "",
   ].join("\n");
   fs.writeFileSync(path.join(OUT, "report.md"), md);
-  console.log(`${zoneId}: ${views.length} views, ${audit.flags.length} flags, ${errors.length} console errors → ${OUT}`);
+  console.log(`${zoneId}: ${views.length} views, ${views.filter((v) => v.over.length).length} over the image limits, ${audit.flags.length} flags, ${errors.length} console errors → ${OUT}`);
 } finally {
   await browser.close();
   stopServer();
@@ -334,8 +403,74 @@ function auditProps() {
   return { flags, stats: { meshes: props.length, skipped } };
 }
 
-/** Where to look from: spawn, interactables, doorways, far corners, flagged objects. */
-function planViews({ samples, flags }) {
+/** Image checks of one view (a) and the same frame with the depth range nudged (b). Runs in a blank page. */
+async function measure({ a, b }) {
+  const load = async (src) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${src}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0);
+    return g.getImageData(0, 0, c.width, c.height);
+  };
+  const A = await load(a);
+  const B = await load(b);
+  const { width: w, height: h } = A;
+  const pa = A.data;
+  const pb = B.data;
+  let blown = 0;
+  let fight = 0;
+  for (let y = 0; y < h - 1; y++) {
+    for (let x = 0; x < w - 1; x++) {
+      const i = (y * w + x) * 4;
+      if (Math.min(pa[i], pa[i + 1], pa[i + 2]) >= 250) blown++;
+      const diff = Math.abs(pa[i] - pb[i]) + Math.abs(pa[i + 1] - pb[i + 1]) + Math.abs(pa[i + 2] - pb[i + 2]);
+      if (diff >= 60) fight++; // nothing moved on screen: a big change is a surface losing its pixel to another
+    }
+  }
+  // pure black 8×8 blocks, the largest connected patch (fog and dark corners are never 0,0,0)
+  const S = 8;
+  const bw = Math.floor(w / S);
+  const bh = Math.floor(h / S);
+  const blockBlack = (bx, by) => {
+    for (let y = by * S; y < by * S + S; y++) {
+      for (let x = bx * S; x < bx * S + S; x++) {
+        const i = (y * w + x) * 4;
+        if (Math.max(pa[i], pa[i + 1], pa[i + 2]) > 3) return false;
+      }
+    }
+    return true;
+  };
+  const black = new Uint8Array(bw * bh);
+  for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) black[by * bw + bx] = blockBlack(bx, by) ? 1 : 0;
+  let biggest = 0;
+  for (let k = 0; k < black.length; k++) {
+    if (black[k] !== 1) continue;
+    let size = 0;
+    const stack = [k];
+    black[k] = 2;
+    while (stack.length) {
+      const c = stack.pop();
+      size++;
+      const cx = c % bw;
+      const cy = (c - cx) / bw;
+      for (const [nx, ny] of [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]]) {
+        if (nx < 0 || ny < 0 || nx >= bw || ny >= bh || black[ny * bw + nx] !== 1) continue;
+        black[ny * bw + nx] = 2;
+        stack.push(ny * bw + nx);
+      }
+    }
+    biggest = Math.max(biggest, size);
+  }
+  const r = (v) => Number(v.toFixed(5));
+  return { blown: r(blown / (w * h)), voidBlob: r(biggest / (bw * bh)), zfight: r(fight / (w * h)) };
+}
+
+/** Where to look from: spawn, interactables, doorways, far corners, flagged objects (or, dense, a grid of spots). */
+function planViews({ samples, flags, dense }) {
   const { zone, ground } = window.__hub;
   const sp = zone.space;
   const st = 1;
@@ -389,6 +524,23 @@ function planViews({ samples, flags }) {
   const facing = (x, z, tx, tz) => Math.atan2(-(tx - x), -(tz - z));
 
   const views = [];
+  if (dense) {
+    // one spot per dense×dense square of walkable floor: its most open cell, 8 directions, then up and down
+    const squares = new Map();
+    for (const [x, z] of cells) {
+      const k = `${Math.floor(x / dense)},${Math.floor(z / dense)}`;
+      const open = sp ? sp.dist(x, z) : 0;
+      const best = squares.get(k);
+      if (!best || open < best.open) squares.set(k, { x, z, open });
+    }
+    let g = 0;
+    for (const { x, z } of squares.values()) {
+      g++;
+      for (let d = 0; d < 8; d++) views.push({ x, z, yaw: (d * Math.PI) / 4, pitch: 0, label: `grille ${g} · ${d * 45}°` });
+      views.push({ x, z, yaw: 0, pitch: 1.1, label: `grille ${g} · plafond` }, { x, z, yaw: 0, pitch: -1.1, label: `grille ${g} · sol` });
+    }
+    return { views, reachable: cells.length * st * st, interior: interior * st * st, cells: [...seen.keys()] };
+  }
   for (let k = 0; k < 4; k++) views.push({ x: s0.x, z: s0.z, yaw: s0.yaw + (k * Math.PI) / 2, pitch: 0, label: `arrivée ${k * 90}°` });
   for (const it of (zone.interactables ?? []).slice(0, 10)) {
     const at = near(it.x, it.z, 2, 4);

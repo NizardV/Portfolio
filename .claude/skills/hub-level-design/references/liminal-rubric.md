@@ -17,8 +17,11 @@ croira-t-il que c'est fait exprès ? »
 - Contrôles automatiques de construction (`hub:audit`) : *hanging* (pan dont le bas ne repose sur rien), *floating*
   (plafond abaissé qui pend au-dessus d'un sol libre), *rail* (garde-corps dans un mur), *skewed* (plafonnier hors de la
   grille des dalles de sa pièce). Aucun n'est jamais voulu.
-- **Avant de montrer une preview** : ces contrôles à zéro (hors étrangetés déclarées), critique sans bloquant ni
-  important. L'utilisateur juge l'ambiance, il ne fait pas la recette.
+- **Avant de montrer une preview** (« fini » = skill `hub-qa` vert) : ces contrôles à zéro (hors étrangetés
+  déclarées), couverture dense sans vue au-delà des limites d'image (halo `blown`, trou `voidBlob`, scintillement
+  `zfight`) sauf vues jugées normales, 0 objet signalé, critique sans bloquant ni important, verdict écrit.
+  L'utilisateur juge l'ambiance, il ne fait pas la recette.
+- Bugs déjà signalés par l'utilisateur : galerie `bugs/README.md`, à chercher en priorité.
 
 ## A. Bugs (toujours à corriger)
 - Objet qui flotte, s'enfonce dans le sol ou traverse un mur sans intention lisible.
