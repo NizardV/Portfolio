@@ -21,7 +21,7 @@ Rendu sur la vraie carte graphique (Chrome headless, D3D11 : rien ne s'ouvre à 
 Un point tous les 6 m de sol atteignable, 8 directions + plafond + sol. Chaque vue est mesurée :
 | Mesure | Ce qu'elle trouve | Limite |
 | --- | --- | --- |
-| `blown` | halo cramé, lumière trop forte (pixels ≥ 250) | 3 % |
+| `blown` | halo cramé : blocs 4×4 dont la moyenne du canal le plus sombre ≥ 225 (le grain disperse les pixels de ±40) ; vues « plafond » exclues | 3 % |
 | `voidBlob` | trou sur le vide : plus grande tache de noir pur (0-3) | 1,5 % |
 | `zfight` | scintillement : même image, plan proche de la caméra décalé de 3 %, horloge gelée → pixels qui basculent (rien ne bouge à l’écran) | 0,05 % |
 Sortie `<tmp>/hub-tour/<zone>-dense/` : `report.md` (section Images = vues au-delà des limites), planches des seules vues

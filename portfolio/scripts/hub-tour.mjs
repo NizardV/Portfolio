@@ -220,7 +220,8 @@ try {
     await shift(1 / 1.03);
     await tab.evaluate(() => window.__hub.freeze(false));
     const image = await lab.evaluate(measure, { a: a.toString("base64"), b: b.toString("base64") });
-    const over = Object.keys(LIMITS).filter((k) => image[k] > LIMITS[k]);
+    // looking straight up at a ceiling light is white by nature: only halos seen from eye level count
+    const over = Object.keys(LIMITS).filter((k) => image[k] > LIMITS[k] && !(k === "blown" && v.pitch > 0.6));
     return { id, ...v, ...perf, image, over, file };
   };
   // --workers N: N tabs share the views (each opens the world once); the graphics card has room for several
@@ -421,14 +422,28 @@ async function measure({ a, b }) {
   const { width: w, height: h } = A;
   const pa = A.data;
   const pb = B.data;
-  let blown = 0;
   let fight = 0;
   for (let y = 0; y < h - 1; y++) {
     for (let x = 0; x < w - 1; x++) {
       const i = (y * w + x) * 4;
-      if (Math.min(pa[i], pa[i + 1], pa[i + 2]) >= 250) blown++;
       const diff = Math.abs(pa[i] - pb[i]) + Math.abs(pa[i + 1] - pb[i + 1]) + Math.abs(pa[i + 2] - pb[i + 2]);
       if (diff >= 60) fight++; // nothing moved on screen: a big change is a surface losing its pixel to another
+    }
+  }
+  // blown out: 4×4 blocks whose mean darkest channel is ≥ 225 (the film grain scatters single pixels by ±40)
+  let blown = 0;
+  let blocks = 0;
+  for (let y = 0; y + 4 <= h; y += 4) {
+    for (let x = 0; x + 4 <= w; x += 4) {
+      let sum = 0;
+      for (let yy = 0; yy < 4; yy++) {
+        for (let xx = 0; xx < 4; xx++) {
+          const i = ((y + yy) * w + x + xx) * 4;
+          sum += Math.min(pa[i], pa[i + 1], pa[i + 2]);
+        }
+      }
+      blocks++;
+      if (sum >= 225 * 16) blown++;
     }
   }
   // pure black 8×8 blocks, the largest connected patch (fog and dark corners are never 0,0,0)
@@ -466,7 +481,7 @@ async function measure({ a, b }) {
     biggest = Math.max(biggest, size);
   }
   const r = (v) => Number(v.toFixed(5));
-  return { blown: r(blown / (w * h)), voidBlob: r(biggest / (bw * bh)), zfight: r(fight / (w * h)) };
+  return { blown: r(blown / blocks), voidBlob: r(biggest / (bw * bh)), zfight: r(fight / (w * h)) };
 }
 
 /** Where to look from: spawn, interactables, doorways, far corners, flagged objects (or, dense, a grid of spots). */

@@ -13,7 +13,7 @@ What it makes, all derived from the plan (the layout may be mad, the building is
   them with its own textures (archi/Skin.tsx). UVs in metres; a ceiling's along its room's 60 cm tile grid;
 - a baseboard along every wall foot; a beam wherever two ceiling grids meet at the same height (a real building changes
   its grid under a beam, never in the open);
-- ceiling lights inside the tiles: one lit 60 cm tile, or 2 x 2 tiles in big rooms, on the room's grid, clear of walls
+- ceiling lights inside the tiles: one lit 60 cm tile, or 2 x 2 tiles in big rooms (never under a low ceiling), on the room's grid, clear of walls
   and beams. Stored in the model (extras "panels" on the "skin" node) for the game to light exactly those.
 Axes: game (x, height, z) is Blender (x, -y, z); the glTF export (+Y up) turns it back into game coordinates.
 """
@@ -332,7 +332,9 @@ def lights(plan):
             continue
         x0, z0, x1, z1 = r["box"]
         area = (x1 - x0) * (z1 - z0)
-        big = r["ceil"] > 3.6 or area > 150
+        # a low ceiling (< 2.75 m - its floor) never takes the big fittings: 1.2 m of light 50 cm over the head fills the view
+        low = r["ceil"] - r["floor"] < 2.7
+        big = not low and (r["ceil"] > 3.6 or area > 150)
         size = 2 * GRID if big else GRID
         step = max(4 if big else 3, round(r["lights"] / GRID)) * GRID
         cos_a, sin_a, cx, cz = frame(r)
