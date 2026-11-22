@@ -63,7 +63,8 @@ const dense = (() => {
 })();
 const WORKERS = opt("workers", dense ? 3 : 2);
 // limits of the image checks, per view
-const LIMITS = { blown: 0.03, voidBlob: 0.015, zfight: 0.0005 };
+// blown 4 %: in a big room, the 2 x 2 ceiling lights in view (white by nature, no halo) already make ~3.5 %
+const LIMITS = { blown: 0.04, voidBlob: 0.015, zfight: 0.0005 };
 let outName = zoneId;
 if (only) outName = `${zoneId}-recheck`;
 else if (at) outName = `${zoneId}-at`;
