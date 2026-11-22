@@ -72,6 +72,7 @@ class Plan:
     def __init__(self, plan):
         self.rooms = sorted(plan["rooms"], key=lambda r: r["index"])
         self.solids = plan["solids"]
+        self.murets = plan.get("murets", [])
         self.cells = {}
         for r in self.rooms:
             r["box"] = bounds(r["outline"])
@@ -308,83 +309,20 @@ MURET_H, MURET_T = 1.0, 0.15
 
 
 def murets(plan, out, slots):
-    """Low walls (1 m, 15 cm thick, plain render in the wall's colour, a capping board) along every drop over 60 cm
-    between skinned rooms, on the higher side, following a ramp's slope: balconies, not railings (the kit lays no railings
-    in a skin). Only where the higher side has head room (a slot under a low ceiling is a construction fault). The outline
-    is walked as one loop, so a muret turns corners and follows a round pit (whose sides are a few cm each)."""
+    """Low walls along balcony edges, exactly as the plan lays them out (archi/murets.ts; the game's collision comes from
+    the same list, so the player stops at what is drawn): plain render in the wall's colour, a capping board, the face
+    toward the drop down to the lower floor, a nosing at the slab."""
     uv = out.loops.layers.uv.verify()
-    seen = {}  # 1 m cells -> points already walled, from outlines done before
-
-    def walled(x, z):
-        cx, cz = math.floor(x), math.floor(z)
-        return any(math.hypot(x - px, z - pz) < 0.2 for i in (-1, 0, 1) for j in (-1, 0, 1) for px, pz in seen.get((cx + i, cz + j), ()))
-
-    for r in plan.rooms:
-        if not r["skinned"] or r["open"]:
-            continue
-        pts = r["outline"]
-        samples = []
-        mine = []
+    for m in plan.murets:
+        pts = m["pts"]
         t = 0.0
-        for k in range(len(pts)):
-            (px, pz), (qx, qz) = pts[k], pts[(k + 1) % len(pts)]
-            length = math.hypot(qx - px, qz - pz)
-            if length < 1e-4:
-                continue
-            tx, tz = (qx - px) / length, (qz - pz) / length
-            nx, nz = -tz, tx  # one side; the higher side is chosen per sample
-            steps = max(1, math.ceil(length / 0.25))
-            for i in range(steps):
-                d = length * i / steps
-                x, z = px + tx * d, pz + tz * d
-                mark = None
-                a, b = plan.owner(x + nx * 0.1, z + nz * 0.1), plan.owner(x - nx * 0.1, z - nz * 0.1)
-                lo = 0.0
-                # only along the edge that really parts the two rooms: this room owns one side (a corridor crossing a
-                # balcony edge would claim bits of it, in pieces and askew)
-                if a is not None and b is not None and a is not b and r in (a, b) and a["skinned"] and b["skinned"] and not a["open"] and not b["open"]:
-                    fa, fb = floor_at(a, x + nx * 0.1, z + nz * 0.1), floor_at(b, x - nx * 0.1, z - nz * 0.1)
-                    hi, side = (a, 1) if fa > fb else (b, -1)
-                    lo = min(fa, fb)
-                    # a boundary already walled from another outline lying on or by it (within 20 cm: two outlines a few
-                    # cm apart walled it twice, the faces flickering); counted once this outline is done
-                    # over 45 cm it is no step the player walks down (STEP_MAX): it gets a low wall
-                    if abs(fa - fb) > 0.45 and not walled(x, z) and (plan.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) or 0) - max(fa, fb) > 2.0:
-                        mark = (hi["index"], side)
-                        mine.append((x, z))
-                samples.append((t + d, x, z, mark, nx, nz, lo))
-            # the corner itself, still facing this side: the next side starts there facing its own way, so the muret turns
-            # the corner closed (cut from 25 cm before it straight to the next side, it left a slit onto the hole)
-            last = samples[-1]
-            if last[3] is not None:
-                samples.append((t + length, qx, qz, last[3], nx, nz, last[6]))
-            t += length
-        for x, z in mine:
-            seen.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
-        if not samples:
-            continue
-        # a loop: start the walk on an unwalled sample, so a muret all around (a pit) is one run
-        start = next((i for i, s in enumerate(samples) if s[3] is None), None)
-        if start is None:
-            ring = samples + [samples[0][:0] + (t,) + samples[0][1:]]
-            wall_run(out, uv, plan, ring, slots, closed=True)
-            continue
-        order = samples[start:] + samples[:start]
-        run = []
-        joined = False  # the run began where another muret ends (no overhang there)
-        for smp in order + [(None, None, None, None, None, None, None)]:
-            if run and (smp[3] is None or smp[3] != run[-1][3]):
-                handover = smp[3] is not None  # another muret takes over here: end exactly where it starts
-                if handover:
-                    run.append((smp[0] + (t if smp[0] < run[-1][0] else 0),) + smp[1:3] + (run[-1][3],) + smp[4:])
-                if len(run) > 1 and sum(math.hypot(p[1] - q[1], p[2] - q[2]) for p, q in zip(run, run[1:])) >= 0.8:  # no stub
-                    wall_run(out, uv, plan, run, slots, ends=(not joined, not handover))
-                run = []
-                joined = handover
-            if smp[3] is not None:
-                if run and smp[0] < run[-1][0]:  # wrapped past the loop's end
-                    smp = (smp[0] + t,) + smp[1:]
-                run.append(smp)
+        samples = []
+        for i, (x, z, nx, nz, _high, low) in enumerate(pts):
+            if i:
+                t += math.hypot(x - pts[i - 1][0], z - pts[i - 1][1])
+            samples.append((t, x, z, (m["room"], 1), nx, nz, low))
+        if len(samples) > 1:
+            wall_run(out, uv, plan, samples, slots, closed=m["closed"], ends=tuple(m["ends"]))
 
 
 def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
@@ -469,7 +407,8 @@ def trims(plan, bm, own, slots):
         span = (b - a).length
         quad(out, a + o, b + o, b + o + h, a + o + h, n, trim, uv, [(0, 0), (span, 0), (span, 0.12), (0, 0.12)])
         quad(out, a + h, b + h, b + o + h, a + o + h, up, trim, uv, [(0, 0), (span, 0), (span, 0.015), (0, 0.015)])
-    for edge in bm.edges:
+    # no beams at grid seams (2026-11-22): they crossed rooms askew as white bars; the tiles of two grids simply meet
+    for edge in ([] if os.environ.get("SKIN_BEAMS") != "1" else bm.edges):
         faces = [f for f in edge.link_faces if f.normal.z < -0.7]
         if len(faces) != 2 or faces[0][own] == faces[1][own]:
             continue

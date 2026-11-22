@@ -1,3 +1,4 @@
+import { murets } from "./archi/murets";
 import { geomBounds, geomDist, Space, type Shape, type Solid } from "./archi/sdf";
 import { back, lazyBuilt, throat } from "./places/common";
 import type { Interactable } from "./zones";
@@ -381,7 +382,11 @@ for (let k = solids.length - 1; k >= 0; k--) {
   if (HALLS.some((h) => geomDist(h, so.x, so.z) < 0)) solids.splice(k, 1);
 }
 
+// low walls along the balcony edges: laid out on the plan, collision here, drawn by the Blender model
+const MURETS = murets(new Space(allShapes, solids));
+solids.push(...MURETS.solids);
 export const LOBBY_SPACE = new Space(allShapes, solids);
+LOBBY_SPACE.murets = MURETS.runs;
 
 /** Geometry is derived once per visit (a few ms per frame, see slice.ts), then shared by the scene and the doorways. */
 export const lobbyBuilt = lazyBuilt(LOBBY_SPACE);

@@ -71,5 +71,7 @@ const solids = sp.solids
 
 const out = path.join(process.cwd(), "tools/blender/plans", `${skin}.json`);
 fs.mkdirSync(path.dirname(out), { recursive: true });
-fs.writeFileSync(out, JSON.stringify({ place: placeName, skin, grid: build.TILE_GRID, rooms, solids }, null, 1));
+// the low walls along balcony edges, as the plan lays them out (archi/murets.ts): skin.py draws these
+const murets = (sp.murets ?? []).filter((m) => sp.shapes[m.room]?.skin === skin).map((m) => ({ ...m, pts: m.pts.map((q) => q.map((v) => +v.toFixed(4))) }));
+fs.writeFileSync(out, JSON.stringify({ place: placeName, skin, grid: build.TILE_GRID, rooms, solids, murets }, null, 1));
 console.log(`${skin}: ${rooms.filter((r) => r.skinned).length} skinned rooms, ${rooms.filter((r) => !r.skinned).length} around them, ${solids.length} solids → ${path.relative(process.cwd(), out)}`);

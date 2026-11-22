@@ -34,7 +34,7 @@ export async function loadPlaces() {
     const js = ts.transpileModule(fs.readFileSync(path.join(W, src), "utf8"), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
     fs.writeFileSync(out, fix(js));
   };
-  for (const f of ["sdf", "contour", "build", "slice"]) tx(`archi/${f}.ts`);
+  for (const f of ["sdf", "contour", "build", "slice", "murets"]) tx(`archi/${f}.ts`);
   tx("lobby.ts");
   for (const f of fs.readdirSync(path.join(W, "places"))) tx(`places/${f}`);
   fs.writeFileSync(path.join(OUT, "collision.mjs"), "export const box = (x, z, w, d) => ({ x, z, w, d });");

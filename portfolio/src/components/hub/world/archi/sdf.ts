@@ -131,6 +131,8 @@ export class Space {
   readonly bounds: [number, number, number, number];
   /** false: open-air places, the edge of the space is invisible (no wall drawn) */
   readonly walls: boolean;
+  /** low walls along balcony edges (archi/murets.ts), for the Blender model to draw; their collision is in solids */
+  murets: { room: number; pts: number[][]; ends: boolean[]; closed: boolean }[] = [];
   private index = new Map<string, { shapes: number[]; solids: number[] }>();
 
   constructor(shapes: Shape[], solids: Solid[] = [], opts: { walls?: boolean } = {}) {

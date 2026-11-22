@@ -80,7 +80,8 @@ const SURFACES: Record<SurfaceKey, { map: Draw; bump: Draw; size?: number }> = {
     bump: (ctx, s, rnd) => { fill("#808080")(ctx, s, rnd); noise(ctx, s, 90, rnd); },
   },
   stain: {
-    map: (ctx, s, rnd) => { fill("#c2beb2")(ctx, s, rnd); noise(ctx, s, 50, rnd); blots(ctx, s, 9, "rgba(45,40,25,0.32)", rnd); },
+    // a worn, darker carpet: no blots (repeated every texture tile they made a grid of spots, cut off at each room)
+    map: (ctx, s, rnd) => { fill("#b3ad9e")(ctx, s, rnd); noise(ctx, s, 50, rnd); },
     bump: (ctx, s, rnd) => { fill("#808080")(ctx, s, rnd); noise(ctx, s, 90, rnd); },
   },
   void: {
