@@ -124,7 +124,9 @@ function audit(sp, spawn) {
           };
           // the side of a ramp (or a riser) is no wall in the open: the floor rises behind it within 60 cm
           let riser = false;
-          for (let t = -0.6; t <= 0.6001 && !riser; t += 0.1) riser = h.y < sp.ground(h.x + dir.x * t, h.z + dir.z * t) + 0.1;
+          for (let r = 0.1; r <= 0.6001 && !riser; r += 0.1) {
+            for (let a = 0; a < 8 && !riser; a++) riser = h.y < sp.ground(h.x + Math.cos((a * Math.PI) / 4) * r, h.z + Math.sin((a * Math.PI) / 4) * r) + 0.1;
+          }
           if (through && !riser && inside(-0.3) && inside(0.3)) note("phantom", h.x, h.z, `seen from ${x.toFixed(1)},${z.toFixed(1)} yaw ${yawd}`);
         }
         // stopped well before what is seen (corner grazes of a few cm do not count)
@@ -202,6 +204,8 @@ function construction(sp, built, mesh, ray, found) {
       const mx = (p.x + q.x) / 2;
       const mz = (p.z + q.z) / 2;
       const yb = (p.y + q.y) / 2; // the middle of the bottom edge, where the floor is measured (a ramp's side slopes)
+      // a sliver with no room on either side (a cut-off behind a door) is never seen: holes onto it are void rays
+      if (sp.ownerIndex(mx + n.x * 0.1, mz + n.z * 0.1) < 0 && sp.ownerIndex(mx - n.x * 0.1, mz - n.z * 0.1) < 0) continue;
       const gFront = sp.ground(mx + n.x * 0.1, mz + n.z * 0.1);
       const gBack = sp.ground(mx - n.x * 0.1, mz - n.z * 0.1);
       if (yb < Math.max(gFront, gBack) + 0.05 && yb > Math.min(gFront, gBack) - 0.3) continue; // stands on a floor

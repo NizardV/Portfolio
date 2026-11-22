@@ -266,7 +266,9 @@ for (const e of EXITS) {
     PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", x: (vx + target.cx) / 2, z: (vz + target.cz) / 2, w: span, d: 3.2 + 8, a: walk.a, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
     // and around the door's landing, square to the door: up to the door's plane, never past it
     const along = Math.abs(fx) > 0.5;
-    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", x: vx, z: vz, w: along ? 6 : 12.4, d: along ? 12.4 : 6, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
+    // 9 m deep from the door, 16 m across: it overlaps the walkway hall well (a sliver of corridor left between the two
+    // halls hung a wall from the ceiling in mid-air)
+    PLACED.splice(PLACED.indexOf(PLAZA), 0, room({ kind: "box", x: x - fx * 4.5, z: z - fz * 4.5, w: along ? 9 : 16, d: along ? 16 : 9, ceil: STAGE.ceil, lights: 3.2, dead: 0.15, tag: "walk-hall" }));
   }
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
