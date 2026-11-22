@@ -15,6 +15,7 @@ What it makes, all derived from the plan (the layout may be mad, the building is
   its grid under a beam, never in the open);
 - ceiling lights inside the tiles: one lit 60 cm tile, or 2 x 2 tiles in big rooms (never under a low ceiling), on the room's grid, clear of walls
   and beams. Stored in the model (extras "panels" on the "skin" node) for the game to light exactly those.
+- the light itself, baked in Cycles (bake.py): <skin>-light.jpg on a second UV set; SKIN_BAKE=0 skips it.
 Axes: game (x, height, z) is Blender (x, -y, z); the glTF export (+Y up) turns it back into game coordinates.
 """
 import json
@@ -366,6 +367,10 @@ def lights(plan):
 
 
 # ---------------------------------------------------------------- the model
+# colour of the ceiling lights, per skin (the scene's palette.light)
+LIGHT_TINT = {"lobby": "#ffe7a8"}
+
+
 def build(skin):
     # a skin name is a plain identifier: it names files, and must never reach outside plans/ or skins/
     if not re.fullmatch(r"[a-z0-9_-]+", skin):
@@ -402,6 +407,10 @@ def build(skin):
     for o in list(bpy.context.scene.objects):
         if o not in (space, trim_obj):
             bpy.data.objects.remove(o)
+    if os.environ.get("SKIN_BAKE", "1") != "0":
+        import bake  # noqa: PLC0415 (Cycles setup only when baking)
+
+        bake.bake(skin, [space, trim_obj], json.loads(space["panels"]), {"light": LIGHT_TINT.get(skin, "#ffe7a8")})
     path = lib.export(skin, "skins", extras=True)
     panels = json.loads(space["panels"])
     print(f"SKIN {skin}: {lib.tris()} triangles, {len(panels)} lights, {os.path.getsize(path) // 1024} KB -> {os.path.relpath(path, lib.ROOT)}")

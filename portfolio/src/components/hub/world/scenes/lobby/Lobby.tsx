@@ -27,7 +27,7 @@ export const LOBBY_PALETTE: Palette = {
   rail: "#3a3320",
   panel: "#fff3d2",
   light: "#ffe7a8",
-  intensity: 13,
+  intensity: 5, // the live lights only light the objects now: walls, floors and ceilings carry their baked light
   range: 15,
   roughness: 0.95,
 };

@@ -65,7 +65,7 @@ const SURFACES: Record<SurfaceKey, { map: Draw; bump: Draw; size?: number }> = {
       for (let y = 0; y < s; y += 24) for (let x = 0; x < s; x += 32) {
         ctx.beginPath(); ctx.moveTo(x + 8, y + 12); ctx.lineTo(x + 16, y + 4); ctx.lineTo(x + 24, y + 12); ctx.stroke();
       }
-      blots(ctx, s, 3, "rgba(80,70,30,0.10)", rnd, 0.1, 0.3); // damp patches
+      // no damp patches: repeated every texture tile they made a grid of stains (wear goes where it makes sense)
       noise(ctx, s, 14, rnd);
     },
     bump: (ctx, s, rnd) => {
@@ -75,7 +75,8 @@ const SURFACES: Record<SurfaceKey, { map: Draw; bump: Draw; size?: number }> = {
     },
   },
   carpet: {
-    map: (ctx, s, rnd) => { fill("#c9c6bd")(ctx, s, rnd); noise(ctx, s, 46, rnd); blots(ctx, s, 3, "rgba(60,55,40,0.14)", rnd); },
+    // plain: stains repeated every texture tile read as a grid of dark spots across a whole floor
+    map: (ctx, s, rnd) => { fill("#c9c6bd")(ctx, s, rnd); noise(ctx, s, 46, rnd); },
     bump: (ctx, s, rnd) => { fill("#808080")(ctx, s, rnd); noise(ctx, s, 90, rnd); },
   },
   stain: {
