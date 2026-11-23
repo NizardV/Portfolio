@@ -165,11 +165,13 @@ function audit(sp, spawn) {
  *   skewed    ceiling lights off or askew to the 60 cm ceiling tiles as drawn (see tileCheck)
  *   lamp      a ceiling light over a pillar or a partition reaching the ceiling
  *   unlit     a skinned room that asks for lights (lights > 0) and owns over 20 m² of floor, without a single light
+ *   crowded   two ceiling lights less than 60 cm apart (edge to edge): fittings never touch
+ *   mixed     one room lit by both sizes of fitting (tubes and 2 x 2 panels)
  *   jog       two box rooms whose walls run side by side 2–60 cm apart: a notch where one ends (lobby.ts alignWalls)
  *   ledge     a balcony edge (a drop over 50 cm with head room above) with no low wall: the player stops at nothing
  */
 function construction(sp, built, mesh, ray, found) {
-  for (const k of ["hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog"]) found[k] = new Map();
+  for (const k of ["hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog", "crowded", "mixed"]) found[k] = new Map();
   const note = (kind, x, z, what) => {
     const k = `${Math.round(x / 3) * 3},${Math.round(z / 3) * 3}`;
     const e = found[kind].get(k) ?? { n: 0, what: `${what} (first at ${x.toFixed(2)}, ${z.toFixed(2)})` };
@@ -398,8 +400,8 @@ for (const [name, { space, spawn }] of Object.entries(places)) {
   const { spots: n, rays, found } = audit(space, spawn);
   const total = (m) => [...m.values()].reduce((a, e) => a + e.n, 0);
   console.log(`${name}: ${n} spots, ${rays} rays — void ${total(found.void)} rays, phantom ${total(found.phantom)}, invisible ${total(found.invisible)}, floor ${total(found.floor)} rays, ceiling ${total(found.ceiling)} rays`);
-  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}, unlit ${total(found.unlit)}, ledge ${total(found.ledge)}, jog ${total(found.jog)}`);
-  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog"]) {
+  console.log(`   construction: hanging ${total(found.hanging)}, floating ${total(found.floating)}, rail ${total(found.rail)}, skewed ${total(found.skewed)}, lamp ${total(found.lamp)}, unlit ${total(found.unlit)}, ledge ${total(found.ledge)}, jog ${total(found.jog)}, crowded ${total(found.crowded)}, mixed ${total(found.mixed)}`);
+  for (const kind of ["void", "phantom", "invisible", "floor", "ceiling", "hanging", "floating", "rail", "skewed", "lamp", "unlit", "ledge", "jog", "crowded", "mixed"]) {
     for (const [k, e] of [...found[kind]].sort((a, b) => b[1].n - a[1].n).slice(0, full ? found[kind].size : 4)) console.log(`   ${kind} @${k} ×${e.n}  ${e.what}`);
   }
 }
@@ -426,6 +428,21 @@ function skinChecks(sp, note) {
     }
   }
   const lit = new Set(panels.map(([x, , z]) => sp.ownerIndex(x, z)));
+  // crowded / mixed
+  const sizes = new Map();
+  panels.forEach(([x, , z, , size], k) => {
+    const o = sp.ownerIndex(x, z);
+    sizes.set(o, (sizes.get(o) ?? new Set()).add(size));
+    for (let m = k + 1; m < panels.length; m++) {
+      const [px, , pz, , ps] = panels[m];
+      if (Math.max(Math.abs(x - px), Math.abs(z - pz)) < (size + ps) / 2 + 0.6) note("crowded", x, z, `lights ${Math.hypot(x - px, z - pz).toFixed(2)} m apart`);
+    }
+  });
+  for (const [o, set] of sizes) {
+    if (o < 0 || set.size < 2) continue;
+    const [bx0, bz0, bx1, bz1] = sdf.geomBounds(sp.shapes[o]);
+    note("mixed", (bx0 + bx1) / 2, (bz0 + bz1) / 2, `room #${o} has both sizes of light`);
+  }
   sp.shapes.forEach((s, i) => {
     if (!s.skin || s.open || !(s.lights > 0) || (owned.get(i) ?? 0) < 20 || lit.has(i)) return;
     const [bx0, bz0, bx1, bz1] = sdf.geomBounds(s);

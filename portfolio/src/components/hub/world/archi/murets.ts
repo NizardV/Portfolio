@@ -36,7 +36,7 @@ export function murets(sp: Space): { runs: MuretRun[]; solids: Solid[] } {
     if (!s.skin || s.open) return;
     const samples = edgeSamples(sp, si, walled);
     for (const p of samples) if (p.mark) seen.set(`${Math.floor(p.x)},${Math.floor(p.z)}`, [...(seen.get(`${Math.floor(p.x)},${Math.floor(p.z)}`) ?? []), [p.x, p.z]]);
-    runs.push(...splitRuns(samples));
+    runs.push(...splitRuns(samples).map((r) => reachWalls(sp, r)));
   });
   return { runs, solids: runs.flatMap(collision) };
 }
@@ -71,10 +71,45 @@ function sample(sp: Space, si: number, x: number, z: number, nx: number, nz: num
   const fb = sp.ground(x - nx * 0.1, z - nz * 0.1);
   const side = fa > fb ? 1 : -1;
   const high = Math.max(fa, fb);
-  if (Math.abs(fa - fb) <= STEP || walled(x, z)) return none;
+  // along a ramp the wall runs its whole length (from where the floors part), as on a real ramp: a wall starting halfway
+  // down, where the drop passes a step, looked unfinished and left a corner to squeeze through
+  const ramp = (i: number) => typeof sp.shapes[i].floor === "object" && rampDrop(sp.shapes[i]) > STEP;
+  const min = ramp(a) || ramp(b) ? 0.05 : STEP;
+  if (Math.abs(fa - fb) <= min || walled(x, z)) return none;
   if (sp.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) - high <= HEAD) return none;
   const room = side > 0 ? a : b;
   return { x, z, nx: nx * side, nz: nz * side, high, low: Math.min(fa, fb), mark: `${room}:${side}`, room };
+}
+
+function rampDrop(s: Space["shapes"][number]) {
+  const f = s.floor;
+  return typeof f === "object" ? Math.abs(f.hb - f.ha) : 0;
+}
+
+/** A free end, carried on along its line to the wall when one stands within 60 cm (a gap a hand fits through, not a
+ * passage): the low wall then closes onto it. */
+function reachWalls(sp: Space, r: MuretRun): MuretRun {
+  if (r.closed) return r;
+  const pts = [...r.pts];
+  const ends: [boolean, boolean] = [...r.ends];
+  for (const end of [0, 1] as const) {
+    if (!ends[end]) continue;
+    const [a, b] = end === 0 ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
+    const len = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
+    const [dx, dz] = [(a[0] - b[0]) / len, (a[1] - b[1]) / len];
+    for (let d = 0.05; d <= 0.6; d += 0.05) {
+      const x = a[0] + dx * d;
+      const z = a[1] + dz * d;
+      // the wall face is where the middle of the low wall leaves the space
+      if (sp.dist(x + a[2] * THICK * 0.5, z + a[3] * THICK * 0.5) < 0) continue;
+      const p: MuretRun["pts"][number] = [x, z, a[2], a[3], a[4], a[5]];
+      if (end === 0) pts.unshift(p);
+      else pts.push(p);
+      ends[end] = false; // closed on the wall: no overhang
+      break;
+    }
+  }
+  return { ...r, pts, ends };
 }
 
 /** Runs of consecutive marked samples (one loop: a wall all around a pit is one closed run). */

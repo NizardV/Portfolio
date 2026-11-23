@@ -53,7 +53,8 @@ export const ARRIVAL_MOUTH = 75.2;
 export const HALL = room({ kind: "box", x: -6, z: 16, w: 34, d: 26, a: 0.17, ceil: 12, mat: "stain", lights: 4.2, dead: 0.2, tag: "hall" });
 export const ROTUNDA = room({ kind: "ngon", x: 34, z: -20, r: 13, n: 8, a: Math.PI / 8, ceil: 10, lights: 3.4, tag: "rotunda" });
 const TRIANGLE = room({ kind: "ngon", x: -44, z: -6, r: 14, n: 3, a: 0.4, ceil: 4.4, lights: 3, mat: "stain" });
-export const PLAZA = room({ kind: "box", x: 42, z: 34, w: 22, d: 18, a: -0.32, floor: -2.4, ceil: 5.4, mat: "concrete", wall: "concrete", lights: 3.6, dead: 0.25 });
+// the Lobby's own materials: in grey concrete, under the carpeted hall around it, it read as a texture bug (2026-11-22)
+export const PLAZA = room({ kind: "box", x: 42, z: 34, w: 22, d: 18, a: -0.32, floor: -2.4, ceil: 5.4, lights: 3.6, dead: 0.25 });
 export const STAGE = room({ kind: "box", x: -48, z: 38, w: 20, d: 14, a: 0.6, floor: 1.8, ceil: 5.6, lights: 3.2 });
 export const HOLES_ROOM = room({ kind: "box", x: 8, z: -38, w: 18, d: 18, a: 0.1, ceil: 3.3, lights: 3, tag: "holes" });
 const FOREST = room({ kind: "box", x: -28, z: -44, w: 26, d: 20, a: -0.08, ceil: 6.5, lights: 3.4, dead: 0.45, mat: "stain" });
@@ -139,7 +140,9 @@ function rampInto(r: Room, pts: [number, number][]) {
   const dz = (r.cz - fz) / len;
   const h = typeof r.floor === "number" ? r.floor : 0;
   // one way up per side: a second ramp within 5 m of another one squeezed a paper-thin wall between the two
-  if (ramps.some((o) => o.kind === "box" && Math.hypot(o.x - bx, o.z - bz) < 5)) return;
+  // one way down per side: a second ramp within 9 m of another one (two ramps side by side, a V of low walls between
+  // them) is left out; its corridor reaches the other ramp through the hall around the level
+  if (ramps.some((o) => o.kind === "box" && Math.hypot(o.x - bx, o.z - bz) < 9)) return;
   ramps.push({ kind: "box", x: bx, z: bz, w: 8, d: 3.6, a: Math.atan2(-dz, dx), ceil: Math.max(3, r.ceil), lights: 2.4, dead: 0.1, mat: r.mat, wall: r.wall,
     floor: { ax: bx - dx * 4, az: bz - dz * 4, bx: bx + dx * 4, bz: bz + dz * 4, ha: 0, hb: h } });
 }
@@ -350,7 +353,10 @@ export const SLICE0_MEMORIES: Memory[] = [];
  * jog where one ends, a notch in the wall and its baseboard. The later room's wall moves onto the earlier one's line
  * (boxes only; 2 to 60 cm; the layout keeps its shape, the building gets straight walls).
  */
-function alignWalls(shapes: Shape[]) {
+function alignWalls(shapes: Shape[], movableBelow: number) {
+  // only corridors and fillers move: rooms, vestibules and throats are tied to doors (a moved wall left a door frame
+  // standing in the open), the slice's rooms to its memories
+  const movable = (i: number) => i < movableBelow && !SLICE0.includes(i);
   type Side = { i: number; nx: number; nz: number; c: number; t0: number; t1: number; axis: "w" | "d" };
   const sidesOf = (s: Shape, i: number): Side[] => {
     if (s.kind !== "box" || s.open) return [];
@@ -371,9 +377,11 @@ function alignWalls(shapes: Shape[]) {
         const delta = A.c - B.c;
         if (Math.abs(delta) < 0.02 || Math.abs(delta) > 0.6) continue;
         if (A.t0 > B.t1 + 0.3 || B.t0 > A.t1 + 0.3) continue; // not side by side
-        const s = shapes[j];
-        if (s.kind !== "box") continue;
-        shapes[j] = { ...s, x: s.x + (B.nx * delta) / 2, z: s.z + (B.nz * delta) / 2, [B.axis]: s[B.axis] + delta };
+        // the later one moves onto the earlier one's line, or the other way round when only the earlier one may move
+        const [k, side, d] = movable(j) ? [j, B, delta] : [i, A, -delta];
+        const s = shapes[k];
+        if (!movable(k) || s.kind !== "box") continue;
+        shapes[k] = { ...s, x: s.x + (side.nx * d) / 2, z: s.z + (side.nz * d) / 2, [side.axis]: s[side.axis] + d };
         moved++;
         break;
       }
@@ -381,9 +389,13 @@ function alignWalls(shapes: Shape[]) {
   }
   return moved;
 }
-alignWalls(allShapes);
+alignWalls(allShapes, corridors.length + fillers.length);
 
-for (let k = 0; k < allShapes.length; k++) allShapes[k] = { ...allShapes[k], skin: "lobby" };
+// one carpet: the darker "stain" carpet stopped in a hard line at every room it covered (2026-11-22)
+for (let k = 0; k < allShapes.length; k++) {
+  const s = allShapes[k];
+  allShapes[k] = { ...s, skin: "lobby", ...(s.mat === "stain" ? { mat: "carpet" as const } : {}) };
+}
 
 if (SLICE0_READY) {
   // no random partitions in the slice: what stands there is placed on purpose, on the tile grid
@@ -428,6 +440,11 @@ LOBBY_SPACE.murets = MURETS.runs;
 
 /** Geometry is derived once per visit (a few ms per frame, see slice.ts), then shared by the scene and the doorways. */
 export const lobbyBuilt = lazyBuilt(LOBBY_SPACE);
+
+/** the arrival room's back wall, where the meadow's doorway opens: its white frame hangs on it (75.2, the old mouth of a
+ * little vestibule, left it standing 80 cm into the room once the room reached the wall) */
+const ARRIVAL_SHAPE = allShapes.find((s) => s.tag === "arrival");
+export const ARRIVAL_WALL = ARRIVAL_SHAPE?.kind === "box" ? ARRIVAL_SHAPE.z + ARRIVAL_SHAPE.d / 2 : ARRIVAL_MOUTH;
 
 export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 

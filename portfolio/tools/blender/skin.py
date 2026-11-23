@@ -500,56 +500,71 @@ def over_solid(plan, r, pu, pv, half):
 
 
 def lights(plan):
-    """One lit tile (60 cm), or 2 x 2 tiles in big rooms, every `lights` metres on each room's grid, 30 cm clear of
-    walls, beams and other rooms' ceilings. Never two in the same spot (a room and the feature sharing its grid both laid
-    one there: twice the light). A room that would get none (narrow, eaten by its neighbours) gets one, 15 cm clear.
+    """Ceiling lights inside the tiles, dosed and centred per room (2026-11-23, the user's notes):
+    - one size per room: 2 x 2 tiles under a tall ceiling (> 3.6 m above the floor), one tile everywhere else (tubes and
+      big fittings mixed in one room looked odd);
+    - spaced: a tube every 5 tiles (3 m), a big one every 8 (4.8 m), at least 1 m from the walls;
+    - centred: the pattern is laid symmetrically across the room (on its own axes, snapped to the tiles);
+    - never touching: 1.2 m of ceiling at least between two fittings, whichever rooms they belong to (big rooms first);
+    - none over a pillar or a partition, nor against a wall (30 cm clear); a room that would get none gets one.
     [x, y, z, angle, size, dead] for the game."""
     panels = []
     taken = {}
 
-    def free(x, z):
-        cell = (math.floor(x), math.floor(z))
-        return all(math.hypot(x - px, z - pz) >= 0.9 for i in (-1, 0, 1) for j in (-1, 0, 1) for px, pz in taken.get((cell[0] + i, cell[1] + j), ()))
+    def free(x, z, size):
+        cell = (math.floor(x / 4), math.floor(z / 4))
+        for i in (-1, 0, 1):
+            for j in (-1, 0, 1):
+                for px, pz, ps in taken.get((cell[0] + i, cell[1] + j), ()):
+                    if max(abs(x - px), abs(z - pz)) < (size + ps) / 2 + 1.2:
+                        return False
+        return True
 
-    def place(r, margin, step=None, limit=None):
-        x0, z0, x1, z1 = r["box"]
-        area = (x1 - x0) * (z1 - z0)
-        # a low ceiling (< 2.75 m - its floor) never takes the big fittings: 1.2 m of light 50 cm over the head fills the view
-        low = r["ceil"] - r["floor"] < 2.7
-        big = not low and (r["ceil"] > 3.6 or area > 150)
-        size = 2 * GRID if big else GRID
-        # a 1.2 m fitting every 3.6 m at least (every 2.4 m, a quarter of a hall's ceiling was light: burnt white)
-        # one rhythm for the whole place, so rows of lights run on from room to room: a tube every 4 tiles (2.4 m), a 1.2 m
-        # fitting every 8 tiles (4.8 m, every other row of the tubes' lattice)
-        step = step or (8 if big else 4) * GRID
+    def extents(r):
         cos_a, sin_a, cx, cz = frame(r)
-        reach = math.hypot(x1 - x0, z1 - z0) / 2
+        us, vs = [], []
+        for x, z in r["outline"]:
+            dx, dz = x - cx, z - cz
+            us.append(dx * cos_a - dz * sin_a)
+            vs.append(dx * sin_a + dz * cos_a)
+        return min(us), max(us), min(vs), max(vs)
+
+    def axis(lo, hi, step, big):
+        """Centred positions along one axis, snapped to the tiles (big: on a tile corner, tube: mid-tile)."""
+        width = hi - lo
+        n = max(1, int((width - 2.0) // step) + 1)
+        mid = (lo + hi) / 2
+        out = []
+        for i in range(n):
+            v = mid + (i - (n - 1) / 2) * step
+            out.append(round(v / GRID) * GRID if big else (math.floor(v / GRID) + 0.5) * GRID)
+        return out
+
+    def place(r, margin, only_middle=False):
+        big = r["ceil"] - r["floor"] > 3.6
+        size = 2 * GRID if big else GRID
+        step = (8 if big else 5) * GRID
+        cos_a, sin_a, cx, cz = frame(r)
+        u0, u1, v0, v1 = extents(r)
         half = size / 2 + margin
-        # around the room itself, on its grid (a room following another's grid lies away from that grid's origin)
-        mx, mz = (x0 + x1) / 2 - cx, (z0 + z1) / 2 - cz
-        uc, vc = mx * cos_a - mz * sin_a, mx * sin_a + mz * cos_a
-        spots = []
-        u = math.floor((uc - reach) / step) * step
-        while u <= uc + reach:
-            v = math.floor((vc - reach) / step) * step
-            while v <= vc + reach:
-                spots.append((u, v) if big else (u + GRID / 2, v + GRID / 2))
-                v += step
-            u += step
-        if limit:
-            spots.sort(key=lambda s: (s[0] - uc) ** 2 + (s[1] - vc) ** 2)  # the fallback: nearest the middle first
+        spots = [(u, v) for u in axis(u0, u1, step, big) for v in axis(v0, v1, step, big)]
+        if only_middle:
+            # the fallback: the tiles nearest the middle, one light
+            mu, mv = (u0 + u1) / 2, (v0 + v1) / 2
+            spots = sorted({(round(mu / GRID + i) * GRID + (0 if big else GRID / 2), round(mv / GRID + j) * GRID + (0 if big else GRID / 2)) for i in range(-3, 4) for j in range(-3, 4)},
+                           key=lambda s: (s[0] - mu) ** 2 + (s[1] - mv) ** 2)
         count = 0
         for pu, pv in spots:
             x, z = cx + pu * cos_a + pv * sin_a, cz - pu * sin_a + pv * cos_a
-            if not free(x, z) or not fits(r, pu, pv, half) or over_solid(plan, r, pu, pv, half):
+            if not free(x, z, size) or not fits(r, pu, pv, half) or over_solid(plan, r, pu, pv, half):
                 continue
             # never two dead in a row (only every other light may die, twice as often): a corridor whose 3 tubes all
             # drew "dead" went black
             dead = count % 2 == 1 and (math.sin(r["index"] * 12.9898 + count * 78.233) * 43758.5453) % 1 < 2 * min(0.15, r["dead"])
             panels.append([round(x, 3), round(r["ceil"] - 0.004, 3), round(z, 3), round(grid_angle(r), 5), size, dead])
-            taken.setdefault((math.floor(x), math.floor(z)), []).append((x, z))
+            taken.setdefault((math.floor(x / 4), math.floor(z / 4)), []).append((x, z, size))
             count += 1
-            if limit and count >= limit:
+            if only_middle:
                 break
         return count
 
@@ -562,17 +577,17 @@ def lights(plan):
                 cu, cv = pu + du, pv + dv
                 x, z = cx + cu * cos_a + cv * sin_a, cz - cu * sin_a + cv * cos_a
                 o = plan.owner(x, z)
-                # a feature under the same ceiling on the same grid (the holes of the holes room) carries lights too
-                shared = o is not None and o is not r and not o["open"] and o["ceil"] == r["ceil"] and same_grid(o, r)
+                # a pit under the same ceiling (the holes of the holes room) carries lights too
+                shared = o is not None and o is not r and not o["open"] and o["ceil"] == r["ceil"] and o["floor"] < r["floor"] - 0.5
                 if (o is not r and not shared) or plan.ceiling(x, z) != r["ceil"] or not plan.in_volume(x, r["ceil"] - 0.05, z):
                     return False
         return True
 
-    for r in plan.rooms:
-        if not r["skinned"] or r["open"] or not r["lights"]:
-            continue
+    rooms = [r for r in plan.rooms if r["skinned"] and not r["open"] and r["lights"]]
+    rooms.sort(key=lambda r: -(r["box"][2] - r["box"][0]) * (r["box"][3] - r["box"][1]))  # big rooms lay their pattern first
+    for r in rooms:
         if not place(r, 0.3):
-            place(r, 0.15, step=GRID, limit=1)
+            place(r, 0.15, only_middle=True)
     return panels
 
 

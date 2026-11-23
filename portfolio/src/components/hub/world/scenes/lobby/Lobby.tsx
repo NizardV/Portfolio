@@ -6,7 +6,7 @@ import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
 import { useSkin } from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
@@ -338,7 +338,7 @@ function Lobby() {
       <Gallery />
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}
-      <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_MOUTH]} rotation={[0, Math.PI, 0]}>
+      <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_WALL]} rotation={[0, Math.PI, 0]}>
         <Frame w={0.98} h={2.02} color="#efe9da" />
       </group>
       {EXITS.map((e) => (
