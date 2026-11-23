@@ -7,7 +7,7 @@ black corners elsewhere. Baked once in Cycles, the light is soft, falls off alon
 the ceiling, and costs the game one texture read.
 
 Used by skin.py (skip with SKIN_BAKE=0). Settings, from the environment: BAKE_SIZE (2048), BAKE_SAMPLES (256),
-BAKE_WATTS (power of one 60 cm tile, 35), BAKE_SMOOTH (denoise blur, px, 1.5). Output: public/hub/models/skins/<skin>-light.jpg, read on the model's second UV
+BAKE_WATTS (power of one 60 cm tile, 50), BAKE_SMOOTH (denoise blur, px, 1.5). Output: public/hub/models/skins/<skin>-light.jpg, read on the model's second UV
 set ("lightmap", TEXCOORD_1). Stored in sRGB, divided by SCALE so values up to SCALE (light brighter than white paper
 under it) survive 8 bits: the game multiplies back (archi/Skin.tsx, LIGHTMAP_SCALE).
 """
@@ -22,7 +22,8 @@ import lib
 SCALE = 6.0  # keep in step with LIGHTMAP_SCALE in archi/Skin.tsx
 SIZE = int(os.environ.get("BAKE_SIZE", "2048"))  # ~10 cm a texel over the Lobby: light is smooth
 SAMPLES = int(os.environ.get("BAKE_SAMPLES", "256"))
-WATTS = float(os.environ.get("BAKE_WATTS", "35"))
+# 50 W a tile: fewer, better spaced lights since 2026-11-23 (a tube every 3 m) need more each to light as before
+WATTS = float(os.environ.get("BAKE_WATTS", "50"))
 SMOOTH = float(os.environ.get("BAKE_SMOOTH", "1.5"))  # px, gaussian sigma of the denoise
 # how much light each kind of surface sends back (its texture's mean colour, roughly): only the bounce depends on it
 ALBEDO = {"f": 0.42, "w": 0.62, "c": 0.7, "trim": 0.12, "beam": 0.7}
