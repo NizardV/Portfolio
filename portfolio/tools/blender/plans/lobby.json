@@ -7071,7 +7071,7 @@
    ],
    "floor": 0,
    "ramp": null,
-   "ceil": 3,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7082,7 +7082,7 @@
    "wall": "tile",
    "ceilMat": "tile",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {
@@ -7145,7 +7145,7 @@
    ],
    "floor": 0,
    "ramp": null,
-   "ceil": 3,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7156,7 +7156,7 @@
    "wall": "wallpaper",
    "ceilMat": "ceiling",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {
@@ -7219,7 +7219,7 @@
    ],
    "floor": 0,
    "ramp": null,
-   "ceil": 3,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7230,7 +7230,7 @@
    "wall": "wallpaper",
    "ceilMat": "ceiling",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {
@@ -7304,7 +7304,7 @@
    "wall": "wallpaper",
    "ceilMat": "ceiling",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {
@@ -7404,7 +7404,7 @@
    ],
    "floor": 0,
    "ramp": null,
-   "ceil": 3,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7415,7 +7415,7 @@
    "wall": "wallpaper",
    "ceilMat": "ceiling",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {
@@ -7478,7 +7478,7 @@
    ],
    "floor": 0,
    "ramp": null,
-   "ceil": 3,
+   "ceil": 2.75,
    "open": false,
    "angle": 0,
    "centre": [
@@ -7489,7 +7489,7 @@
    "wall": "wallpaper",
    "ceilMat": "ceiling",
    "lights": 2.4,
-   "dead": 0.2,
+   "dead": 0,
    "tag": null
   },
   {

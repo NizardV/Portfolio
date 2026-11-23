@@ -256,7 +256,7 @@ for (const e of EXITS) {
   const vz = z - fz * 3;
   const special = e.kind === "grate" ? { mat: "tile" as const, wall: "tile" as const } : {};
   const isStage = e.kind === "velvet";
-  vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: (isStage ? 1.8 : 0) + 3, lights: 2.4, dead: 0.2, floor: isStage ? 1.8 : 0, ...special });
+  vestibules.push({ kind: "box", x: vx, z: vz, w: Math.abs(fx) > 0.5 ? 6 : 4.4, d: Math.abs(fx) > 0.5 ? 4.4 : 6, ceil: (isStage ? 1.8 : 0) + 3, lights: 2.4, dead: 0, floor: isStage ? 1.8 : 0, ...special });
   const level = ROOMS.filter((r) => !raised(r));
   const nearest = level.reduce((a, b) => (Math.hypot(a.cx - vx, a.cz - vz) < Math.hypot(b.cx - vx, b.cz - vz) ? a : b), level[0]);
   const target = isStage ? STAGE : nearest;
@@ -390,6 +390,30 @@ function alignWalls(shapes: Shape[], movableBelow: number) {
   return moved;
 }
 alignWalls(allShapes, corridors.length + fillers.length);
+
+/**
+ * Ceilings a few cm apart where two rooms overlap left a sliver of wall across the ceiling (a 20 cm band of wallpaper,
+ * askew): under 40 cm of difference, the later room takes the earlier one's height (2026-11-23).
+ */
+for (let j = 0; j < allShapes.length; j++) {
+  const s = allShapes[j];
+  if (s.open) continue;
+  const [x0, z0, x1, z1] = geomBounds(s);
+  for (let i = 0; i < j; i++) {
+    const o = allShapes[i];
+    const diff = Math.abs(o.ceil - s.ceil);
+    if (o.open || diff < 0.02 || diff >= 0.4) continue;
+    const [a0, b0, a1, b1] = geomBounds(o);
+    if (a0 > x1 || a1 < x0 || b0 > z1 || b1 < z0) continue;
+    let shared = false;
+    for (let x = Math.max(x0, a0) + 0.25; x < Math.min(x1, a1) && !shared; x += 0.5) {
+      for (let z = Math.max(z0, b0) + 0.25; z < Math.min(z1, b1) && !shared; z += 0.5) shared = geomDist(s, x, z) < -0.05 && geomDist(o, x, z) < -0.05;
+    }
+    if (!shared) continue;
+    allShapes[j] = { ...s, ceil: o.ceil };
+    break;
+  }
+}
 
 // one carpet: the darker "stain" carpet stopped in a hard line at every room it covered (2026-11-22)
 for (let k = 0; k < allShapes.length; k++) {

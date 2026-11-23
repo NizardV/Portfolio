@@ -86,7 +86,7 @@ function rampDrop(s: Space["shapes"][number]) {
   return typeof f === "object" ? Math.abs(f.hb - f.ha) : 0;
 }
 
-/** A free end, carried on along its line to the wall when one stands within 60 cm (a gap a hand fits through, not a
+/** A free end, carried on along its line to the wall when one stands within 1 m (a gap a hand fits through, not a
  * passage): the low wall then closes onto it. */
 function reachWalls(sp: Space, r: MuretRun): MuretRun {
   if (r.closed) return r;
@@ -97,7 +97,7 @@ function reachWalls(sp: Space, r: MuretRun): MuretRun {
     const [a, b] = end === 0 ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
     const len = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
     const [dx, dz] = [(a[0] - b[0]) / len, (a[1] - b[1]) / len];
-    for (let d = 0.05; d <= 0.6; d += 0.05) {
+    for (let d = 0.05; d <= 1.0; d += 0.05) {
       const x = a[0] + dx * d;
       const z = a[1] + dz * d;
       // the wall face is where the middle of the low wall leaves the space

@@ -427,7 +427,8 @@ function skinChecks(sp, note) {
       if (i >= 0) owned.set(i, (owned.get(i) ?? 0) + 1);
     }
   }
-  const lit = new Set(panels.map(([x, , z]) => sp.ownerIndex(x, z)));
+  // a dead light lights nothing: a room whose only light drew "dead" is dark
+  const lit = new Set(panels.filter((p) => !p[5]).map(([x, , z]) => sp.ownerIndex(x, z)));
   // crowded / mixed
   const sizes = new Map();
   panels.forEach(([x, , z, , size], k) => {
