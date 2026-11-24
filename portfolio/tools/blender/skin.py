@@ -418,7 +418,10 @@ def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
         # the capping board
         quad(out, at(s0, -0.013, f0 + MURET_H), at(s1, -0.013, f1 + MURET_H), at(s1, MURET_T + 0.01, f1 + MURET_H), at(s0, MURET_T + 0.01, f0 + MURET_H), up, cap, uv,
              [(t0, 0), (t1, 0), (t1, MURET_T), (t0, MURET_T)])
-        # the slab's nosing: 16 cm high, 2.5 cm proud, at the upper floor
+        # the slab's nosing: 16 cm high, 2.5 cm proud, at the upper floor; only where the drop shows it (a dark band lay on
+        # the floor along the top of a ramp, where the two floors are a few cm apart)
+        if min(f0 - lo0, f1 - lo1) < 0.3:
+            continue
         quad(out, at(s0, -0.028, f0 - 0.16), at(s1, -0.028, f1 - 0.16), at(s1, -0.028, f1), at(s0, -0.028, f0), out_dir, cap, uv,
              [(t0, 0), (t1, 0), (t1, 0.16), (t0, 0.16)])
         quad(out, at(s0, -0.028, f0), at(s1, -0.028, f1), at(s1, -0.003, f1), at(s0, -0.003, f0), up, cap, uv,
@@ -566,14 +569,21 @@ def lights(plan):
             vs.append(dx * sin_a + dz * cos_a)
         return min(us), max(us), min(vs), max(vs)
 
-    def axis(lo, hi, step, big):
-        """Centred positions along one axis, snapped to the tiles (big: on a tile corner, tube: mid-tile)."""
-        width = hi - lo
-        n = max(1, int((width - 2.0) // step) + 1)
-        mid = (lo + hi) / 2
+    def axis(lo, hi, step, big, mid=None):
+        """Positions along one axis, snapped to the tiles (big: on a tile corner, tube: mid-tile). Centred on the room, or
+        (mid given) on the pattern of the group of rooms it belongs to, kept wherever it falls in this room."""
+        if mid is None:
+            width = hi - lo
+            n = max(1, int((width - 2.0) // step) + 1)
+            mid = (lo + hi) / 2
+            ks = [i - (n - 1) / 2 for i in range(n)]
+        else:
+            ks = [k for k in range(math.floor((lo + 1.0 - mid) / step), math.ceil((hi - 1.0 - mid) / step) + 1) if lo + 1.0 <= mid + k * step <= hi - 1.0]
+            if not ks:
+                ks = [round(((lo + hi) / 2 - mid) / step)]
         out = []
-        for i in range(n):
-            v = mid + (i - (n - 1) / 2) * step
+        for i in ks:
+            v = mid + i * step
             out.append(round(v / GRID) * GRID if big else (math.floor(v / GRID) + 0.5) * GRID)
         return out
 
@@ -584,7 +594,8 @@ def lights(plan):
         cos_a, sin_a, cx, cz = frame(r)
         u0, u1, v0, v1 = extents(r)
         half = size / 2 + margin
-        spots = [(u, v) for u in axis(u0, u1, step, big) for v in axis(v0, v1, step, big)]
+        am = anchor_mid.get(r["index"])
+        spots = [(u, v) for u in axis(u0, u1, step, big, am[0] if am else None) for v in axis(v0, v1, step, big, am[1] if am else None)]
         if only_middle:
             # the fallback: the tiles nearest the middle, one light
             mu, mv = (u0 + u1) / 2, (v0 + v1) / 2
@@ -621,6 +632,34 @@ def lights(plan):
         return True
 
     rooms = [r for r in plan.rooms if r["skinned"] and not r["open"] and r["lights"]]
+    # rooms that overlap under one ceiling height read as one room: one pattern for the group, centred on its biggest
+    # room (2026-11-23: per-room centring scattered the lights by the hotel door, the owner wants them in rows)
+    area = lambda r: (r["box"][2] - r["box"][0]) * (r["box"][3] - r["box"][1])  # noqa: E731
+    group = {r["index"]: r["index"] for r in rooms}
+
+    def find(i):
+        while group[i] != i:
+            group[i] = group[group[i]]
+            i = group[i]
+        return i
+
+    for a_ in rooms:
+        for b_ in rooms:
+            if a_["index"] < b_["index"] and abs(a_["ceil"] - b_["ceil"]) < 0.01 and overlaps(a_["box"], b_["box"]):
+                if any(inside(x, z, b_["outline"]) for x, z in a_["outline"]) or any(inside(x, z, a_["outline"]) for x, z in b_["outline"]):
+                    group[find(a_["index"])] = find(b_["index"])
+    biggest = {}
+    for r in rooms:
+        g = find(r["index"])
+        if g not in biggest or area(r) > area(biggest[g]):
+            biggest[g] = r
+    anchor_mid = {}
+    for r in rooms:
+        big_r = biggest[find(r["index"])]
+        if big_r is r:
+            continue  # the biggest room centres itself
+        bu0, bu1, bv0, bv1 = extents(big_r)
+        anchor_mid[r["index"]] = ((bu0 + bu1) / 2, (bv0 + bv1) / 2)
     rooms.sort(key=lambda r: -(r["box"][2] - r["box"][0]) * (r["box"][3] - r["box"][1]))  # big rooms lay their pattern first
     for r in rooms:
         if not place(r, 0.3):

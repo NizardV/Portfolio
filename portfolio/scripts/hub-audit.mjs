@@ -446,6 +446,8 @@ function skinChecks(sp, note) {
   }
   sp.shapes.forEach((s, i) => {
     if (!s.skin || s.open || !(s.lights > 0) || (owned.get(i) ?? 0) < 20 || lit.has(i)) return;
+    // a small room under the lights of the room around it (a ramp in a hall) is not dark: a live light within 2.5 m
+    if (panels.some((p) => !p[5] && sdf.geomDist(s, p[0], p[2]) < 2.5 && Math.abs(p[1] - s.ceil) < 0.05)) return;
     const [bx0, bz0, bx1, bz1] = sdf.geomBounds(s);
     note("unlit", (bx0 + bx1) / 2, (bz0 + bz1) / 2, `room #${i} (${owned.get(i)} m²) has no ceiling light`);
   });
