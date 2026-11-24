@@ -2,7 +2,7 @@
 import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
-import { Mesh, MeshBasicMaterial, SRGBColorSpace, TextureLoader, type Group, type Texture } from "three";
+import { Color, Mesh, MeshBasicMaterial, SRGBColorSpace, TextureLoader, type Group, type Texture } from "three";
 import { TILE, type Panel } from "./build";
 import { surface, type SurfaceKey } from "./materials";
 import type { Palette } from "./Architecture";
@@ -43,14 +43,19 @@ function tintOf(kind: string, key: string, palette: Palette): string | undefined
  * place's palette, so a skinned room looks like the others, only built properly. Lit only by the baked light: the live
  * lights of the place (Architecture's pool) no longer touch it.
  */
+/** plaster under wallpaper's average tone */
+const MURET_TONE = 0.8;
+
 function dress(name: string, palette: Palette, light: Texture): MeshBasicMaterial | null {
   const [kind, key] = name.includes(":") ? name.split(":") : [name, name];
   const baked = { lightMap: light, lightMapIntensity: LIGHT };
   if (kind === "trim") return new MeshBasicMaterial({ color: palette.trim, ...baked });
   // a balcony's low wall: plain plaster in the colour of the wall it stands for (a wallpaper pattern on 1 m looked busy)
-  if (kind === "muret") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: tintOf("w", key, palette) ?? "#ffffff", ...baked });
+  // the wall's own tone: plaster is lighter than wallpaper, so it is darkened to match (a lighter balcony read as a
+  // separate block, 2026-11-24)
+  if (kind === "muret") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: new Color(tintOf("w", key, palette) ?? "#ffffff").multiplyScalar(MURET_TONE), ...baked });
   // a muret's corner post: too small for the baked light (a few texels, bled black), lit evenly like the murets around it
-  if (kind === "post") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: tintOf("w", key, palette) ?? "#ffffff" });
+  if (kind === "post") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: new Color(tintOf("w", key, palette) ?? "#ffffff").multiplyScalar(MURET_TONE) });
   const look = (kind === "beam" ? "plaster" : key) as SurfaceKey; // a beam: painted plaster, the ceiling's colour
   const tint = tintOf(kind, key, palette);
   return new MeshBasicMaterial({ map: metres(surface(look).map, look), color: tint ?? "#ffffff", ...baked });

@@ -24,7 +24,7 @@ export async function loadPlaces() {
   if (!bvhDir) throw new Error("three-mesh-bvh not found (installed with @react-three/drei)");
   const fix = (js) =>
     js
-      .replace(/from "(\.{1,2}\/[\w/]+)"/g, 'from "$1.mjs"')
+      .replace(/from "(\.{1,2}\/[\w/-]+)"/g, 'from "$1.mjs"')
       .replace(/from "three\/examples\/jsm\/utils\/BufferGeometryUtils\.js"/, `from "${url(path.join(THREE_DIR, "examples/jsm/utils/BufferGeometryUtils.js"))}"`)
       .replace(/from "three"/, `from "${url(path.join(THREE_DIR, "build/three.module.js"))}"`)
       .replace(/import [^;]* from "\.\/zones\.mjs";?/, "");
@@ -35,6 +35,7 @@ export async function loadPlaces() {
     fs.writeFileSync(out, fix(js));
   };
   for (const f of ["sdf", "contour", "build", "slice", "murets"]) tx(`archi/${f}.ts`);
+  tx("lobby-recesses.ts");
   tx("lobby.ts");
   for (const f of fs.readdirSync(path.join(W, "places"))) tx(`places/${f}`);
   fs.writeFileSync(path.join(OUT, "collision.mjs"), "export const box = (x, z, w, d) => ({ x, z, w, d });");

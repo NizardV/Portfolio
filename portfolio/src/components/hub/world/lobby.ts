@@ -1,4 +1,5 @@
 import { murets } from "./archi/murets";
+import { RECESS_DEAD_ENDS, RECESS_FILLS } from "./lobby-recesses";
 import { geomBounds, geomDist, Space, type Shape, type Solid } from "./archi/sdf";
 import { back, lazyBuilt, throat } from "./places/common";
 import type { Interactable } from "./zones";
@@ -415,6 +416,10 @@ for (let j = 0; j < allShapes.length; j++) {
     break;
   }
 }
+
+// the corridors' recesses (lobby-recesses.ts, generated): filled, or made into dead ends
+allShapes.push(...RECESS_DEAD_ENDS);
+solids.push(...RECESS_FILLS);
 
 // one carpet: the darker "stain" carpet stopped in a hard line at every room it covered (2026-11-22)
 for (let k = 0; k < allShapes.length; k++) {

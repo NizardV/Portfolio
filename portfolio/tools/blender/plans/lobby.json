@@ -7792,6 +7792,117 @@
    "lights": 2.4,
    "dead": 0.1,
    "tag": null
+  },
+  {
+   "index": 188,
+   "skinned": true,
+   "outline": [
+    [
+     22.5082,
+     -56.0513
+    ],
+    [
+     22.2076,
+     -58.0549
+    ],
+    [
+     25.1744,
+     -58.4999
+    ],
+    [
+     25.475,
+     -56.4963
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.7197,
+   "centre": [
+    23.8413,
+    -57.2756
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.5,
+   "tag": "impasse"
+  },
+  {
+   "index": 189,
+   "skinned": true,
+   "outline": [
+    [
+     12.1298,
+     -55.9828
+    ],
+    [
+     12.4938,
+     -53.7245
+    ],
+    [
+     9.532,
+     -53.2472
+    ],
+    [
+     9.168,
+     -55.5055
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": -1.411,
+   "centre": [
+    10.8309,
+    -54.615
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.5,
+   "tag": "impasse"
+  },
+  {
+   "index": 190,
+   "skinned": true,
+   "outline": [
+    [
+     -39.1638,
+     6.887
+    ],
+    [
+     -39.074,
+     5.3413
+    ],
+    [
+     -36.079,
+     5.5152
+    ],
+    [
+     -36.1688,
+     7.0609
+    ]
+   ],
+   "floor": 0,
+   "ramp": null,
+   "ceil": 2.75,
+   "open": false,
+   "angle": 1.5128,
+   "centre": [
+    -37.6214,
+    6.2011
+   ],
+   "mat": "carpet",
+   "wall": "wallpaper",
+   "ceilMat": "ceiling",
+   "lights": 2.4,
+   "dead": 0.5,
+   "tag": "impasse"
   }
  ],
  "solids": [
