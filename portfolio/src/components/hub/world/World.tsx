@@ -39,6 +39,7 @@ function Ready({ onReady }: { onReady: () => void }) {
 function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>; pose: MutableRefObject<Pose> }) {
   const [near, setNear] = useState<number[]>([]);
   const last = useRef(0);
+  const hurried = useRef(new Set<string>());
   // get every place behind this one's doors ready, shortly after arriving (code + geometry, a few ms per frame)
   useEffect(() => {
     const t = setTimeout(() => {
@@ -49,6 +50,13 @@ function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>;
   useFrame(({ clock }) => {
     if (clock.elapsedTime - last.current < 0.3) return;
     last.current = clock.elapsedTime;
+    // a doorway within 10 m: its place is built in big slices now (in small ones, a big place behind a far door of the
+    // Lobby could still be building when the player reached it: the doorway showed black)
+    for (const p of zone.portals) {
+      if (!p.link || hurried.current.has(p.to) || Math.hypot(p.link.from.x - pose.current.x, p.link.from.z - pose.current.z) > 10) continue;
+      hurried.current.add(p.to);
+      PREPARE[p.to](true).catch(() => undefined);
+    }
     const list = zone.portals
       .map((p, i) => [p, i] as const)
       .filter(([p]) => p.link && (!p.requires || used.has(p.requires)) && Math.hypot(p.link.from.x - pose.current.x, p.link.from.z - pose.current.z) < 32)
