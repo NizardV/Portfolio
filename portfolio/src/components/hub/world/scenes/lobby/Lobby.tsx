@@ -67,19 +67,41 @@ function Gallery() {
     }
     return piecesGeometry(pieces);
   }, []);
+  // a frame round each of them: doors (closed off), not holes in the wall
+  const frames = useMemo(() => {
+    if (HALL.kind !== "box") return null;
+    const a = HALL.a ?? 0;
+    const pieces: Piece[] = [];
+    const at = (lx: number, lz: number) => [HALL.cx + lx * Math.cos(a) + lz * Math.sin(a), HALL.cz - lx * Math.sin(a) + lz * Math.cos(a)];
+    for (let lx = -HALL.w / 2 + 3; lx < HALL.w / 2 - 2; lx += 4.2) for (const s of [-1, 1]) {
+      const lz = s * (HALL.d / 2 - 0.2);
+      for (const sx of [-1, 1]) {
+        const [x, z] = at(lx + sx * 0.71, lz);
+        pieces.push({ x, y: 6.3, z, w: 0.12, h: 2.42, d: 0.1, a });
+      }
+      const [x, z] = at(lx, lz);
+      pieces.push({ x, y: 8.66, z, w: 1.54, h: 0.12, d: 0.1, a });
+    }
+    return piecesGeometry(pieces);
+  }, []);
   const wall = surface("wallpaper");
   return (
     <>
       {geo && (
         <mesh geometry={geo}>
           {/* unlit + the hall's even light: the place's live lights only touch objects now, too dim for a 6 m gallery */}
-          <meshBasicMaterial map={wall.map} color="#ead07a" />
+          <meshBasicMaterial map={wall.map} color="#c9ad58" />
         </mesh>
       )}
       {/* doorways to nowhere along the gallery; nothing behind them */}
+      {frames && (
+        <mesh geometry={frames}>
+          <meshBasicMaterial color="#3d321a" />
+        </mesh>
+      )}
       {doors && (
         <mesh geometry={doors}>
-          <meshBasicMaterial color="#0c0a04" />
+          <meshBasicMaterial color="#2b2215" />
         </mesh>
       )}
     </>
@@ -201,7 +223,7 @@ function Plate({ text, color, at }: Readonly<{ text: string; color: string; at: 
 }
 
 /** the shop's glass doors: tinted, see-through (they used to read as white slabs) */
-const SHOP_GLASS = { color: "#8fb0bf", transparent: true, opacity: 0.16, roughness: 0.05, metalness: 0.3, depthWrite: false } as const;
+const SHOP_GLASS = { color: "#8fb0bf", transparent: true, opacity: 0.16, roughness: 0.35, metalness: 0.1, depthWrite: false } as const;
 /** the light of a threshold, a hint of the place behind */
 const WELCOME_LIGHT = { intensity: 1.4, distance: 6, decay: 1.6 } as const;
 
@@ -256,7 +278,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.55), h / 2, 0.02]}>
               <boxGeometry args={[0.84, h, 0.05]} />
-              <meshStandardMaterial color="#9aa1a7" metalness={0.75} roughness={0.35} />
+              <meshStandardMaterial color="#9aa1a7" metalness={0.25} roughness={0.45} />
             </mesh>
           ))}
         </>
@@ -279,7 +301,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.4), 0.5, 0.5]}>
               <cylinderGeometry args={[0.05, 0.08, 1, 12]} />
-              <meshStandardMaterial color="#c9a24a" metalness={0.8} roughness={0.3} />
+              <meshStandardMaterial color="#c9a24a" metalness={0.3} roughness={0.4} />
             </mesh>
           ))}
         </>

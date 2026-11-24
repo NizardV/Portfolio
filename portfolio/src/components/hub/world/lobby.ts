@@ -276,7 +276,8 @@ for (const e of EXITS) {
   }
   else corridor(vx, vz, target.cx, target.cz, { bend: false });
   // open doorways: a passage on the far side, so walking through stays inside the Lobby until the swap
-  if (!e.text) vestibules.push(throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05, 1.6, 0.02));
+  // the passage behind the door in the door room's materials (behind the tiled grate, a band of wallpaper)
+  if (!e.text) vestibules.push({ ...throat(back(e.anchor), e.size[0] + 0.1, e.size[1] + 0.05, 1.6, 0.02), ...special });
 }
 
 /* ---------- the place ---------- */

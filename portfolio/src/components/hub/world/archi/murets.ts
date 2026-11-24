@@ -38,7 +38,7 @@ export function murets(sp: Space): { runs: MuretRun[]; solids: Solid[] } {
     for (const p of samples) if (p.mark) seen.set(`${Math.floor(p.x)},${Math.floor(p.z)}`, [...(seen.get(`${Math.floor(p.x)},${Math.floor(p.z)}`) ?? []), [p.x, p.z]]);
     runs.push(...splitRuns(samples).map((r) => reachWalls(sp, r)));
   });
-  const joined = joinRuns(runs);
+  const joined = meetRuns(joinRuns(runs));
   return { runs: joined, solids: joined.flatMap(collision) };
 }
 
@@ -193,5 +193,38 @@ function joinRuns(runs: MuretRun[]): MuretRun[] {
     if (r.pts.length > 3 && near(r.pts[0], r.pts[r.pts.length - 1])) out.push({ ...r, pts: [...r.pts, r.pts[0]], ends: [false, false], closed: true });
     else out.push(r);
   }
+  return out;
+}
+
+/**
+ * A free end within 1 m of another low wall (a ramp's side wall stopping short of the stage front) is carried on to it:
+ * the gap between the two, a slit a hand fits through, is closed (2026-11-24).
+ */
+function meetRuns(runs: MuretRun[]): MuretRun[] {
+  const out = runs.map((r) => ({ ...r, pts: [...r.pts], ends: [...r.ends] as [boolean, boolean] }));
+  out.forEach((r, ri) => {
+    if (r.closed) return;
+    for (const end of [0, 1] as const) {
+      if (!r.ends[end]) continue;
+      const a = end === 0 ? r.pts[0] : r.pts[r.pts.length - 1];
+      let best: [number, number] | null = null;
+      let bestD = 1.0;
+      out.forEach((o, oi) => {
+        if (oi === ri) return;
+        for (const q of o.pts) {
+          const d = Math.hypot(q[0] - a[0], q[1] - a[1]);
+          if (d > 0.05 && d < bestD) {
+            bestD = d;
+            best = [q[0], q[1]];
+          }
+        }
+      });
+      if (!best) continue;
+      const p: MuretRun["pts"][number] = [best[0], best[1], a[2], a[3], a[4], a[5]];
+      if (end === 0) r.pts.unshift(p);
+      else r.pts.push(p);
+      r.ends[end] = false;
+    }
+  });
   return out;
 }

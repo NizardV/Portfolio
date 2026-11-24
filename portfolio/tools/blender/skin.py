@@ -356,6 +356,7 @@ def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
             return (a[0] + (MURET_T if a[0] >= b[0] else -MURET_T), a[1] + dx / d * MURET_T, a[2] + dz / d * MURET_T) + tuple(a[3:])
         run = ([past(run[0], run[1])] if ends[0] else []) + run + ([past(run[-1], run[-2])] if ends[1] else [])
     wall, cap = slots(f"muret:{hi['wall']}"), slots("trim")
+    facade = slots(f"w:{hi['wall']}")
     up = Vector((0, 0, 1))
 
     # mitred corners: where two samples share a spot (a corner: one facing each side), they become one whose offset runs
@@ -409,9 +410,12 @@ def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
         # the corner, its facing was the previous side, at right angles: faces flipped and culled, a slit at every corner)
         out_dir = Vector((-s1[4] * side, s1[5] * side, 0))
         in_dir = -out_dir
-        # toward the drop: from the lower floor to the top, 3 mm proud of the riser so it covers it
-        quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,
-             [(t0, lo0), (t1, lo1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
+        # toward the drop, 3 mm proud of the riser so it covers it: the room's wall (wallpaper) from the lower floor up to the
+        # slab, the low wall (plain render) above it (a 2.8 m block of plain render read as a box, 2026-11-24)
+        quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1), at(s0, -0.003, f0), out_dir, facade, uv,
+             [(t0, lo0), (t1, lo1), (t1, f1), (t0, f0)])
+        quad(out, at(s0, -0.003, f0), at(s1, -0.003, f1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,
+             [(t0, f0), (t1, f1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
         # toward the room
         quad(out, at(s0, MURET_T, f0), at(s1, MURET_T, f1), at(s1, MURET_T, f1 + MURET_H), at(s0, MURET_T, f0 + MURET_H), in_dir, wall, uv,
              [(t0, f0), (t1, f1), (t1, f1 + MURET_H), (t0, f0 + MURET_H)])
