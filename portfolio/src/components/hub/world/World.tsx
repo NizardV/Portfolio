@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Ambience } from "./audio";
+import { Ambience, type Surface } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
 import { QualityContext, isSoftwareRenderer, canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
@@ -33,6 +33,18 @@ function Ready({ onReady }: { onReady: () => void }) {
     return () => cancelAnimationFrame(id);
   }, [onReady]);
   return null;
+}
+
+/** The sound of the floor at (x, z), from the material of the room there; undefined: the place's own (grass…). */
+function surfaceAt(zone: Zone, x: number, z: number): Surface | undefined {
+  const sp = zone.space;
+  if (!sp || zone.floor === "grass") return undefined;
+  const s = sp.shapes[sp.ownerIndex(x, z)];
+  if (!s) return undefined;
+  if (s.mat === "tile" || s.mat === "marble") return "tile";
+  if (s.mat === "concrete" || s.mat === "wood") return "hard";
+  if (s.mat === "carpet" || s.mat === "stain" || (!s.mat && zone.floor === "carpet")) return "carpet";
+  return undefined;
 }
 
 /** Doorways near the player show the place behind them, live (kept to the near ones: each costs a render). */
@@ -178,7 +190,11 @@ export default function World() {
   }, [markUsed]);
   const interactRef = useRef(interact);
   interactRef.current = interact;
-  const onStep = useCallback((run: boolean) => audio.current?.step(floorRef.current, run), []);
+  // the floor under the feet: a tiled or stone room in a carpeted place sounds like tiles (the Poolrooms' doorway, the
+  // grate's room…), a carpet in a hard place like a carpet
+  const zoneRef = useRef(zone);
+  zoneRef.current = zone;
+  const onStep = useCallback((run: boolean) => audio.current?.step(surfaceAt(zoneRef.current, pose.current.x, pose.current.z) ?? floorRef.current, run), []);
 
   /* ---------- the MENU button only shows when useful: mouse free on desktop, a few seconds after a tap on phones ---------- */
   useEffect(() => {

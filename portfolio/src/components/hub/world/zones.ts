@@ -225,7 +225,7 @@ export const ZONES: Record<ZoneId, Zone> = {
     space: POOLS_SPACE,
     portals: [poolsLobby, poolsCanals],
     ambience: "water",
-    floor: "hard",
+    floor: "tile", // faïence: the bright click of wet tiles
     reverb: 0.85,
     post: { ...indoor, bloom: 1.1, saturation: -0.1 },
   },
