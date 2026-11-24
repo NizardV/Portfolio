@@ -49,6 +49,8 @@ function dress(name: string, palette: Palette, light: Texture): MeshBasicMateria
   if (kind === "trim") return new MeshBasicMaterial({ color: palette.trim, ...baked });
   // a balcony's low wall: plain plaster in the colour of the wall it stands for (a wallpaper pattern on 1 m looked busy)
   if (kind === "muret") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: tintOf("w", key, palette) ?? "#ffffff", ...baked });
+  // a muret's corner post: too small for the baked light (a few texels, bled black), lit evenly like the murets around it
+  if (kind === "post") return new MeshBasicMaterial({ map: metres(surface("plaster").map, "plaster"), color: tintOf("w", key, palette) ?? "#ffffff" });
   const look = (kind === "beam" ? "plaster" : key) as SurfaceKey; // a beam: painted plaster, the ceiling's colour
   const tint = tintOf(kind, key, palette);
   return new MeshBasicMaterial({ map: metres(surface(look).map, look), color: tint ?? "#ffffff", ...baked });

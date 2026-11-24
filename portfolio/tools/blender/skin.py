@@ -331,10 +331,10 @@ def murets(plan, out, slots):
         pts = m["pts"]
         t = 0.0
         samples = []
-        for i, (x, z, nx, nz, _high, low) in enumerate(pts):
+        for i, (x, z, nx, nz, high, low) in enumerate(pts):
             if i:
                 t += math.hypot(x - pts[i - 1][0], z - pts[i - 1][1])
-            samples.append((t, x, z, (m["room"], 1), nx, nz, low))
+            samples.append((t, x, z, (m["room"], 1, high), nx, nz, low))
         if len(samples) > 1:
             wall_run(out, uv, plan, samples, slots, closed=m["closed"], ends=tuple(m["ends"]))
 
@@ -353,24 +353,61 @@ def wall_run(out, uv, plan, run, slots, closed=False, ends=(True, True)):
         def past(a, b):
             dx, dz = a[1] - b[1], a[2] - b[2]
             d = math.hypot(dx, dz) or 1.0
-            return (a[0] + (MURET_T if a[0] >= b[0] else -MURET_T), a[1] + dx / d * MURET_T, a[2] + dz / d * MURET_T) + a[3:]
+            return (a[0] + (MURET_T if a[0] >= b[0] else -MURET_T), a[1] + dx / d * MURET_T, a[2] + dz / d * MURET_T) + tuple(a[3:])
         run = ([past(run[0], run[1])] if ends[0] else []) + run + ([past(run[-1], run[-2])] if ends[1] else [])
     wall, cap = slots(f"muret:{hi['wall']}"), slots("trim")
     up = Vector((0, 0, 1))
 
+    # mitred corners: where two samples share a spot (a corner: one facing each side), they become one whose offset runs
+    # along the bisector, (n1 + n2) / (1 + n1·n2), so both faces of the wall meet exactly (posts and bevels left slits)
+    merged = []
+    for smp in run:
+        if merged and math.hypot(smp[1] - merged[-1][1], smp[2] - merged[-1][2]) < 0.01:
+            prev = merged[-1]
+            n1x, n1z, n2x, n2z = prev[4], prev[5], smp[4], smp[5]
+            k = 1 + n1x * n2x + n1z * n2z
+            if k > 0.2:  # under ~145° the mitre runs away: keep the corner as it is
+                merged[-1] = prev[:7] + ((n1x + n2x) / k, (n1z + n2z) / k)
+            continue
+        merged.append(tuple(smp[:7]) + (smp[4], smp[5]))
+    # a turn between two samples (the corner falls between them: two outlines meeting): insert the corner itself, where
+    # the two sides' lines cross, mitred, so the faces meet there instead of cutting across in a slant
+    turned = [merged[0]] if merged else []
+    for q in merged[1:]:
+        p = turned[-1]
+        n1x, n1z, n2x, n2z = p[4], p[5], q[4], q[5]
+        dot = n1x * n2x + n1z * n2z
+        if dot < math.cos(math.radians(10)) and dot > -0.8:
+            t1x, t1z, t2x, t2z = -n1z, n1x, -n2z, n2x
+            det = t1x * (-t2z) - t1z * (-t2x)
+            if abs(det) > 1e-6:
+                dx, dz = q[1] - p[1], q[2] - p[2]
+                a_ = (dx * (-t2z) - dz * (-t2x)) / det
+                cx, cz = p[1] + t1x * a_, p[2] + t1z * a_
+                if math.hypot(cx - p[1], cz - p[2]) < 0.5 and math.hypot(cx - q[1], cz - q[2]) < 0.5:
+                    k = 1 + dot
+                    tc = p[0] + math.hypot(cx - p[1], cz - p[2])
+                    turned.append((tc, cx, cz, p[3], p[4], p[5], p[6], (n1x + n2x) / k, (n1z + n2z) / k))
+        turned.append(q)
+    run = turned
+
     def at(s, inset, h):
-        _, x, z, _, nx, nz, _ = s
-        return Vector((x + nx * side * inset, -(z + nz * side * inset), h))
+        _, x, z, _, _, _, _, mx, mz = s
+        return Vector((x + mx * side * inset, -(z + mz * side * inset), h))
 
     def floor_of(s):
-        _, x, z, _, nx, nz, _ = s
-        return floor_at(hi, x + nx * side * 0.1, z + nz * side * 0.1)
+        _, x, z, _, nx, nz = s[:6]
+        return s[3][2]  # the high floor as the plan measured it at this point (a run may span rooms and a ramp)
 
     for s0, s1 in zip(run, run[1:]):
+        if math.hypot(s1[1] - s0[1], s1[2] - s0[2]) < 0.01:
+            continue  # the turn at a corner: the post fills it (a 0-long bevel there baked black)
         f0, f1 = floor_of(s0), floor_of(s1)
         lo0, lo1 = s0[6], s1[6]
         t0, t1 = s0[0], s1[0]
-        out_dir = Vector((-s0[4] * side, s0[5] * side, 0))
+        # facing from the sample that ends the segment: after a corner, the first one carries the side it turned to (from
+        # the corner, its facing was the previous side, at right angles: faces flipped and culled, a slit at every corner)
+        out_dir = Vector((-s1[4] * side, s1[5] * side, 0))
         in_dir = -out_dir
         # toward the drop: from the lower floor to the top, 3 mm proud of the riser so it covers it
         quad(out, at(s0, -0.003, lo0), at(s1, -0.003, lo1), at(s1, -0.003, f1 + MURET_H), at(s0, -0.003, f0 + MURET_H), out_dir, wall, uv,

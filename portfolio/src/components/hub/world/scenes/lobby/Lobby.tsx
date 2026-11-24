@@ -72,7 +72,8 @@ function Gallery() {
     <>
       {geo && (
         <mesh geometry={geo}>
-          <meshStandardMaterial map={wall.map} bumpMap={wall.bump} color="#cdb65c" roughness={0.95} />
+          {/* unlit + the hall's even light: the place's live lights only touch objects now, too dim for a 6 m gallery */}
+          <meshBasicMaterial map={wall.map} color="#ead07a" />
         </mesh>
       )}
       {/* doorways to nowhere along the gallery; nothing behind them */}
@@ -110,7 +111,7 @@ function Well() {
   }, []);
   return geo ? (
     <mesh geometry={geo}>
-      <meshStandardMaterial color="#5e4a2c" roughness={0.9} />
+      <meshBasicMaterial color="#4a3a22" />
     </mesh>
   ) : null;
 }
@@ -339,7 +340,8 @@ function Lobby() {
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}
       <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_WALL]} rotation={[0, Math.PI, 0]}>
-        <Frame w={0.98} h={2.02} color="#efe9da" />
+        {/* as tall as the doorway it frames (2.25 m: the meadow's door showed above a 2.02 m frame) */}
+        <Frame w={1.3} h={2.25} color="#efe9da" />
       </group>
       {EXITS.map((e) => (
         <ExitThreshold key={e.id} exit={e} />

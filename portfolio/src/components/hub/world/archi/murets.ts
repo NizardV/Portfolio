@@ -38,7 +38,8 @@ export function murets(sp: Space): { runs: MuretRun[]; solids: Solid[] } {
     for (const p of samples) if (p.mark) seen.set(`${Math.floor(p.x)},${Math.floor(p.z)}`, [...(seen.get(`${Math.floor(p.x)},${Math.floor(p.z)}`) ?? []), [p.x, p.z]]);
     runs.push(...splitRuns(samples).map((r) => reachWalls(sp, r)));
   });
-  return { runs, solids: runs.flatMap(collision) };
+  const joined = joinRuns(runs);
+  return { runs: joined, solids: joined.flatMap(collision) };
 }
 
 /** Points every 25 cm along a room's outline, and at each corner (facing both sides), marked where a low wall goes. */
@@ -78,7 +79,7 @@ function sample(sp: Space, si: number, x: number, z: number, nx: number, nz: num
   if (Math.abs(fa - fb) <= min || walled(x, z)) return none;
   if (sp.ceiling(x + side * nx * 0.2, z + side * nz * 0.2) - high <= HEAD) return none;
   const room = side > 0 ? a : b;
-  return { x, z, nx: nx * side, nz: nz * side, high, low: Math.min(fa, fb), mark: `${room}:${side}`, room };
+  return { x, z, nx: nx * side, nz: nz * side, high, low: Math.min(fa, fb), mark: "wall", room }; // one wall along a drop, whichever room owns the high side (split per room, corners were left open)
 }
 
 function rampDrop(s: Space["shapes"][number]) {
@@ -157,4 +158,40 @@ function turned(a: [number, number], b: [number, number], c: [number, number]) {
   const d1 = Math.atan2(b[1] - a[1], b[0] - a[0]);
   const d2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
   return Math.abs(Math.atan2(Math.sin(d2 - d1), Math.cos(d2 - d1))) > 0.02;
+}
+
+/**
+ * Runs from different room outlines meeting at a corner (a pit's sides claimed by two rooms) were walled apart: each
+ * stopped short, the corner left open onto the pit. Ends within 40 cm are joined into one run (a ring when it closes),
+ * so the corner is built once, mitred.
+ */
+function joinRuns(runs: MuretRun[]): MuretRun[] {
+  const out = runs.filter((r) => r.closed);
+  const open = runs.filter((r) => !r.closed).map((r) => ({ ...r, pts: [...r.pts] }));
+  const near = (a: MuretRun["pts"][number], b: MuretRun["pts"][number]) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 0.4;
+  let merged = true;
+  while (merged) {
+    merged = false;
+    for (let i = 0; i < open.length && !merged; i++) {
+      for (let j = 0; j < open.length && !merged; j++) {
+        if (i === j) continue;
+        const a = open[i];
+        const b = open[j];
+        let pts: MuretRun["pts"] | null = null;
+        if (near(a.pts[a.pts.length - 1], b.pts[0])) pts = [...a.pts, ...b.pts];
+        else if (near(a.pts[a.pts.length - 1], b.pts[b.pts.length - 1])) pts = [...a.pts, ...[...b.pts].reverse()];
+        else if (near(a.pts[0], b.pts[0])) pts = [...[...a.pts].reverse(), ...b.pts];
+        if (!pts) continue;
+        open[i] = { ...a, pts, ends: [true, true] };
+        open.splice(j, 1);
+        merged = true;
+      }
+    }
+  }
+  for (const r of open) {
+    // a run that comes back to its start is a ring
+    if (r.pts.length > 3 && near(r.pts[0], r.pts[r.pts.length - 1])) out.push({ ...r, pts: [...r.pts, r.pts[0]], ends: [false, false], closed: true });
+    else out.push(r);
+  }
+  return out;
 }

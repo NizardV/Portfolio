@@ -175,8 +175,8 @@ const solids: Solid[] = [];
 // the rotunda's sunken ring and its bottomless well of shelves
 export const ROTUNDA_PIT = { x: ROTUNDA.cx, z: ROTUNDA.cz, r: 6, floor: -3.2 };
 export const WELL = { x: ROTUNDA.cx, z: ROTUNDA.cz, r: 2.2, floor: -42 };
-features.push({ kind: "circle", x: ROTUNDA_PIT.x, z: ROTUNDA_PIT.z, r: ROTUNDA_PIT.r, floor: ROTUNDA_PIT.floor, ceil: ROTUNDA.ceil, mat: "concrete", wall: "concrete" });
-features.push({ kind: "circle", x: WELL.x, z: WELL.z, r: WELL.r, floor: WELL.floor, ceil: ROTUNDA.ceil, mat: "void", wall: "wallpaper", tag: "well" });
+features.push({ kind: "circle", x: ROTUNDA_PIT.x, z: ROTUNDA_PIT.z, r: ROTUNDA_PIT.r, floor: ROTUNDA_PIT.floor, ceil: ROTUNDA.ceil, ceilMat: "ceiling" }); // the Lobby's carpet and wallpaper (grey concrete read as a bug)
+features.push({ kind: "circle", x: WELL.x, z: WELL.z, r: WELL.r, floor: WELL.floor, ceil: ROTUNDA.ceil, mat: "void", wall: "wallpaper", ceilMat: "ceiling", tag: "well" });
 // holes in the floor, over another lobby 6 m below
 export const HOLE_DEPTH = -6;
 {
