@@ -1,12 +1,14 @@
 "use client";
 import { memo, use, useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { CanvasTexture, SRGBColorSpace, type Group, type Mesh, type PointLight } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { BackSide, CanvasTexture, MeshBasicMaterial, SRGBColorSpace, Vector3, type Group, type Mesh, type PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, memoryId, RED_CITY_LAST, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import { geomDist } from "../../archi/sdf";
+import type { Panel } from "../../archi/build";
+import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, memoryId, RED_CITY_LAST, SLICE0, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
 import { useWorldState } from "../../state";
 import { useSkin } from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
@@ -405,6 +407,99 @@ function MemoryMarkers() {
   );
 }
 
+/**
+ * Memory 3, the event (slice 0): standing in the pentagon and turning back to the long corridor, its lights go out one
+ * by one, the far end first, coming towards you; the corridor stays dark from then on (found for good). The corridor's
+ * light is baked, so a tube going out is drawn: a dead tile over it, and a veil of dark over its stretch of corridor.
+ */
+const EVENT_SPOT = SLICE0_MEMORIES.find((m) => m.id === "lumieres");
+const LOOK = new Vector3();
+const STEPS = 7;
+const VEIL = new MeshBasicMaterial({ color: "#040302", transparent: true, opacity: 0.6, depthWrite: false, side: BackSide });
+const NONE = new MeshBasicMaterial({ visible: false });
+
+/** the corridor's own stretch (where no other room takes over), cut in STEPS pieces, the far end from the spot first */
+function corridorPieces() {
+  const c = LOBBY_SPACE.shapes[SLICE0[3]];
+  if (c.kind !== "box" || !EVENT_SPOT) return null;
+  const a = c.a ?? 0;
+  const [ux, uz] = [Math.cos(a), -Math.sin(a)];
+  let u0 = Infinity;
+  let u1 = -Infinity;
+  for (let u = -c.w / 2; u <= c.w / 2; u += 0.25) if (LOBBY_SPACE.ownerIndex(c.x + ux * u, c.z + uz * u) === SLICE0[3]) [u0, u1] = [Math.min(u0, u), Math.max(u1, u)];
+  if (!Number.isFinite(u0)) return null;
+  const len = (u1 - u0) / STEPS;
+  const pieces = Array.from({ length: STEPS }, (_, k) => {
+    const u = u0 + len * (k + 0.5);
+    return { x: c.x + ux * u, z: c.z + uz * u, first: k === 0, last: k === STEPS - 1 };
+  });
+  const far = Math.hypot(pieces[0].x - EVENT_SPOT.x, pieces[0].z - EVENT_SPOT.z) > Math.hypot(pieces[STEPS - 1].x - EVENT_SPOT.x, pieces[STEPS - 1].z - EVENT_SPOT.z);
+  if (!far) pieces.reverse();
+  return { pieces, len, width: c.d - 0.04, height: c.ceil - 0.02, a };
+}
+
+function LightsEvent({ panels }: { panels: Panel[] }) {
+  const { used, mark } = useWorldState();
+  const { camera } = useThree();
+  const done = used.has(memoryId("lumieres"));
+  const geo = useMemo(corridorPieces, []);
+  // each tube of the corridor goes out with the piece of corridor it lights
+  const tubes = useMemo(() => {
+    if (!geo) return [];
+    const corridor = LOBBY_SPACE.shapes[SLICE0[3]];
+    return panels
+      .filter((p) => !p.dead && geomDist(corridor, p.x, p.z) < -0.2)
+      .map((p) => ({ p, step: geo.pieces.reduce((best, q, k) => (Math.hypot(q.x - p.x, q.z - p.z) < Math.hypot(geo.pieces[best].x - p.x, geo.pieces[best].z - p.z) ? k : best), 0) }));
+  }, [panels, geo]);
+  const out = useRef(done ? STEPS : 0);
+  const started = useRef<number | null>(null);
+  const veils = useRef<(Mesh | null)[]>([]);
+  const covers = useRef<(Mesh | null)[]>([]);
+  useFrame(({ clock }) => {
+    if (!geo || !EVENT_SPOT) return;
+    const t = clock.elapsedTime;
+    if (started.current === null && !done) {
+      // in the pentagon, near the spot, looking back down the corridor
+      if (Math.hypot(camera.position.x - EVENT_SPOT.x, camera.position.z - EVENT_SPOT.z) > 3.5) return;
+      camera.getWorldDirection(LOOK);
+      const far = geo.pieces[0];
+      const dx = far.x - camera.position.x;
+      const dz = far.z - camera.position.z;
+      if ((LOOK.x * dx + LOOK.z * dz) / (Math.hypot(LOOK.x, LOOK.z) * Math.hypot(dx, dz) || 1) < 0.85) return;
+      started.current = t;
+    }
+    const n = done ? STEPS : Math.min(STEPS, Math.floor((t - (started.current ?? t)) / 0.6) + 1);
+    if (n !== out.current) {
+      out.current = n;
+      if (n === STEPS && !done) mark?.([memoryId("lumieres")]);
+    }
+    veils.current.forEach((m, k) => {
+      if (m) m.visible = k < out.current;
+    });
+    covers.current.forEach((m, k) => {
+      if (m) m.visible = tubes[k].step < out.current;
+    });
+  });
+  if (!geo) return null;
+  return (
+    <>
+      {geo.pieces.map((q, k) => (
+        // the dark, inside the corridor: its walls, floor and ceiling seen through it; caps only at the corridor's ends
+        <mesh key={k} ref={(m) => { veils.current[k] = m; }} visible={done} position={[q.x, geo.height / 2, q.z]} rotation={[0, geo.a, 0]} material={[q.first || q.last ? VEIL : NONE, q.first || q.last ? VEIL : NONE, VEIL, VEIL, VEIL, VEIL]}>
+          <boxGeometry args={[geo.len + 0.01, geo.height, geo.width]} />
+        </mesh>
+      ))}
+      {tubes.map(({ p }, k) => (
+        // the tube, dead: an unlit grey tile just under it
+        <mesh key={`${p.x},${p.z}`} ref={(m) => { covers.current[k] = m; }} visible={done} position={[p.x, p.y - 0.006, p.z]} rotation={[Math.PI / 2, 0, -p.a]}>
+          <planeGeometry args={[p.size[0] + 0.01, p.size[1] + 0.01]} />
+          <meshBasicMaterial color="#5d5a52" side={2} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
 /* ---------- scene ---------- */
 
 function Lobby() {
@@ -419,6 +514,7 @@ function Lobby() {
       <Architecture built={lit} palette={LOBBY_PALETTE} flicker={0.06} />
       <primitive object={skin.model} />
       {SLICE0_READY && <MemoryMarkers />}
+      {SLICE0_READY && <LightsEvent panels={skin.panels} />}
       <Gallery />
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}

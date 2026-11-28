@@ -147,7 +147,7 @@ export default function World() {
   usedRef.current = used;
   const [crouched, setCrouched] = useState(false);
   const [rattle, setRattle] = useState<{ id: string; n: number }>();
-  const worldState = useMemo(() => ({ used, rattle }), [used, rattle]);
+  const worldState = useMemo(() => ({ used, rattle, mark: (ids: readonly string[]) => markUsedRef.current(ids) }), [used, rattle]);
   const [toast, setToast] = useState<{ title: string; text: string; color: string }>();
   useEffect(() => {
     if (!toast) return;
@@ -169,6 +169,8 @@ export default function World() {
   const markUsed = useCallback((ids: readonly string[]) => {
     setUsed((prev) => (ids.every((id) => prev.has(id)) ? prev : new Set([...prev, ...ids])));
   }, []);
+  const markUsedRef = useRef(markUsed);
+  markUsedRef.current = markUsed;
   const interact = useCallback(() => {
     const target = focusRef.current;
     if (!target) return;
