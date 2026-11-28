@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Ambience, type Surface } from "./audio";
+import { Ambience, type Sfx, type Surface } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
 import { QualityContext, isSoftwareRenderer, canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
@@ -147,7 +147,7 @@ export default function World() {
   usedRef.current = used;
   const [crouched, setCrouched] = useState(false);
   const [rattle, setRattle] = useState<{ id: string; n: number }>();
-  const worldState = useMemo(() => ({ used, rattle, mark: (ids: readonly string[]) => markUsedRef.current(ids) }), [used, rattle]);
+  const worldState = useMemo(() => ({ used, rattle, mark: (ids: readonly string[]) => markUsedRef.current(ids), sfx: (name: Sfx) => audio.current?.sfx(name) }), [used, rattle]);
   const [toast, setToast] = useState<{ title: string; text: string; color: string }>();
   useEffect(() => {
     if (!toast) return;

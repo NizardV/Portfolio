@@ -7,7 +7,7 @@ import { voice, type Emitter, type Voice } from "./sounds";
 
 export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "nursery" | "garden" | "purple" | "quiet" | "none";
 export type Surface = "grass" | "carpet" | "hard" | "tile";
-export type Sfx = "door-open" | "door-locked" | "switch" | "pickup";
+export type Sfx = "door-open" | "door-locked" | "switch" | "pickup" | "tube-out" | "tube-out-far";
 
 const MAX_VOLUME = 0.35; // « 100 % » stays a background level
 const CROSSFADE = 1.5; // seconds
@@ -607,6 +607,37 @@ export class Ambience {
     const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
+    if (name === "tube-out" || name === "tube-out-far") {
+      // a tube dying behind you: the relay's clunk, then its buzz stuttering out (far: the same, quieter, duller)
+      const near = name === "tube-out";
+      const level = near ? 1 : 0.45;
+      const thump = ctx.createBufferSource();
+      thump.buffer = noise.white;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = near ? 900 : 500;
+      const te = ctx.createGain();
+      te.gain.setValueAtTime(0.0001, t);
+      te.gain.exponentialRampToValueAtTime(0.5 * level, t + 0.005);
+      te.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      thump.connect(lp).connect(te).connect(master);
+      thump.start(t, rand(0, NOISE_SECONDS - 1), 0.15);
+      const hum = ctx.createOscillator();
+      hum.type = "sawtooth";
+      hum.frequency.value = 120;
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = near ? 2400 : 1500;
+      bp.Q.value = 4;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      for (let k = 0; k < 5; k++) g.gain.setValueAtTime(k % 2 ? 0.0001 : 0.05 * level, t + 0.05 + k * rand(0.06, 0.14));
+      g.gain.setValueAtTime(0.0001, t + 0.8);
+      hum.connect(bp).connect(g).connect(master);
+      hum.start(t);
+      hum.stop(t + 0.85);
+      return;
+    }
     if (name === "switch" || name === "pickup") {
       // a small switch: two clicks; a handset lifted: a clunk
       const click = (at: number, f: number, level: number) => {

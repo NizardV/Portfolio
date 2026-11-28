@@ -1,7 +1,7 @@
 "use client";
 import { memo, use, useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { BackSide, CanvasTexture, MeshBasicMaterial, SRGBColorSpace, Vector3, type Group, type Mesh, type PointLight } from "three";
+import { BackSide, CanvasTexture, MeshBasicMaterial, SRGBColorSpace, type Group, type Mesh, type PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
@@ -413,8 +413,9 @@ function MemoryMarkers() {
  * light is baked, so a tube going out is drawn: a dead tile over it, and a veil of dark over its stretch of corridor.
  */
 const EVENT_SPOT = SLICE0_MEMORIES.find((m) => m.id === "lumieres");
-const LOOK = new Vector3();
 const STEPS = 7;
+/** seconds between two tubes going out: the first one heard, then time to turn and watch the rest */
+const STEP_TIME = 1.1;
 const VEIL = new MeshBasicMaterial({ color: "#040302", transparent: true, opacity: 0.6, depthWrite: false, side: BackSide });
 const NONE = new MeshBasicMaterial({ visible: false });
 
@@ -439,7 +440,7 @@ function corridorPieces() {
 }
 
 function LightsEvent({ panels }: { panels: Panel[] }) {
-  const { used, mark } = useWorldState();
+  const { used, mark, sfx } = useWorldState();
   const { camera } = useThree();
   const done = used.has(memoryId("lumieres"));
   const geo = useMemo(corridorPieces, []);
@@ -459,19 +460,19 @@ function LightsEvent({ panels }: { panels: Panel[] }) {
     if (!geo || !EVENT_SPOT) return;
     const t = clock.elapsedTime;
     if (started.current === null && !done) {
-      // in the pentagon, near the spot, looking back down the corridor
+      // stepping into the pentagon, the corridor behind you: it starts at once; the first tube clunks out in your back,
+      // loud enough to turn round, and the others follow slowly enough to be seen (the owner, 2026-11-28)
       if (Math.hypot(camera.position.x - EVENT_SPOT.x, camera.position.z - EVENT_SPOT.z) > 3.5) return;
-      camera.getWorldDirection(LOOK);
-      const far = geo.pieces[0];
-      const dx = far.x - camera.position.x;
-      const dz = far.z - camera.position.z;
-      if ((LOOK.x * dx + LOOK.z * dz) / (Math.hypot(LOOK.x, LOOK.z) * Math.hypot(dx, dz) || 1) < 0.85) return;
       started.current = t;
     }
-    const n = done ? STEPS : Math.min(STEPS, Math.floor((t - (started.current ?? t)) / 0.6) + 1);
+    const n = done ? STEPS : Math.min(STEPS, Math.floor((t - (started.current ?? t)) / STEP_TIME) + 1);
     if (n !== out.current) {
       out.current = n;
-      if (n === STEPS && !done) mark?.([memoryId("lumieres")]);
+      if (!done) {
+        // the nearest pieces sound closer (the last ones die right behind you)
+        sfx?.(n === 1 || n >= STEPS - 1 ? "tube-out" : "tube-out-far");
+        if (n === STEPS) mark?.([memoryId("lumieres")]);
+      }
     }
     veils.current.forEach((m, k) => {
       if (m) m.visible = k < out.current;
