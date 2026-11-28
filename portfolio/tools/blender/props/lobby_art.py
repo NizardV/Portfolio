@@ -153,11 +153,13 @@ def house_scene(w, h, lit, seed=7, aged=0.0):
     # ouvertures
     door = rect(hx + 0.036, base - 0.0165, 0.0075, 0.0165)
     house = mix(house, (0.04, 0.035, 0.04), door)
-    win_cx, win_cy, ww, wh = hx - 0.030, wall_cy - 0.002, 0.0125, 0.0165
+    win_cy, ww, wh = wall_cy - 0.002, 0.0125, 0.0165
     dark_glass = np.array([0.05, 0.065, 0.095], dtype=np.float32) + 0.07 * (0.5 + 0.5 * np.clip((X - Y) * 6 % 1, 0, 1))[..., None] * np.array([0.5, 0.6, 0.9], dtype=np.float32)
-    for wx in (hx - 0.030, hx + 0.0, hx + 0.042):
-        pane = rect(wx, win_cy - (0.012 if wx == hx + 0.042 else 0), ww if wx != hx + 0.042 else 0.0085, wh if wx != hx + 0.042 else 0.012)
-        is_lit = lit and wx == hx - 0.030
+    # the three windows by index (no float equality): 0 the lit one, 2 the small one high up
+    for k, wx in enumerate((hx - 0.030, hx + 0.0, hx + 0.042)):
+        small = k == 2
+        pane = rect(wx, win_cy - (0.012 if small else 0), 0.0085 if small else ww, 0.012 if small else wh)
+        is_lit = lit and k == 0
         if is_lit:
             col = np.array([1.0, 0.80, 0.46], dtype=np.float32) * (0.92 + 0.12 * vnoise(X * 500, Y * 500, seed + 11))[..., None]
             bar = np.maximum(rect(wx, win_cy, 0.0008, wh), rect(wx, win_cy - 0.002, ww, 0.0007))

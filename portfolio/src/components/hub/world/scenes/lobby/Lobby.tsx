@@ -349,7 +349,9 @@ function useProp(name: string) {
 
 function Prop({ name, m, lift = 0 }: { name: string; m: Memory; lift?: number }) {
   const node = useProp(name);
-  return node ? <primitive object={node} position={[m.x, m.y + lift, m.z]} rotation={[0, m.ry, 0]} /> : null;
+  if (!node) return null;
+  const place = { object: node, position: [m.x, m.y + lift, m.z] as const, rotation: [0, m.ry, 0] as const };
+  return <primitive {...place} />;
 }
 
 function ArrivalFrame({ m }: { m: Memory }) {
@@ -370,7 +372,9 @@ function ArrivalFrame({ m }: { m: Memory }) {
     });
   }, [node, images, stage]);
   // its back on the wall (the memory's spot is 3 cm off it)
-  return node ? <primitive object={node} position={[m.x - Math.sin(m.ry) * 0.03, m.y, m.z - Math.cos(m.ry) * 0.03]} rotation={[0, m.ry, 0]} /> : null;
+  if (!node) return null;
+  const place = { object: node, position: [m.x - Math.sin(m.ry) * 0.03, m.y, m.z - Math.cos(m.ry) * 0.03] as const, rotation: [0, m.ry, 0] as const };
+  return <primitive {...place} />;
 }
 
 function MemoryMarkers() {
