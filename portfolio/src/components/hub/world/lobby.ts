@@ -342,6 +342,18 @@ export const SLICE0_READY = allShapes[149]?.tag === "arrival";
  * A memory to find (bible: « Bible narrative — le hub, prologue du jeu » in Notion): trace = look at it a while,
  * objet = pick it up, evenement = witness it; change = what the world shows once a memory is back. ry: the way it faces.
  */
+/** ids of the memories, as kept in the world state (used) and saved: "mem:<id>" */
+export const memoryId = (id: string) => `mem:${id}`;
+/** the last memory of the Red City (not built yet): with it, the arrival room's frame shows the lit window */
+export const RED_CITY_LAST = memoryId("rouge-fin");
+/**
+ * The words of the memories you can find in slice 0. PROVISIONAL (2026-11-28): to be checked against the narrative bible
+ * (Notion, « Design — Hub liminal v2 ») by the owner.
+ */
+const MEMORY_TEXTS: Record<string, { verb: string; title: string; text: string }> = {
+  plan: { verb: "Regarder", title: "Un plan, dessiné à la main", text: "Des couloirs au crayon, et une pièce entourée deux fois. À côté, une flèche et un mot : « ici ». L'écriture te ressemble." },
+  polaroid: { verb: "Ramasser", title: "Un Polaroid", text: "Une maison au bout d'une prairie, une fenêtre allumée. Au dos, une date que l'eau a effacée." },
+};
 export type Memory = { id: string; kind: "trace" | "objet" | "evenement" | "change"; x: number; y: number; z: number; ry: number };
 export const SLICE0_MEMORIES: Memory[] = [];
 
@@ -478,7 +490,18 @@ export const ARRIVAL_WALL = ARRIVAL_SHAPE?.kind === "box" ? ARRIVAL_SHAPE.z + AR
 
 export const LOBBY_SPAWN = { x: LOBBY_ARRIVAL.x, z: LOBBY_ARRIVAL.z - 2.5, yaw: 0 };
 
-export const LOBBY_INTERACTABLES: Interactable[] = EXITS.filter((e) => e.text).map((e) => {
+// the memories you look at or pick up (the event and the frame happen on their own)
+const MEMORY_INTERACTABLES: Interactable[] = SLICE0_MEMORIES.filter((m) => MEMORY_TEXTS[m.id]).map((m) => ({
+  id: memoryId(m.id),
+  x: m.x,
+  z: m.z,
+  radius: 1.8,
+  verb: MEMORY_TEXTS[m.id].verb,
+  memory: { title: MEMORY_TEXTS[m.id].title, text: MEMORY_TEXTS[m.id].text },
+  sfx: "pickup" as const,
+}));
+
+export const LOBBY_INTERACTABLES: Interactable[] = [...MEMORY_INTERACTABLES, ...EXITS.filter((e) => e.text).map((e) => {
   // the sealed door is looked at from the edge of the void, across it
   const back = e.kind === "sealed" ? CHASM.landing + CHASM.gap + 0.8 : 0.6;
   return {
@@ -489,4 +512,4 @@ export const LOBBY_INTERACTABLES: Interactable[] = EXITS.filter((e) => e.text).m
   verb: e.kind === "elevator" ? "Appeler l'ascenseur" : e.kind === "sealed" ? "Regarder" : "Ouvrir",
   locked: { name: e.name, text: e.text!, color: e.color },
   };
-});
+})];

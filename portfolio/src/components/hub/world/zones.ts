@@ -61,6 +61,8 @@ export type Interactable = {
   toggle?: boolean;
   /** the sound of using it (default: a door) */
   sfx?: Sfx;
+  /** a memory fragment: using it shows its text once and keeps it found for good (saved across visits) */
+  memory?: { title: string; text: string };
 };
 
 /** Post-processing mood of a place (see DreamFilter). */

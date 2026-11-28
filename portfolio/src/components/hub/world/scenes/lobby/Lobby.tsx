@@ -1,12 +1,13 @@
 "use client";
-import { memo, use, useMemo, useRef } from "react";
+import { memo, use, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { Group, Mesh, PointLight } from "three";
+import { CanvasTexture, SRGBColorSpace, type Group, type Mesh, type PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, memoryId, RED_CITY_LAST, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import { useWorldState } from "../../state";
 import { useSkin } from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
@@ -328,10 +329,70 @@ const MARK: Record<Memory["kind"], { color: string; size: [number, number]; flat
   change: { color: "#3aa66a", size: [0.5, 0.7], flat: false },
 };
 
+/**
+ * The arrival room's frame: blank at first; once the Polaroid is found, the house in the meadow at dusk, its window dark;
+ * once the Red City's last memory is found too, the window lit (the owner's call, 2026-11-23). Drawn on a canvas until
+ * the art pass.
+ */
+function frameTexture(stage: 0 | 1 | 2) {
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 358;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#e9e3d2";
+  g.fillRect(0, 0, c.width, c.height);
+  if (stage > 0) {
+    const sky = g.createLinearGradient(0, 30, 0, 220);
+    sky.addColorStop(0, "#2b3550");
+    sky.addColorStop(1, "#b7876a");
+    g.fillStyle = sky;
+    g.fillRect(24, 24, 208, 200);
+    g.fillStyle = "#3e4a2a";
+    g.fillRect(24, 224, 208, 110);
+    // the house, small, at the far end of the meadow
+    g.fillStyle = "#1d1c1f";
+    g.fillRect(150, 172, 44, 34);
+    g.beginPath();
+    g.moveTo(144, 174);
+    g.lineTo(172, 150);
+    g.lineTo(200, 174);
+    g.fill();
+    g.fillStyle = stage === 2 ? "#ffd37a" : "#2a2a30";
+    g.fillRect(166, 182, 10, 10);
+  }
+  const t = new CanvasTexture(c);
+  t.colorSpace = SRGBColorSpace;
+  return t;
+}
+
+function ArrivalFrame({ m }: { m: Memory }) {
+  const { used } = useWorldState();
+  let stage: 0 | 1 | 2 = 0;
+  if (used.has(memoryId("polaroid"))) stage = used.has(RED_CITY_LAST) ? 2 : 1;
+  const texture = useMemo(() => frameTexture(stage), [stage]);
+  useEffect(() => () => texture.dispose(), [texture]);
+  return (
+    <group position={[m.x, m.y, m.z]} rotation={[0, m.ry, 0]}>
+      <mesh position={[0, 0, 0.012]}>
+        <planeGeometry args={[0.56, 0.76]} />
+        <meshBasicMaterial color="#3a2f1c" />
+      </mesh>
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[0.5, 0.7]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
 function MemoryMarkers() {
+  const { used } = useWorldState();
   return (
     <>
       {SLICE0_MEMORIES.map((m) => {
+        if (m.kind === "change") return <ArrivalFrame key={m.id} m={m} />;
+        // the event happens on its own: nothing to see on the floor; a picked-up object is gone
+        if (m.kind === "evenement" || (m.kind === "objet" && used.has(memoryId(m.id)))) return null;
         const k = MARK[m.kind];
         return (
           <mesh key={m.id} position={[m.x, m.y, m.z]} rotation={k.flat ? [-Math.PI / 2, 0, m.ry] : [0, m.ry, 0]}>
