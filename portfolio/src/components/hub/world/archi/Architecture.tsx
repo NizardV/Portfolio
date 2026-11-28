@@ -44,11 +44,12 @@ export default function Architecture({ built, palette, flicker = 0.05 }: { built
   const { mesh, live, flickers } = useMemo(() => {
     const m = new InstancedMesh(new PlaneGeometry(1, 1), new MeshBasicMaterial({ toneMapped: false }), Math.max(1, built.panels.length));
     const on = new Color(palette.panel).multiplyScalar(1.6); // > 1: picked up by bloom
-    const off = new Color("#2a2a26");
+    const off = new Color("#6f6c63"); // a dead tube: an unlit diffuser, grey, not a hole in the ceiling
     const liveIdx: number[] = [];
     built.panels.forEach((p, i) => {
       UP.position.set(p.x, p.y, p.z);
-      UP.rotation.set(Math.PI / 2, 0, p.a);
+      // -a: a room turned by a runs its tiles along (cos a, -sin a) (build.ts tileFrame); +a set them 2a askew
+      UP.rotation.set(Math.PI / 2, 0, -p.a);
       UP.scale.set(p.size[0], p.size[1], 1);
       UP.updateMatrix();
       m.setMatrixAt(i, UP.matrix);

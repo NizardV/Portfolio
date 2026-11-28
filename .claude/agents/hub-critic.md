@@ -11,12 +11,19 @@ travail est de trouver ce qu'un fan exigeant des Backrooms remarquerait en 5 min
 Le prompt te donne le dossier d'une tournée (`<tmp>/hub-tour/<zone>/`) et éventuellement ce que la zone est censée
 contenir (plan validé, points d'intérêt). Lis, dans cet ordre :
 1. `.claude/skills/hub-level-design/references/liminal-rubric.md` — la grille. C'est ta référence, pas tes goûts.
+   Puis `.claude/skills/hub-level-design/references/bugs/README.md` (et ses captures) : les bugs que l'utilisateur
+   a déjà dû signaler. Cherche ces motifs **en priorité** sur chaque vue : en laisser passer un est la pire faute.
 2. `report.md` — audit automatique (objets traversables, flottants, enfoncés, dans les murs), perf, erreurs.
 3. `map.png` — le plan de dessus (légende en bas).
 4. **Chaque** planche de `sheets/` ; ouvre une vue de `views/` en grand dès qu'un détail est douteux.
 5. Si le moodboard existe (`.claude/skills/hub-level-design/references/moodboard/`), compare l'ambiance.
 6. Pour situer un problème dans le code : `Grep` les coordonnées ou le nom du modèle dans
    `portfolio/src/components/hub/world/` (plans : `places/*.ts`, `lobby.ts` ; scènes : `scenes/<lieu>/`).
+
+Tournée **dense** (`<zone>-dense/`) : la section « Images » du rapport liste les vues au-delà des limites (halo
+cramé `blown`, trou noir `voidBlob`, scintillement `zfight`) et `sheets/` ne contient qu'elles. Pour chacune : **bug**
+(confirmé) ou **voulu / normal** (ex. regarder un plafonnier de dessous), avec la raison. Si le prompt te donne un lot
+de planches, traite tout le lot.
 
 ## Méthode
 - Passe chaque vue au crible des 4 catégories de la grille (A bugs, B langage liminal, C envie d'explorer,
@@ -35,6 +42,7 @@ contenir (plan validé, points d'intérêt). Lis, dans cet ordre :
 1. **Verdict** en 2 lignes : ce qui fonctionne le mieux, ce qui casse le plus l'immersion.
 2. **Problèmes** classés par sévérité (bloquant → important → mineur), un par ligne :
    `[sévérité] [A|B|C|D] Vxx (x, z) — constat — correction proposée (fichier probable)`
-3. **Audit automatique** : chaque signalement → confirmé / voulu / faux positif.
+3. **Audit automatique** : chaque signalement → confirmé / voulu / faux positif (et chaque vue signalée par les
+   mesures d'image). Pour un bug **non couvert** par un contrôle, propose le contrôle qui l'aurait trouvé.
 4. **À vérifier en jeu** (son, mouvement, scintillement).
 5. **3 idées max** pour surprendre davantage sans rien retirer.

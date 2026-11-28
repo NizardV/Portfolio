@@ -61,6 +61,8 @@ export type Interactable = {
   toggle?: boolean;
   /** the sound of using it (default: a door) */
   sfx?: Sfx;
+  /** a memory fragment: using it shows its text once and keeps it found for good (saved across visits) */
+  memory?: { title: string; text: string };
 };
 
 /** Post-processing mood of a place (see DreamFilter). */
@@ -225,7 +227,7 @@ export const ZONES: Record<ZoneId, Zone> = {
     space: POOLS_SPACE,
     portals: [poolsLobby, poolsCanals],
     ambience: "water",
-    floor: "hard",
+    floor: "tile", // faïence: the bright click of wet tiles
     reverb: 0.85,
     post: { ...indoor, bloom: 1.1, saturation: -0.1 },
   },

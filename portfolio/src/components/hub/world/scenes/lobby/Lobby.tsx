@@ -1,12 +1,17 @@
 "use client";
-import { memo, use, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import type { Group, Mesh, PointLight } from "three";
+import { memo, use, useEffect, useMemo, useRef } from "react";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { BackSide, Mesh, MeshBasicMaterial, SRGBColorSpace, TextureLoader, type Group, type MeshStandardMaterial, type PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
 import { surface } from "../../archi/materials";
-import { ARRIVAL_MOUTH, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, WELL, type Exit } from "../../lobby";
+import { geomDist } from "../../archi/sdf";
+import type { Panel } from "../../archi/build";
+import { ARRIVAL_WALL, EXITS, HALL, LOBBY_ARRIVAL, LOBBY_SPACE, lobbyBuilt, memoryId, RED_CITY_LAST, SLICE0, SLICE0_MEMORIES, SLICE0_READY, WELL, type Exit, type Memory } from "../../lobby";
+import { useWorldState } from "../../state";
+import { useSkin } from "../../archi/Skin";
 import { usePreview } from "../../PortalWindow";
 import { usePlateTexture } from "./textures";
 
@@ -26,7 +31,7 @@ export const LOBBY_PALETTE: Palette = {
   rail: "#3a3320",
   panel: "#fff3d2",
   light: "#ffe7a8",
-  intensity: 13,
+  intensity: 5, // the live lights only light the objects now: walls, floors and ceilings carry their baked light
   range: 15,
   roughness: 0.95,
 };
@@ -66,18 +71,41 @@ function Gallery() {
     }
     return piecesGeometry(pieces);
   }, []);
+  // a frame round each of them: doors (closed off), not holes in the wall
+  const frames = useMemo(() => {
+    if (HALL.kind !== "box") return null;
+    const a = HALL.a ?? 0;
+    const pieces: Piece[] = [];
+    const at = (lx: number, lz: number) => [HALL.cx + lx * Math.cos(a) + lz * Math.sin(a), HALL.cz - lx * Math.sin(a) + lz * Math.cos(a)];
+    for (let lx = -HALL.w / 2 + 3; lx < HALL.w / 2 - 2; lx += 4.2) for (const s of [-1, 1]) {
+      const lz = s * (HALL.d / 2 - 0.2);
+      for (const sx of [-1, 1]) {
+        const [x, z] = at(lx + sx * 0.71, lz);
+        pieces.push({ x, y: 6.3, z, w: 0.12, h: 2.42, d: 0.1, a });
+      }
+      const [x, z] = at(lx, lz);
+      pieces.push({ x, y: 8.66, z, w: 1.54, h: 0.12, d: 0.1, a });
+    }
+    return piecesGeometry(pieces);
+  }, []);
   const wall = surface("wallpaper");
   return (
     <>
       {geo && (
         <mesh geometry={geo}>
-          <meshStandardMaterial map={wall.map} bumpMap={wall.bump} color="#cdb65c" roughness={0.95} />
+          {/* unlit + the hall's even light: the place's live lights only touch objects now, too dim for a 6 m gallery */}
+          <meshBasicMaterial map={wall.map} color="#c9ad58" />
         </mesh>
       )}
       {/* doorways to nowhere along the gallery; nothing behind them */}
+      {frames && (
+        <mesh geometry={frames}>
+          <meshBasicMaterial color="#3d321a" />
+        </mesh>
+      )}
       {doors && (
         <mesh geometry={doors}>
-          <meshBasicMaterial color="#0c0a04" />
+          <meshBasicMaterial color="#2b2215" />
         </mesh>
       )}
     </>
@@ -109,7 +137,7 @@ function Well() {
   }, []);
   return geo ? (
     <mesh geometry={geo}>
-      <meshStandardMaterial color="#5e4a2c" roughness={0.9} />
+      <meshBasicMaterial color="#4a3a22" />
     </mesh>
   ) : null;
 }
@@ -199,7 +227,7 @@ function Plate({ text, color, at }: Readonly<{ text: string; color: string; at: 
 }
 
 /** the shop's glass doors: tinted, see-through (they used to read as white slabs) */
-const SHOP_GLASS = { color: "#8fb0bf", transparent: true, opacity: 0.16, roughness: 0.05, metalness: 0.3, depthWrite: false } as const;
+const SHOP_GLASS = { color: "#8fb0bf", transparent: true, opacity: 0.16, roughness: 0.35, metalness: 0.1, depthWrite: false } as const;
 /** the light of a threshold, a hint of the place behind */
 const WELCOME_LIGHT = { intensity: 1.4, distance: 6, decay: 1.6 } as const;
 
@@ -254,7 +282,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.55), h / 2, 0.02]}>
               <boxGeometry args={[0.84, h, 0.05]} />
-              <meshStandardMaterial color="#9aa1a7" metalness={0.75} roughness={0.35} />
+              <meshStandardMaterial color="#9aa1a7" metalness={0.25} roughness={0.45} />
             </mesh>
           ))}
         </>
@@ -277,7 +305,7 @@ function ExitThreshold({ exit }: { exit: Exit }) {
           {[-1, 1].map((sd) => (
             <mesh key={sd} position={[sd * (w / 2 + 0.4), 0.5, 0.5]}>
               <cylinderGeometry args={[0.05, 0.08, 1, 12]} />
-              <meshStandardMaterial color="#c9a24a" metalness={0.8} roughness={0.3} />
+              <meshStandardMaterial color="#c9a24a" metalness={0.3} roughness={0.4} />
             </mesh>
           ))}
         </>
@@ -295,20 +323,191 @@ function ExitThreshold({ exit }: { exit: Exit }) {
   );
 }
 
+/* ---------- slice 0: where its memories will be (greybox markers, the real objects come with the art pass) ---------- */
+
+/** the slice's objects, modelled in Blender (tools/blender/props/lobby.py): one node per object, textures as files */
+export const PROPS_URL = "/hub/models/props/lobby.glb";
+// fetched with the Lobby's code (PREPARE imports this module), ready before anyone walks in
+useGLTF.preload(PROPS_URL, false, false);
+/** the arrival room's frame, by memories found: blank; the house, window dark (the Polaroid); window lit (the Red City) */
+const FRAME_IMAGES = ["cadre_vide", "cadre_fenetre_sombre", "cadre_fenetre_allumee"].map((n) => `/hub/textures/props/${n}.jpg`);
+
+/** a node of the props model, dressed for the Lobby: unlit (the place's light is baked, the live lights only reach
+ * objects faintly), the same tone as the walls around */
+function useProp(name: string) {
+  const { scene } = useGLTF(PROPS_URL, false, false);
+  return useMemo(() => {
+    const node = scene.getObjectByName(name)?.clone(true);
+    node?.traverse((o) => {
+      if (!(o instanceof Mesh) || Array.isArray(o.material)) return;
+      const m = o.material as MeshStandardMaterial;
+      o.material = new MeshBasicMaterial({ name: m.name, map: m.map, color: m.color.clone().multiplyScalar(0.88), transparent: m.transparent, opacity: m.opacity, depthWrite: !m.transparent });
+    });
+    return node ?? null;
+  }, [scene, name]);
+}
+
+function Prop({ name, m, lift = 0 }: { name: string; m: Memory; lift?: number }) {
+  const node = useProp(name);
+  if (!node) return null;
+  const place = { object: node, position: [m.x, m.y + lift, m.z] as const, rotation: [0, m.ry, 0] as const };
+  return <primitive {...place} />;
+}
+
+function ArrivalFrame({ m }: { m: Memory }) {
+  const { used } = useWorldState();
+  const node = useProp("cadre");
+  const images = useLoader(TextureLoader, FRAME_IMAGES);
+  let stage = 0;
+  if (used.has(memoryId("polaroid"))) stage = used.has(RED_CITY_LAST) ? 2 : 1;
+  useEffect(() => {
+    node?.traverse((o) => {
+      if (!(o instanceof Mesh) || (o.material as MeshBasicMaterial).name !== "cadre:image") return;
+      const t = images[stage];
+      t.flipY = false; // glTF UVs
+      t.colorSpace = SRGBColorSpace;
+      t.needsUpdate = true;
+      (o.material as MeshBasicMaterial).map = t;
+      (o.material as MeshBasicMaterial).needsUpdate = true;
+    });
+  }, [node, images, stage]);
+  // its back on the wall (the memory's spot is 3 cm off it)
+  if (!node) return null;
+  const place = { object: node, position: [m.x - Math.sin(m.ry) * 0.03, m.y, m.z - Math.cos(m.ry) * 0.03] as const, rotation: [0, m.ry, 0] as const };
+  return <primitive {...place} />;
+}
+
+function MemoryMarkers() {
+  const { used } = useWorldState();
+  return (
+    <>
+      {SLICE0_MEMORIES.map((m) => {
+        if (m.kind === "change") return <ArrivalFrame key={m.id} m={m} />;
+        // the map's back on the pillar face (the memory's spot is 1 cm off it), facing the room as modelled
+        if (m.kind === "trace") return <Prop key={m.id} name="plan" m={{ ...m, x: m.x - Math.sin(m.ry) * 0.009, z: m.z - Math.cos(m.ry) * 0.009 }} />;
+        // the Polaroid, until picked up; the event happens on its own
+        if (m.kind === "objet" && !used.has(memoryId(m.id))) return <Prop key={m.id} name="polaroid" m={m} lift={-0.01} />;
+        return null;
+      })}
+    </>
+  );
+}
+
+/**
+ * Memory 3, the event (slice 0): standing in the pentagon and turning back to the long corridor, its lights go out one
+ * by one, the far end first, coming towards you; the corridor stays dark from then on (found for good). The corridor's
+ * light is baked, so a tube going out is drawn: a dead tile over it, and a veil of dark over its stretch of corridor.
+ */
+const EVENT_SPOT = SLICE0_MEMORIES.find((m) => m.id === "lumieres");
+const STEPS = 7;
+/** seconds between two tubes going out: the first one heard, then time to turn and watch the rest */
+const STEP_TIME = 1.1;
+const VEIL = new MeshBasicMaterial({ color: "#040302", transparent: true, opacity: 0.6, depthWrite: false, side: BackSide });
+const NONE = new MeshBasicMaterial({ visible: false });
+
+/** the corridor's own stretch (where no other room takes over), cut in STEPS pieces, the far end from the spot first */
+function corridorPieces() {
+  const c = LOBBY_SPACE.shapes[SLICE0[3]];
+  if (c.kind !== "box" || !EVENT_SPOT) return null;
+  const a = c.a ?? 0;
+  const [ux, uz] = [Math.cos(a), -Math.sin(a)];
+  let u0 = Infinity;
+  let u1 = -Infinity;
+  for (let u = -c.w / 2; u <= c.w / 2; u += 0.25) if (LOBBY_SPACE.ownerIndex(c.x + ux * u, c.z + uz * u) === SLICE0[3]) [u0, u1] = [Math.min(u0, u), Math.max(u1, u)];
+  if (!Number.isFinite(u0)) return null;
+  const len = (u1 - u0) / STEPS;
+  const pieces = Array.from({ length: STEPS }, (_, k) => {
+    const u = u0 + len * (k + 0.5);
+    return { x: c.x + ux * u, z: c.z + uz * u, first: k === 0, last: k === STEPS - 1 };
+  });
+  const far = Math.hypot(pieces[0].x - EVENT_SPOT.x, pieces[0].z - EVENT_SPOT.z) > Math.hypot(pieces[STEPS - 1].x - EVENT_SPOT.x, pieces[STEPS - 1].z - EVENT_SPOT.z);
+  if (!far) pieces.reverse();
+  return { pieces, len, width: c.d - 0.04, height: c.ceil - 0.02, a };
+}
+
+function LightsEvent({ panels }: { panels: Panel[] }) {
+  const { used, mark, sfx } = useWorldState();
+  const { camera } = useThree();
+  const done = used.has(memoryId("lumieres"));
+  const geo = useMemo(corridorPieces, []);
+  // each tube of the corridor goes out with the piece of corridor it lights
+  const tubes = useMemo(() => {
+    if (!geo) return [];
+    const corridor = LOBBY_SPACE.shapes[SLICE0[3]];
+    return panels
+      .filter((p) => !p.dead && geomDist(corridor, p.x, p.z) < -0.2)
+      .map((p) => ({ p, step: geo.pieces.reduce((best, q, k) => (Math.hypot(q.x - p.x, q.z - p.z) < Math.hypot(geo.pieces[best].x - p.x, geo.pieces[best].z - p.z) ? k : best), 0) }));
+  }, [panels, geo]);
+  const out = useRef(done ? STEPS : 0);
+  const started = useRef<number | null>(null);
+  const veils = useRef<(Mesh | null)[]>([]);
+  const covers = useRef<(Mesh | null)[]>([]);
+  useFrame(({ clock }) => {
+    if (!geo || !EVENT_SPOT) return;
+    const t = clock.elapsedTime;
+    if (started.current === null && !done) {
+      // stepping into the pentagon, the corridor behind you: it starts at once; the first tube clunks out in your back,
+      // loud enough to turn round, and the others follow slowly enough to be seen (the owner, 2026-11-28)
+      if (Math.hypot(camera.position.x - EVENT_SPOT.x, camera.position.z - EVENT_SPOT.z) > 3.5) return;
+      started.current = t;
+    }
+    const n = done ? STEPS : Math.min(STEPS, Math.floor((t - (started.current ?? t)) / STEP_TIME) + 1);
+    if (n !== out.current) {
+      out.current = n;
+      if (!done) {
+        // the nearest pieces sound closer (the last ones die right behind you)
+        sfx?.(n === 1 || n >= STEPS - 1 ? "tube-out" : "tube-out-far");
+        if (n === STEPS) mark?.([memoryId("lumieres")]);
+      }
+    }
+    veils.current.forEach((m, k) => {
+      if (m) m.visible = k < out.current;
+    });
+    covers.current.forEach((m, k) => {
+      if (m) m.visible = tubes[k].step < out.current;
+    });
+  });
+  if (!geo) return null;
+  return (
+    <>
+      {geo.pieces.map((q, k) => (
+        // the dark, inside the corridor: its walls, floor and ceiling seen through it; caps only at the corridor's ends
+        <mesh key={k} ref={(m) => { veils.current[k] = m; }} visible={done} position={[q.x, geo.height / 2, q.z]} rotation={[0, geo.a, 0]} material={[q.first || q.last ? VEIL : NONE, q.first || q.last ? VEIL : NONE, VEIL, VEIL, VEIL, VEIL]}>
+          <boxGeometry args={[geo.len + 0.01, geo.height, geo.width]} />
+        </mesh>
+      ))}
+      {tubes.map(({ p }, k) => (
+        // the tube, dead: an unlit grey tile just under it
+        <mesh key={`${p.x},${p.z}`} ref={(m) => { covers.current[k] = m; }} visible={done} position={[p.x, p.y - 0.006, p.z]} rotation={[Math.PI / 2, 0, -p.a]}>
+          <planeGeometry args={[p.size[0] + 0.01, p.size[1] + 0.01]} />
+          <meshBasicMaterial color="#5d5a52" side={2} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
 /* ---------- scene ---------- */
 
 function Lobby() {
   const built = use(lobbyBuilt(!usePreview())); // urgent when standing in it, not through a doorway
+  // drawn by its Blender model; the kit adds the railings, and lights the tiles the model lit
+  const skin = useSkin("lobby", LOBBY_PALETTE);
+  const lit = useMemo(() => ({ ...built, panels: [...built.panels, ...skin.panels] }), [built, skin.panels]);
   return (
     <>
       <Atmosphere background={FOG} fog={FOG} density={0.042} />
       <hemisphereLight args={["#fff2c4", "#3a3016", 0.38]} />
-      <Architecture built={built} palette={LOBBY_PALETTE} flicker={0.06} />
+      <Architecture built={lit} palette={LOBBY_PALETTE} flicker={0.06} />
+      <primitive object={skin.model} />
+      {SLICE0_READY && <MemoryMarkers />}
+      {SLICE0_READY && <LightsEvent panels={skin.panels} />}
       <Gallery />
       <Well />
       {/* the way back to the meadow: the same white door frame as out there */}
-      <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_MOUTH]} rotation={[0, Math.PI, 0]}>
-        <Frame w={0.98} h={2.02} color="#efe9da" />
+      <group position={[LOBBY_ARRIVAL.x, 0, ARRIVAL_WALL]} rotation={[0, Math.PI, 0]}>
+        {/* as tall as the doorway it frames (2.25 m: the meadow's door showed above a 2.02 m frame) */}
+        <Frame w={1.3} h={2.25} color="#efe9da" />
       </group>
       {EXITS.map((e) => (
         <ExitThreshold key={e.id} exit={e} />

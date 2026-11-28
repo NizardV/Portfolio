@@ -34,6 +34,13 @@ export type Shape = Geom & {
   dead?: number;
   /** free-form label for props (hall, well…) */
   tag?: string;
+  /**
+   * drawn by a model made in Blender (e.g. "slice0" → public/hub/models/skins/slice0.glb) instead of the kit: no walls,
+   * floor, ceiling or soffits of its own here, ceiling lights on a 60 cm tile grid. Collisions are unchanged.
+   */
+  skin?: string;
+  /** the ceiling tile grid this shape follows, when not its own (a ramp under a hall's ceiling: one grid, no seam) */
+  grid?: { a: number; x: number; z: number };
   /** no ceiling at all (open sky or a void above) */
   open?: boolean;
   /** walking speed here, as a share of normal (a ball pit: 0.45) */
@@ -124,6 +131,8 @@ export class Space {
   readonly bounds: [number, number, number, number];
   /** false: open-air places, the edge of the space is invisible (no wall drawn) */
   readonly walls: boolean;
+  /** low walls along balcony edges (archi/murets.ts), for the Blender model to draw; their collision is in solids */
+  murets: { room: number; pts: number[][]; ends: boolean[]; closed: boolean }[] = [];
   private index = new Map<string, { shapes: number[]; solids: number[] }>();
 
   constructor(shapes: Shape[], solids: Solid[] = [], opts: { walls?: boolean } = {}) {

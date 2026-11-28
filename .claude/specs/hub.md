@@ -75,6 +75,20 @@ Lieux permet d'y voyager une fois découverts. Restent à brancher : Backrooms (
 - **Visite à la 1re personne** : `localStorage["hub-debug-spawn"] = JSON.stringify({ zone, x, z, yaw, pitch })` fait
   démarrer le rêve à cet endroit (captures Playwright d'un lieu précis) et expose `window.__hub` (`debug.ts` :
   scène, zone, `teleport`). Le groupe de l'architecture s'appelle `archi` (exclu de l'audit des objets).
+- **Pièces habillées (skins, 2026-11-21)** : une pièce dont `Shape.skin` vaut un nom n'est plus dessinée par le kit : murs,
+  sols, plafonds, plinthes, poutres et plafonniers viennent d'un modèle Blender construit depuis le même plan. **Tout le
+  Lobby** est habillé (`skin: "lobby"`) ; le kit n'y pose plus que les garde-corps. Chaîne : `pnpm hub:plan LOBBY lobby`
+  (→ `tools/blender/plans/lobby.json`) → `blender --background --python tools/blender/skin.py -- lobby` (≈ 35 s,
+  → `public/hub/models/skins/lobby.glb`) → `archi/Skin.tsx` (`useSkin` : habille avec les textures et la palette du kit,
+  rend les plafonniers que le modèle porte en extras « panels »). Règles de construction (`skin.py`) : la pièce posée
+  après possède le **sol** (estrades, fosses ; les **rampes passent en dernier** : elles possèdent toute leur emprise) ;
+  au **plafond, le plus haut l'emporte** (sinon gorges de porte et paliers pendent en caisson) ; découpes rétrécies de
+  5 mm (des volumes qui se touchent pile laissent des faces internes soudées aux vrais murs) ; solveur booléen **EXACT**
+  (Manifold perdait des sols là où beaucoup de pièces se chevauchent) ; faces jugées triangle par triangle ; plafonds en
+  dalles de 60 cm sur la grille de leur pièce, **poutre** là où deux grilles se rencontrent ; plafonniers = une dalle
+  allumée, ou 2 × 2 dans les grandes salles, à 30 cm des murs et des poutres. Textures : jamais dans le .glb (chargées en
+  `blob:`, refusé par la CSP). Plafond standard `STD_CEIL` = 2,75 m (pièces et couloirs ordinaires). Collisions
+  inchangées ; `hub:audit` charge le modèle (sans ses finitions « trims »).
 - **Tournée** : `node scripts/hub-tour.mjs <zone>` — vues automatiques, carte, audit des objets posés par les scènes,
   draw calls ; puis revue par l'agent `hub-critic` (`.claude/agents/`) selon
   `skills/hub-level-design/references/liminal-rubric.md`.

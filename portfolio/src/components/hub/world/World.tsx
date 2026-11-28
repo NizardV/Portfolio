@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Ambience } from "./audio";
+import { Ambience, type Sfx, type Surface } from "./audio";
 import { hasWebGL, loadJSON, saveJSON, useReducedMotion, useTouch } from "./env";
 import { QualityContext, isSoftwareRenderer, canFullscreen, fullscreenMode, pixelRatio, toggleFullscreen, useSettings } from "./settings";
 import Fallback from "./Fallback";
@@ -18,6 +18,8 @@ import { START_ZONE, ZONE_ORDER, ZONES, throughDoor, type Interactable, type Por
 const WAKE_MS = 1800; // first fade from white: waking up
 const FADE_MS = 500; // between zones
 const STORE_PLACES = "hub-v2-places";
+/** the memories found, kept across visits (ids "mem:…") */
+const STORE_MEMORIES = "hub-v2-memories";
 /** A pointer-locked mouse sometimes reports a bogus huge jump (Chrome on Windows): the view would snap. */
 const MAX_MOUSE_STEP = 200;
 
@@ -35,10 +37,23 @@ function Ready({ onReady }: { onReady: () => void }) {
   return null;
 }
 
+/** The sound of the floor at (x, z), from the material of the room there; undefined: the place's own (grass…). */
+function surfaceAt(zone: Zone, x: number, z: number): Surface | undefined {
+  const sp = zone.space;
+  if (!sp || zone.floor === "grass") return undefined;
+  const s = sp.shapes[sp.ownerIndex(x, z)];
+  if (!s) return undefined;
+  if (s.mat === "tile" || s.mat === "marble") return "tile";
+  if (s.mat === "concrete" || s.mat === "wood") return "hard";
+  if (s.mat === "carpet" || s.mat === "stain" || (!s.mat && zone.floor === "carpet")) return "carpet";
+  return undefined;
+}
+
 /** Doorways near the player show the place behind them, live (kept to the near ones: each costs a render). */
 function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>; pose: MutableRefObject<Pose> }) {
   const [near, setNear] = useState<number[]>([]);
   const last = useRef(0);
+  const hurried = useRef(new Set<string>());
   // get every place behind this one's doors ready, shortly after arriving (code + geometry, a few ms per frame)
   useEffect(() => {
     const t = setTimeout(() => {
@@ -49,6 +64,13 @@ function Doorways({ zone, used, pose }: { zone: Zone; used: ReadonlySet<string>;
   useFrame(({ clock }) => {
     if (clock.elapsedTime - last.current < 0.3) return;
     last.current = clock.elapsedTime;
+    // a doorway within 10 m: its place is built in big slices now (in small ones, a big place behind a far door of the
+    // Lobby could still be building when the player reached it: the doorway showed black)
+    for (const p of zone.portals) {
+      if (!p.link || hurried.current.has(p.to) || Math.hypot(p.link.from.x - pose.current.x, p.link.from.z - pose.current.z) > 10) continue;
+      hurried.current.add(p.to);
+      PREPARE[p.to](true).catch(() => undefined);
+    }
     const list = zone.portals
       .map((p, i) => [p, i] as const)
       .filter(([p]) => p.link && (!p.requires || used.has(p.requires)) && Math.hypot(p.link.from.x - pose.current.x, p.link.from.z - pose.current.z) < 32)
@@ -118,12 +140,14 @@ export default function World() {
   const quality = useMemo(() => ({ quality: settings.quality, touch, weak }), [settings.quality, touch, weak]);
   const headBob = settings.headBob ?? !reducedMotion; // an explicit choice wins over the system setting
   const zone = ZONES[arrival.zone];
-  const [used, setUsed] = useState<ReadonlySet<string>>(() => new Set());
+  // doors open again on each visit; memories stay found
+  const [used, setUsed] = useState<ReadonlySet<string>>(() => new Set(loadJSON<string[]>(STORE_MEMORIES, []).filter((id) => id.startsWith("mem:"))));
+  useEffect(() => saveJSON(STORE_MEMORIES, [...used].filter((id) => id.startsWith("mem:"))), [used]);
   const usedRef = useRef(used);
   usedRef.current = used;
   const [crouched, setCrouched] = useState(false);
   const [rattle, setRattle] = useState<{ id: string; n: number }>();
-  const worldState = useMemo(() => ({ used, rattle }), [used, rattle]);
+  const worldState = useMemo(() => ({ used, rattle, mark: (ids: readonly string[]) => markUsedRef.current(ids), sfx: (name: Sfx) => audio.current?.sfx(name) }), [used, rattle]);
   const [toast, setToast] = useState<{ title: string; text: string; color: string }>();
   useEffect(() => {
     if (!toast) return;
@@ -145,6 +169,8 @@ export default function World() {
   const markUsed = useCallback((ids: readonly string[]) => {
     setUsed((prev) => (ids.every((id) => prev.has(id)) ? prev : new Set([...prev, ...ids])));
   }, []);
+  const markUsedRef = useRef(markUsed);
+  markUsedRef.current = markUsed;
   const interact = useCallback(() => {
     const target = focusRef.current;
     if (!target) return;
@@ -153,6 +179,14 @@ export default function World() {
       setRattle((r) => ({ id: target.id, n: (r?.n ?? 0) + 1 }));
       setToast({ title: target.locked.name, text: target.locked.text, color: target.locked.color });
       audio.current?.sfx("door-locked");
+      return;
+    }
+    if (target.memory) {
+      // a memory: its words, once; then it stays found (the scene hides what was picked up, the frame changes…)
+      if (!usedRef.current.has(target.id)) setToast({ title: target.memory.title, text: target.memory.text, color: "#e8d8a8" });
+      markUsed([target.id]);
+      setFocus(null);
+      audio.current?.sfx(target.sfx ?? "pickup");
       return;
     }
     if (target.toggle) {
@@ -170,7 +204,11 @@ export default function World() {
   }, [markUsed]);
   const interactRef = useRef(interact);
   interactRef.current = interact;
-  const onStep = useCallback((run: boolean) => audio.current?.step(floorRef.current, run), []);
+  // the floor under the feet: a tiled or stone room in a carpeted place sounds like tiles (the Poolrooms' doorway, the
+  // grate's room…), a carpet in a hard place like a carpet
+  const zoneRef = useRef(zone);
+  zoneRef.current = zone;
+  const onStep = useCallback((run: boolean) => audio.current?.step(surfaceAt(zoneRef.current, pose.current.x, pose.current.z) ?? floorRef.current, run), []);
 
   /* ---------- the MENU button only shows when useful: mouse free on desktop, a few seconds after a tap on phones ---------- */
   useEffect(() => {

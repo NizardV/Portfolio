@@ -19,17 +19,18 @@ export const SCENES: Record<ZoneId, LazyExoticComponent<ComponentType>> = {
 /**
  * Get a place ready before anyone looks at it: its code, and its geometry (built a few ms per frame). Called for the
  * places seen through the doorways of the current one, so a doorway shows its place at once, without a hitch.
+ * urgent: someone is about to look through (a doorway a few metres away): build in big slices.
  */
-export const PREPARE: Record<ZoneId, () => Promise<unknown>> = {
+export const PREPARE: Record<ZoneId, (urgent?: boolean) => Promise<unknown>> = {
   meadow: () => Promise.all([import("./meadow/Meadow"), import("../Model").then((m) => m.preloadModels(["houseOpen", "houseYellow", "houseCottage", "treeSwing", "powerPole", "streetLamp", "bathtub"]))]),
-  lobby: () => Promise.all([import("./lobby/Lobby"), import("../lobby").then((m) => m.lobbyBuilt())]),
-  bureaux: () => Promise.all([import("./offices/Offices"), import("../places/offices").then((m) => m.officesBuilt())]),
-  bassins: () => Promise.all([import("./pools/Pools"), import("../places/pools").then((m) => m.poolsBuilt())]),
-  canaux: () => Promise.all([import("./canals/Canals"), import("../places/canals").then((m) => m.canalsBuilt())]),
-  rouge: () => Promise.all([import("./city/RedCity"), import("../places/redcity").then((m) => m.cityBuilt())]),
-  commerce: () => Promise.all([import("./mall/Mall"), import("../places/mall").then((m) => m.mallBuilt())]),
-  hotel: () => Promise.all([import("./hotel/Hotel"), import("../places/hotel").then((m) => m.hotelBuilt())]),
-  jeux: () => Promise.all([import("./dreamcore/Playroom"), import("../places/playground").then((m) => m.playBuilt()), import("../Model").then((m) => m.preloadModels(["carousel", "houseYellow"]))]),
-  collines: () => Promise.all([import("./dreamcore/HillsScene"), import("../places/dreamcore").then((m) => m.hillsBuilt())]),
-  lotissement: () => Promise.all([import("./dreamcore/SuburbScene"), import("../places/dreamcore").then((m) => m.suburbBuilt())]),
+  lobby: (urgent) => Promise.all([import("./lobby/Lobby"), import("../lobby").then((m) => m.lobbyBuilt(urgent)), import("../archi/Skin").then((m) => m.preloadSkin("lobby"))]),
+  bureaux: (urgent) => Promise.all([import("./offices/Offices"), import("../places/offices").then((m) => m.officesBuilt(urgent))]),
+  bassins: (urgent) => Promise.all([import("./pools/Pools"), import("../places/pools").then((m) => m.poolsBuilt(urgent))]),
+  canaux: (urgent) => Promise.all([import("./canals/Canals"), import("../places/canals").then((m) => m.canalsBuilt(urgent))]),
+  rouge: (urgent) => Promise.all([import("./city/RedCity"), import("../places/redcity").then((m) => m.cityBuilt(urgent))]),
+  commerce: (urgent) => Promise.all([import("./mall/Mall"), import("../places/mall").then((m) => m.mallBuilt(urgent))]),
+  hotel: (urgent) => Promise.all([import("./hotel/Hotel"), import("../places/hotel").then((m) => m.hotelBuilt(urgent))]),
+  jeux: (urgent) => Promise.all([import("./dreamcore/Playroom"), import("../places/playground").then((m) => m.playBuilt(urgent)), import("../Model").then((m) => m.preloadModels(["carousel", "houseYellow"]))]),
+  collines: (urgent) => Promise.all([import("./dreamcore/HillsScene"), import("../places/dreamcore").then((m) => m.hillsBuilt(urgent))]),
+  lotissement: (urgent) => Promise.all([import("./dreamcore/SuburbScene"), import("../places/dreamcore").then((m) => m.suburbBuilt(urgent))]),
 };

@@ -40,6 +40,9 @@ Fichiers : `portfolio/public/hub/models/<zone>/*.glb`, textures `portfolio/publi
 ressource chargée depuis un domaine externe (CSP).
 
 ## 3. Modéliser dans Blender (par script, réutilisable)
+**Architecture** (murs, sols, plafonds, plinthes, plafonniers) : skill `hub-skin`. **Objets** (tout le reste, depuis le
+2026-11-22, plus de primitives three.js) : skill `hub-props` (dimensions réelles, planche 4 angles, un glb par lieu).
+Ce qui suit reste valable pour les grands décors extérieurs (maisons, manège…).
 - Blender : `C:\Program Files\Blender Foundation\Blender 5.3\blender.exe`, sans interface :
   `blender --background --python portfolio/tools/blender/<generateur>.py -- <args>`.
 - Un **générateur paramétrable par famille** (`tools/blender/`) : maisons, manège, arbres, panneaux, clôtures,
@@ -68,10 +71,14 @@ ressource chargée depuis un domaine externe (CSP).
 - Lumière : la pool suit le joueur ; limiter les point lights propres à la scène (≤ 8 visibles).
 
 ## 5. Vérifier comme un joueur
+**Procédure complète et obligatoire avant toute preview : skill `hub-qa`** (audit à 0, couverture dense sur la carte
+graphique avec mesures d'image, tournée, critique, verdict écrit). Bug signalé par l'utilisateur (touche P avec
+`/hub?dev=1`) : skill `hub-bug-triage` (un bug = un contrôle). Détail des outils :
 Grille commune : `references/liminal-rubric.md` (bugs, langage liminal, envie d'explorer, finition, sévérités).
 - `pnpm hub:audit <LIEU> [--full]` : l'**architecture** — tout atteignable, 0 mur fantôme, vide < 0,05 % des rayons,
   pas de blocage invisible, 0 trou de sol ou de plafond (rayons verticaux, raccords compris).
-- `node scripts/hub-tour.mjs <zone> [--only V03,V52]` (`pnpm hub:tour`, ~20 s par vue, en arrière-plan ; `--only` = revoir
+- `node scripts/hub-tour.mjs <zone> [--only V03,V52] [--at "x,z,yaw,pitch;…"] [--dense 6]` (`pnpm hub:tour`, sur la
+  carte graphique par défaut, `--soft` = SwiftShader lent ; en arrière-plan ; `--only` = revoir
   ces vues de la dernière tournée après une correction) : les
   **objets posés par les scènes** (traversables, flottants, enfoncés, dans un mur), une carte de dessus
   (`map.png` : zones inaccessibles en bleu nuit), des vues choisies seules (arrivée, interactions, passages, coins les

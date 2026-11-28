@@ -6,8 +6,8 @@
 import { voice, type Emitter, type Voice } from "./sounds";
 
 export type AmbienceId = "wind" | "hum" | "lobby" | "water" | "city" | "mall" | "nursery" | "garden" | "purple" | "quiet" | "none";
-export type Surface = "grass" | "carpet" | "hard";
-export type Sfx = "door-open" | "door-locked" | "switch" | "pickup";
+export type Surface = "grass" | "carpet" | "hard" | "tile";
+export type Sfx = "door-open" | "door-locked" | "switch" | "pickup" | "tube-out" | "tube-out-far";
 
 const MAX_VOLUME = 0.35; // « 100 % » stays a background level
 const CROSSFADE = 1.5; // seconds
@@ -75,6 +75,63 @@ function chirp(ctx: AudioContext, out: AudioNode) {
     osc.start(t);
     osc.stop(t + len + 0.02);
     t += len + rand(0.03, 0.12);
+  }
+}
+
+/** Close, rare, unsettling: knocks in a wall, a whisper, a tube crackling (the Lobby only). */
+function uncanny(ctx: AudioContext, noise: AudioBuffer, out: AudioNode) {
+  const t = ctx.currentTime;
+  const pan = ctx.createStereoPanner();
+  pan.pan.value = rand(-0.8, 0.8);
+  pan.connect(out);
+  const kind = Math.random();
+  const burst = (at: number, len: number, type: BiquadFilterType, f: number, q: number, level: number) => {
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = f;
+    filter.Q.value = q;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, at);
+    env.gain.exponentialRampToValueAtTime(level, at + Math.min(0.01, len / 4));
+    env.gain.exponentialRampToValueAtTime(0.0001, at + len);
+    src.connect(filter).connect(env).connect(pan);
+    src.start(at, rand(0, NOISE_SECONDS - 1), len + 0.05);
+    return filter;
+  };
+  if (kind < 0.4) {
+    // three knocks behind a wall, a pause, sometimes one more
+    const n = Math.random() < 0.3 ? 4 : 3;
+    for (let k = 0; k < n; k++) {
+      const at = t + k * rand(0.28, 0.34) + (k === 3 ? 0.9 : 0);
+      burst(at, 0.09, "lowpass", rand(140, 220), 1, 0.35);
+      burst(at, 0.03, "bandpass", 900, 2, 0.05);
+    }
+  } else if (kind < 0.7) {
+    // a whisper: breath through a moving vowel filter, too short to understand
+    const len = rand(1.2, 2.2);
+    const f = burst(t, len, "bandpass", 1200, 6, 0.05);
+    f.frequency.setValueAtTime(rand(800, 1100), t);
+    f.frequency.linearRampToValueAtTime(rand(1800, 2400), t + len * 0.4);
+    f.frequency.linearRampToValueAtTime(rand(900, 1300), t + len);
+  } else {
+    // a tube on its way out, just above: a few crackles and a stutter of its buzz
+    for (let k = 0; k < 5 + Math.floor(Math.random() * 6); k++) burst(t + rand(0, 1.4), rand(0.01, 0.04), "highpass", 3000, 0.7, rand(0.04, 0.1));
+    const hum = ctx.createOscillator();
+    hum.type = "sawtooth";
+    hum.frequency.value = 120;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 2400;
+    bp.Q.value = 4;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    for (let k = 0; k < 6; k++) g.gain.setValueAtTime(k % 2 ? 0.0001 : 0.03, t + k * rand(0.08, 0.2));
+    g.gain.setValueAtTime(0.0001, t + 1.5);
+    hum.connect(bp).connect(g).connect(pan);
+    hum.start(t);
+    hum.stop(t + 1.6);
   }
 }
 
@@ -384,6 +441,8 @@ function build(ctx: AudioContext, id: AmbienceId, noise: { brown: AudioBuffer; w
     air.connect(lp).connect(ag).connect(gain);
     sources.push(air);
     timers.push(every(10, 32, () => distant(ctx, noise.white, gain)));
+    // and closer, rarer: someone knocking in a wall, whispers you cannot make out, a tube crackling overhead
+    timers.push(every(35, 90, () => uncanny(ctx, noise.white, gain)));
   } else {
     // mains hum of fluorescent tubes + faint ventilation
     const src = loop(ctx, noise.brown);
@@ -499,6 +558,32 @@ export class Ambience {
     const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
+    if (surface === "tile") {
+      // wet ceramic: a bright click and a short ring off the tiled walls around
+      const click = ctx.createBufferSource();
+      click.buffer = noise.white;
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = rand(1700, 2300) * (run ? 1.15 : 1);
+      bp.Q.value = 2.2;
+      const env = ctx.createGain();
+      const peak = 0.24 * (run ? 1.4 : 1) * rand(0.8, 1.1);
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + rand(0.05, 0.07));
+      click.connect(bp).connect(env).connect(master);
+      click.start(t, rand(0, NOISE_SECONDS - 1), 0.1);
+      const ring = ctx.createOscillator();
+      ring.frequency.value = rand(2600, 3200);
+      const rg = ctx.createGain();
+      rg.gain.setValueAtTime(0.0001, t);
+      rg.gain.exponentialRampToValueAtTime(0.012, t + 0.006);
+      rg.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      ring.connect(rg).connect(master);
+      ring.start(t);
+      ring.stop(t + 0.2);
+      return;
+    }
     const src = ctx.createBufferSource();
     src.buffer = noise.white;
     const filter = ctx.createBiquadFilter();
@@ -522,6 +607,37 @@ export class Ambience {
     const master = this.bus;
     if (!ctx || !master || !noise) return;
     const t = ctx.currentTime;
+    if (name === "tube-out" || name === "tube-out-far") {
+      // a tube dying behind you: the relay's clunk, then its buzz stuttering out (far: the same, quieter, duller)
+      const near = name === "tube-out";
+      const level = near ? 1 : 0.45;
+      const thump = ctx.createBufferSource();
+      thump.buffer = noise.white;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = near ? 900 : 500;
+      const te = ctx.createGain();
+      te.gain.setValueAtTime(0.0001, t);
+      te.gain.exponentialRampToValueAtTime(0.5 * level, t + 0.005);
+      te.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      thump.connect(lp).connect(te).connect(master);
+      thump.start(t, rand(0, NOISE_SECONDS - 1), 0.15);
+      const hum = ctx.createOscillator();
+      hum.type = "sawtooth";
+      hum.frequency.value = 120;
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = near ? 2400 : 1500;
+      bp.Q.value = 4;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      for (let k = 0; k < 5; k++) g.gain.setValueAtTime(k % 2 ? 0.0001 : 0.05 * level, t + 0.05 + k * rand(0.06, 0.14));
+      g.gain.setValueAtTime(0.0001, t + 0.8);
+      hum.connect(bp).connect(g).connect(master);
+      hum.start(t);
+      hum.stop(t + 0.85);
+      return;
+    }
     if (name === "switch" || name === "pickup") {
       // a small switch: two clicks; a handset lifted: a clunk
       const click = (at: number, f: number, level: number) => {
