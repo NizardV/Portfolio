@@ -1,7 +1,8 @@
 "use client";
 import { memo, use, useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { BackSide, CanvasTexture, MeshBasicMaterial, SRGBColorSpace, type Group, type Mesh, type PointLight } from "three";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { BackSide, Mesh, MeshBasicMaterial, SRGBColorSpace, TextureLoader, type Group, type MeshStandardMaterial, type PointLight } from "three";
 import Architecture, { type Palette } from "../../archi/Architecture";
 import Atmosphere from "../../Atmosphere";
 import { piecesGeometry, type Piece } from "../../archi/build";
@@ -324,67 +325,52 @@ function ExitThreshold({ exit }: { exit: Exit }) {
 
 /* ---------- slice 0: where its memories will be (greybox markers, the real objects come with the art pass) ---------- */
 
-const MARK: Record<Memory["kind"], { color: string; size: [number, number]; flat: boolean }> = {
-  trace: { color: "#e07a3a", size: [0.3, 0.42], flat: false },
-  objet: { color: "#e07a3a", size: [0.1, 0.12], flat: true },
-  evenement: { color: "#8a5cd6", size: [1.2, 1.2], flat: true },
-  change: { color: "#3aa66a", size: [0.5, 0.7], flat: false },
-};
+/** the slice's objects, modelled in Blender (tools/blender/props/lobby.py): one node per object, textures as files */
+export const PROPS_URL = "/hub/models/props/lobby.glb";
+// fetched with the Lobby's code (PREPARE imports this module), ready before anyone walks in
+useGLTF.preload(PROPS_URL, false, false);
+/** the arrival room's frame, by memories found: blank; the house, window dark (the Polaroid); window lit (the Red City) */
+const FRAME_IMAGES = ["cadre_vide", "cadre_fenetre_sombre", "cadre_fenetre_allumee"].map((n) => `/hub/textures/props/${n}.jpg`);
 
-/**
- * The arrival room's frame: blank at first; once the Polaroid is found, the house in the meadow at dusk, its window dark;
- * once the Red City's last memory is found too, the window lit (the owner's call, 2026-11-23). Drawn on a canvas until
- * the art pass.
- */
-function frameTexture(stage: 0 | 1 | 2) {
-  const c = document.createElement("canvas");
-  c.width = 256;
-  c.height = 358;
-  const g = c.getContext("2d")!;
-  g.fillStyle = "#e9e3d2";
-  g.fillRect(0, 0, c.width, c.height);
-  if (stage > 0) {
-    const sky = g.createLinearGradient(0, 30, 0, 220);
-    sky.addColorStop(0, "#2b3550");
-    sky.addColorStop(1, "#b7876a");
-    g.fillStyle = sky;
-    g.fillRect(24, 24, 208, 200);
-    g.fillStyle = "#3e4a2a";
-    g.fillRect(24, 224, 208, 110);
-    // the house, small, at the far end of the meadow
-    g.fillStyle = "#1d1c1f";
-    g.fillRect(150, 172, 44, 34);
-    g.beginPath();
-    g.moveTo(144, 174);
-    g.lineTo(172, 150);
-    g.lineTo(200, 174);
-    g.fill();
-    g.fillStyle = stage === 2 ? "#ffd37a" : "#2a2a30";
-    g.fillRect(166, 182, 10, 10);
-  }
-  const t = new CanvasTexture(c);
-  t.colorSpace = SRGBColorSpace;
-  return t;
+/** a node of the props model, dressed for the Lobby: unlit (the place's light is baked, the live lights only reach
+ * objects faintly), the same tone as the walls around */
+function useProp(name: string) {
+  const { scene } = useGLTF(PROPS_URL, false, false);
+  return useMemo(() => {
+    const node = scene.getObjectByName(name)?.clone(true);
+    node?.traverse((o) => {
+      if (!(o instanceof Mesh) || Array.isArray(o.material)) return;
+      const m = o.material as MeshStandardMaterial;
+      o.material = new MeshBasicMaterial({ name: m.name, map: m.map, color: m.color.clone().multiplyScalar(0.88), transparent: m.transparent, opacity: m.opacity, depthWrite: !m.transparent });
+    });
+    return node ?? null;
+  }, [scene, name]);
+}
+
+function Prop({ name, m, lift = 0 }: { name: string; m: Memory; lift?: number }) {
+  const node = useProp(name);
+  return node ? <primitive object={node} position={[m.x, m.y + lift, m.z]} rotation={[0, m.ry, 0]} /> : null;
 }
 
 function ArrivalFrame({ m }: { m: Memory }) {
   const { used } = useWorldState();
-  let stage: 0 | 1 | 2 = 0;
+  const node = useProp("cadre");
+  const images = useLoader(TextureLoader, FRAME_IMAGES);
+  let stage = 0;
   if (used.has(memoryId("polaroid"))) stage = used.has(RED_CITY_LAST) ? 2 : 1;
-  const texture = useMemo(() => frameTexture(stage), [stage]);
-  useEffect(() => () => texture.dispose(), [texture]);
-  return (
-    <group position={[m.x, m.y, m.z]} rotation={[0, m.ry, 0]}>
-      <mesh position={[0, 0, 0.012]}>
-        <planeGeometry args={[0.56, 0.76]} />
-        <meshBasicMaterial color="#3a2f1c" />
-      </mesh>
-      <mesh position={[0, 0, 0.02]}>
-        <planeGeometry args={[0.5, 0.7]} />
-        <meshBasicMaterial map={texture} toneMapped={false} />
-      </mesh>
-    </group>
-  );
+  useEffect(() => {
+    node?.traverse((o) => {
+      if (!(o instanceof Mesh) || (o.material as MeshBasicMaterial).name !== "cadre:image") return;
+      const t = images[stage];
+      t.flipY = false; // glTF UVs
+      t.colorSpace = SRGBColorSpace;
+      t.needsUpdate = true;
+      (o.material as MeshBasicMaterial).map = t;
+      (o.material as MeshBasicMaterial).needsUpdate = true;
+    });
+  }, [node, images, stage]);
+  // its back on the wall (the memory's spot is 3 cm off it)
+  return node ? <primitive object={node} position={[m.x - Math.sin(m.ry) * 0.03, m.y, m.z - Math.cos(m.ry) * 0.03]} rotation={[0, m.ry, 0]} /> : null;
 }
 
 function MemoryMarkers() {
@@ -393,15 +379,11 @@ function MemoryMarkers() {
     <>
       {SLICE0_MEMORIES.map((m) => {
         if (m.kind === "change") return <ArrivalFrame key={m.id} m={m} />;
-        // the event happens on its own: nothing to see on the floor; a picked-up object is gone
-        if (m.kind === "evenement" || (m.kind === "objet" && used.has(memoryId(m.id)))) return null;
-        const k = MARK[m.kind];
-        return (
-          <mesh key={m.id} position={[m.x, m.y, m.z]} rotation={k.flat ? [-Math.PI / 2, 0, m.ry] : [0, m.ry, 0]}>
-            <planeGeometry args={k.size} />
-            <meshBasicMaterial color={k.color} toneMapped={false} />
-          </mesh>
-        );
+        // the map's back on the pillar face (the memory's spot is 1 cm off it), facing the room as modelled
+        if (m.kind === "trace") return <Prop key={m.id} name="plan" m={{ ...m, x: m.x - Math.sin(m.ry) * 0.009, z: m.z - Math.cos(m.ry) * 0.009 }} />;
+        // the Polaroid, until picked up; the event happens on its own
+        if (m.kind === "objet" && !used.has(memoryId(m.id))) return <Prop key={m.id} name="polaroid" m={m} lift={-0.01} />;
+        return null;
       })}
     </>
   );
